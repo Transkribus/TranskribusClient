@@ -27,7 +27,7 @@
 			    
 		<dependency>
 			<groupId>eu.transkribus</groupId>
-			<artifactId>core</artifactId>
+			<artifactId>TranskribusCore</artifactId>
 			<version>0.0.1</version>
 		</dependency>
 
