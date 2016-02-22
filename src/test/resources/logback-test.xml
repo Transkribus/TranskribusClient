@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- For assistance related to logback-translator or configuration  -->
+<!-- files in general, please contact the logback user mailing list -->
+<!-- at http://www.qos.ch/mailman/listinfo/logback-user             -->
+<!--                                                                -->
+<!-- For professional support please see                            -->
+<!--    http://www.qos.ch/shop/products/professionalSupport         -->
+<!--                                                                -->
+<configuration>
+  <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%d{HH:mm:ss.SSS} %5p | [%C{1}] %m%n</pattern>
+    </encoder>
+  </appender>
+  <logger name="org.apache.http" level="INFO">
+    <appender-ref ref="Console"/>
+  </logger>
+  <logger name="org.dea" level="DEBUG">
+    <appender-ref ref="Console"/>
+  </logger>
+</configuration>
