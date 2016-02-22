@@ -4,18 +4,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -36,7 +33,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.io.ASingleDocUpload;
-import eu.transkribus.client.io.TrpDocUploadFtp;
 import eu.transkribus.client.io.TrpDocUploadMultipart;
 import eu.transkribus.client.io.TrpDocUploadZipHttp;
 import eu.transkribus.client.util.BufferedFileBodyWriter;
@@ -59,9 +55,6 @@ import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
-import eu.transkribus.core.model.beans.pagecontent_extension.ITrpShapeType;
-import eu.transkribus.core.model.beans.pagecontent_extension.TrpPageType;
-import eu.transkribus.core.model.beans.pagecontent_extension.TrpWordType;
 import eu.transkribus.core.program_updater.HttpProgramPackageFile;
 import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.PageXmlUtils;
@@ -751,18 +744,13 @@ public class TrpServerConn extends ATrpServerConn {
 //		return upload;
 	}
 	
-	public void postTrpDoc(final int colId, TrpDoc doc, IProgressMonitor monitor, boolean viaFtp) throws Exception {
+	public void postTrpDoc(final int colId, TrpDoc doc, IProgressMonitor monitor) throws Exception {
 		if (doc == null) {
 			throw new IllegalArgumentException("TrpDoc is null!");
 		}
 		
-		ASingleDocUpload upload;
-		if (viaFtp) {
-			upload = new TrpDocUploadFtp(colId, this, doc, monitor);
-		} else {
-			WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH);
-			upload = new TrpDocUploadZipHttp(target, doc, monitor);
-		}
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH);
+		ASingleDocUpload upload = new TrpDocUploadZipHttp(target, doc, monitor);
 		
 		upload.call();
 	}

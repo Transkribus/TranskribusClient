@@ -42,7 +42,7 @@ public class TrpDocUploadTest {
 			    }
 			};
 			
-			conn.postTrpDoc(2, doc, null, false);
+			conn.postTrpDoc(2, doc, null);
 			
 //			conn.status.addObserver(o);
 			
