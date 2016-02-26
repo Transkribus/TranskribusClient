@@ -41,6 +41,7 @@ import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.EdOption;
 import eu.transkribus.core.model.beans.HtrModel;
+import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpDoc;
@@ -1239,6 +1240,17 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.NAME_PARAM, targetDocName);
 		return postEntityReturnObject(docTarget, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
+	}
+
+	public List<KwsDocHit> doKwsSearch(int colId, Integer docId, String term) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId);
+		if(docId != null && docId != 0){
+			docTarget = docTarget.path(""+docId);
+		}
+		docTarget = docTarget.path(RESTConst.KWS_SEARCH_PATH)
+				.queryParam(RESTConst.TEXT_PARAM, term);
+		return super.getList(docTarget, new GenericType<List<KwsDocHit>>() {});
 	}
 	
 }

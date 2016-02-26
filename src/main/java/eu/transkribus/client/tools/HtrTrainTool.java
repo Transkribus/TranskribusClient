@@ -85,8 +85,11 @@ public class HtrTrainTool {
 //			final Integer[] docIds = {3840};
 //			System.out.println(conn.runHtrTraining("Just_Anton", docIds));
 			
-			final Integer[] docIds = {3667, 3668};
-			System.out.println(conn.runHtrTraining("Schweinfurth_Georg", docIds));
+//			final Integer[] docIds = {3667, 3668};
+//			System.out.println(conn.runHtrTraining("Schweinfurth_Georg", docIds));
+			
+			final Integer[] docIds = {3675, 3676, 3849};
+			System.out.println(conn.runHtrTraining("Nuernberger_Briefbuecher", docIds));
 			
 		} catch (Exception e){
 			e.printStackTrace();
