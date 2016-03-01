@@ -1242,14 +1242,15 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 
-	public List<KwsDocHit> doKwsSearch(int colId, Integer docId, String term) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public List<KwsDocHit> doKwsSearch(int colId, Integer docId, String term, int confidence) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId);
 		if(docId != null && docId != 0){
 			docTarget = docTarget.path(""+docId);
 		}
 		docTarget = docTarget.path(RESTConst.KWS_SEARCH_PATH)
-				.queryParam(RESTConst.TEXT_PARAM, term);
+				.queryParam(RESTConst.TEXT_PARAM, term)
+				.queryParam(RESTConst.CONFIDENCE_PARAM, confidence);
 		return super.getList(docTarget, new GenericType<List<KwsDocHit>>() {});
 	}
 	
