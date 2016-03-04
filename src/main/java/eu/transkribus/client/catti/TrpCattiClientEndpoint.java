@@ -26,7 +26,8 @@ import eu.transkribus.core.catti.CattiRequestEncoder;
 public class TrpCattiClientEndpoint {
 	private final static Logger logger = LoggerFactory.getLogger(TrpCattiClientEndpoint.class);
 	
-	public static final String DEFAULT_CATTI_URI = "ws://dbis-faxe.uibk.ac.at:8082/TrpCatti/";
+//	public static final String DEFAULT_CATTI_URI = "ws://dbis-faxe.uibk.ac.at:8082/TrpCatti/";
+	public static final String DEFAULT_CATTI_URI = "ws://dbis-faxe.uibk.ac.at:8080/TrpCatti/";
 //	public static final String DEFAULT_CATTI_URI = "ws://localhost:8081/TrpCatti/";
 
 	String baseUri = DEFAULT_CATTI_URI;
@@ -51,6 +52,7 @@ public class TrpCattiClientEndpoint {
 		if (!this.baseUri.endsWith("/"))
 			this.baseUri += "/";
 
+		this.userid = userid;
 		this.docid = docid;
 		this.pid = pid;
 		this.lid = lid;
