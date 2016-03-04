@@ -767,10 +767,11 @@ public class TrpServerConn extends ATrpServerConn {
 		super.postNull(target);
 	}
 		
-	public void ingestDocFromUrl(final int colId, final String metsUrl) throws Exception {
+	public void ingestDocFromUrl(final int colId, final String metsUrl) throws SessionExpiredException, ServerErrorException, ClientErrorException{
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("createDocFromMetsUrl");
 		target = target.queryParam(RESTConst.FILE_NAME_PARAM, metsUrl);
 		super.postNull(target);
+
 	}
 	
 	public void processTrpDocFromFtp(final int colId, String zipFn) throws Exception {
