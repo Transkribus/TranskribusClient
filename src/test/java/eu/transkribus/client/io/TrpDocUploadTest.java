@@ -25,8 +25,8 @@ public class TrpDocUploadTest {
 			
 //			PageXmlUtils.updatePageFormat(docPath);
 			
-			TrpDoc doc = LocalDocReader.load(docPath, true);
-			System.out.println(doc.toString());
+//			TrpDoc doc = LocalDocReader.load(docPath, true);
+//			System.out.println(doc.toString());
 
 //			TrpServerConn conn = null;
 
@@ -42,7 +42,11 @@ public class TrpDocUploadTest {
 			    }
 			};
 			
-			conn.postTrpDoc(2, doc, null);
+			
+			//test coll on test server is 235 and on prod server is 211
+			conn.ingestDocFromUrl(235, "http://rosdok.uni-rostock.de/file/rosdok_document_0000007322/rosdok_derivate_0000026952/ppn778418405.dv.mets.xml");
+			
+			//conn.postTrpDoc(2, doc, null);
 			
 //			conn.status.addObserver(o);
 			
