@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.security.auth.login.LoginException;
+import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import javax.xml.bind.JAXBException;
 
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.connection.TrpServerConn;
+import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.io.LocalDocReader;
 import eu.transkribus.core.io.UnsupportedFormatException;
 import eu.transkribus.core.model.beans.PageLock;
@@ -294,10 +296,19 @@ public class TrpServerConnTest {
 //		}
 //	}
 	
+	static void testDeleteUser(String username, String user, String pw) throws ServerErrorException, ClientErrorException, LoginException {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw)) {
+			conn.deleteUser(username);
+			System.out.println("success deleting user: "+username);
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 		if(args.length != 2){
 			throw new IllegalArgumentException("No credentials");
 		}
+		
+		testDeleteUser("adam.cernikovski@gmx.at", args[0], args[1]);
 		
 //		testListingPageLocks(args[0], args[1]);
 		
@@ -307,7 +318,7 @@ public class TrpServerConnTest {
 		
 //		testJobsPagination(args[0], args[1]);
 		
-		testListCollectionsPaging(args[0], args[1]);
+//		testListCollectionsPaging(args[0], args[1]);
 		
 //		testCountUsersForCollection(args[0], args[1]);
 		

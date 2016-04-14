@@ -631,6 +631,14 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(docTarget);
 	}
 	
+	public void deleteUser(String username) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget t = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.DELETE_PATH);
+		
+		t = t.queryParam(RESTConst.USER_PARAM, username);
+		
+		delete(t);
+	}
+	
 	public TrpPage replacePageImage(final int colId, final int docId, final int pageNr, File imgFile, final IProgressMonitor monitor) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
 				.path(RESTConst.REPLACE_PAGE_PATH);
@@ -918,6 +926,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return runOcr(colId, docId, -1);
 	}
 	
+	@Deprecated
 	public String runHtr(final int colId, final int docId, final int pageNr, final String modelName) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_PATH);
@@ -929,6 +938,7 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
+	@Deprecated
 	public String runHtr(final int colId, final int docId, final String modelName) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_PATH);
