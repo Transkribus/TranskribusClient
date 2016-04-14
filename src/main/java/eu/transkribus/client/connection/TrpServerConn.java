@@ -985,7 +985,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public String runRnnHtr(final int colId, final int docId, final String pageStr, final String modelName, final String dictName) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_PATH);
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_RNN_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGES_PARAM, pageStr);
