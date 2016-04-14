@@ -54,7 +54,7 @@ public class DocxTest {
 		
 	
 		ExportUtils.storeCustomTagMapForDoc(doc7, wordbased, idxs2, null);
-		DocxBuilder.writeDocxForDoc(doc7, true, true, true, new File("C:/Users/Administrator/DocxTest.rtf"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), true, false, false);
+		DocxBuilder.writeDocxForDoc(doc7, true, true, true, new File("C:/Users/Administrator/DocxTest.rtf"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), true, false, false, false);
 		
 
 	}
