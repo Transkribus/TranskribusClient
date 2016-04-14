@@ -983,34 +983,6 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getList(target, new GenericType<List<HtrModel>>(){});
 	}
 	
-	public String runRnnHtr(final int colId, final int docId, final String pageStr, final String modelName, final String dictName) 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_RNN_PATH);
-		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
-		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
-		target = target.queryParam(RESTConst.PAGES_PARAM, pageStr);
-		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
-		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
-		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
-				String.class, MediaType.APPLICATION_XML_TYPE);
-	}
-	
-	@Deprecated
-	public List<String> getHtrRnnListText() 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_NETS_PATH);
-		final String modelsStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
-		return Arrays.asList(modelsStr.split("\n"));
-	}
-	
-	@Deprecated
-	public List<String> getHtrDictListText() 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_DICTS_PATH);
-		final String modelsStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
-		return Arrays.asList(modelsStr.split("\n"));
-	}
-	
 	public void addOrModifyUserInCollection(int colId, int userId, TrpRole role) throws SessionExpiredException, ServerErrorException, ClientErrorException  {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 							.path(""+colId)
