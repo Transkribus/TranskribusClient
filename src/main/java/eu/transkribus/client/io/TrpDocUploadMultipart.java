@@ -12,6 +12,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
 import org.slf4j.Logger;
@@ -90,12 +91,12 @@ public class TrpDocUploadMultipart extends Observable implements Runnable {
 		for(TrpPage p : doc.getPages()){
 			File img = null;
 
-			img = new File(p.getUrl().getPath());
+			img = FileUtils.toFile(p.getUrl());
 
 			FileDataBodyPart imgPart = new FileDataBodyPart("img", img, MediaType.APPLICATION_OCTET_STREAM_TYPE);
 	
 			TrpTranscriptMetadata tmd = p.getCurrentTranscript();
-			File xml = new File(tmd.getUrl().getPath());
+			File xml = FileUtils.toFile(tmd.getUrl());
 			
 			FileDataBodyPart xmlPart = new FileDataBodyPart("xml", xml, MediaType.APPLICATION_OCTET_STREAM_TYPE);
 			
