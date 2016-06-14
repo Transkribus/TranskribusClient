@@ -94,8 +94,11 @@ public class HtrTrainTool {
 //			final Integer[] docIds = {4658};
 //			System.out.println(conn.runHtrTraining("NAF_504_v1", docIds));
 			
-			final Integer[] docIds = {4865, 4973};
-			System.out.println(conn.runHtrTraining("GeoIII", docIds));
+//			final Integer[] docIds = {4865, 4973};
+//			System.out.println(conn.runHtrTraining("GeoIII", docIds));
+			
+			final Integer[] docIds =  {3963, 3964, 4158, 4159, 4160, 4161, 3678, 3679, 3680};
+			System.out.println(conn.runHtrTraining("Konzilsprotokolle_3", docIds));
 			
 		} catch (Exception e){
 			e.printStackTrace();
