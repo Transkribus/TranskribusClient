@@ -1243,12 +1243,13 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(target, EVENT_LIST_TYPE);
 	}
 	
-	public String duplicateDocument(final int colId, final int docId, final String targetDocName) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
+	public String duplicateDocument(final int colId, final int docId, final String targetDocName, final Integer toColId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
 				.path(""+docId)
 				.path(RESTConst.DUPLICATE_PATH)
-				.queryParam(RESTConst.NAME_PARAM, targetDocName);
+				.queryParam(RESTConst.NAME_PARAM, targetDocName)
+				.queryParam(RESTConst.COLLECTION_ID_PARAM, toColId);
 		return postEntityReturnObject(docTarget, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}

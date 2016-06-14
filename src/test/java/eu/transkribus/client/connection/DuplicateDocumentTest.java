@@ -19,7 +19,7 @@ private static final Logger logger = LoggerFactory.getLogger(TrpServerConnTest.c
 		final int colId = 2;
 		
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], args[0], args[1])) {
-			logger.info(conn.duplicateDocument(colId, docId, "Test copy of Bentham Box 35"));
+			logger.info(conn.duplicateDocument(colId, docId, "Test copy of Bentham Box 35", null));
 		} catch (LoginException e){
 			e.printStackTrace();
 		}
