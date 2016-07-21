@@ -14,7 +14,7 @@ import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.builder.pdf.PdfExporter;
 
 public class PdfTest {
-	public static void main(String[] args) throws LoginException, MalformedURLException, DocumentException, IOException, JAXBException, URISyntaxException{
+	public static void main(String[] args) throws LoginException, MalformedURLException, DocumentException, IOException, JAXBException, URISyntaxException, InterruptedException{
 //		TrpServerConn conn = TrpServerConn.getInstance(TrpServerConn.SERVER_URIS[1], args[0], args[1]);
 //		TrpDoc doc = conn.getTrpDoc(69);
 		

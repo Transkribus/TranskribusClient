@@ -20,7 +20,7 @@ import eu.transkribus.core.model.builder.pdf.PdfExporter;
 import eu.transkribus.core.model.builder.rtf.TrpRtfBuilder;
 
 public class PdfTestCopy {
-	public static void main(String[] args) throws LoginException, MalformedURLException, DocumentException, IOException, JAXBException, URISyntaxException{
+	public static void main(String[] args) throws LoginException, MalformedURLException, DocumentException, IOException, JAXBException, URISyntaxException, InterruptedException{
 //		TrpServerConn conn = TrpServerConn.getInstance(TrpServerConn.SERVER_URIS[1], "philip", "test123");
 //		TrpDoc doc = conn.getTrpDoc(69);
 		
