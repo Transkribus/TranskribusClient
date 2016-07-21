@@ -40,7 +40,7 @@ public class LaTest {
 		
 //		TrpServerConn conn = null;
 
-		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[TrpServerConn.DEFAULT_URI_INDEX], args[0], args[1])) {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], args[0], args[1])) {
 //			conn = TrpServerConn.getInstance(TrpServerConn.SERVER_URIS[TrpServerConn.DEFAULT_URI_INDEX], args[0], args[1]);
 			
 			FimgStoreGetClient getter = new FimgStoreGetClient("dbis-thure.uibk.ac.at", "f");

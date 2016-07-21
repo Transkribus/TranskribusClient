@@ -20,8 +20,8 @@ public class StatusUpdater {
 			throw new IllegalArgumentException("No credentials");
 		}
 		
-		final int colId = 2;
-		final int[] docIds = {286};
+		final int colId = 2247;
+		final int[] docIds = {5010};
 		
 		TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], args[0], args[1]);
 		
@@ -30,7 +30,7 @@ public class StatusUpdater {
 			for(TrpPage p : doc.getPages()){
 				final int pageNr = p.getPageNr();
 				logger.debug("In page: " + pageNr);
-				if(pageNr > 10 && pageNr < 311){
+				if(pageNr < 60){
 //				if(!EditStatus.DONE.equals(p.getCurrentTranscript().getStatus())) {
 					TrpTranscriptMetadata newMd = conn.updateTranscript(colId, docId, pageNr, EditStatus.DONE, null, -1, null);
 				}

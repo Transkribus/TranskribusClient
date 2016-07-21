@@ -35,7 +35,9 @@ import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.util.ClientRequestAuthFilter2;
 import eu.transkribus.client.util.SessionExpiredException;
+import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
 import eu.transkribus.core.model.beans.auth.TrpUserLogin;
+import eu.transkribus.core.model.beans.enums.OAuthProvider;
 import eu.transkribus.core.rest.RESTConst;
 
 /**
@@ -52,6 +54,7 @@ public abstract class ATrpServerConn implements Closeable {
 	private /*static*/ URI serverUri;
 	protected /*static*/ WebTarget baseTarget;
 	private /*static*/ WebTarget loginTarget;
+	private /*static*/ WebTarget loginOAuthTarget;
 	
 	protected final static MediaType DEFAULT_RESP_TYPE = MediaType.APPLICATION_JSON_TYPE;
 	
@@ -113,6 +116,7 @@ public abstract class ATrpServerConn implements Closeable {
 	
 	private void initTargets() {
 		loginTarget = client.target(serverUri).path(RESTConst.BASE_PATH).path(RESTConst.AUTH_PATH).path(RESTConst.LOGIN_PATH);
+		loginOAuthTarget = client.target(serverUri).path(RESTConst.BASE_PATH).path(RESTConst.AUTH_PATH).path(RESTConst.LOGIN_OAUTH_PATH);
 		baseTarget = client.target(serverUri).path(RESTConst.BASE_PATH);
 		baseTarget.register(GZipEncoder.class);
 	}
@@ -178,6 +182,46 @@ public abstract class ATrpServerConn implements Closeable {
 					);
 			
 			initTargets();
+		} catch(Exception e) {
+			login = null;
+			logger.error("Login request failed!", e);
+			throw new LoginException(e.getMessage());
+		}
+		logger.debug("Logged in as: " + login.toString());
+		
+		return login;
+	}
+	
+	public TrpUserLogin loginOAuth(final String code, final String state, final String grantType, final OAuthProvider prov) throws LoginException, OAuthTokenRevokedException {
+		if (login != null) {
+			logout();
+		}
+
+		//post creds to /rest/auth/login
+		Form form = new Form();
+		form = form.param(RESTConst.CODE_PARAM, code);
+		form = form.param(RESTConst.STATE_PARAM, state);
+		form = form.param(RESTConst.TYPE_PARAM, grantType);
+		form = form.param(RESTConst.PROVIDER_PARAM, prov.toString());
+		
+		login = null;
+		try {
+			login = postEntityReturnObject(
+					loginOAuthTarget, 
+					form, MediaType.APPLICATION_FORM_URLENCODED_TYPE, 
+					TrpUserLogin.class, MediaType.APPLICATION_JSON_TYPE
+					);
+			
+			initTargets();
+		} catch(ClientErrorException cee){
+			if(cee.getResponse().getStatus() == 403) {
+				login = null;
+				throw new OAuthTokenRevokedException();				
+			} else {
+				login = null;
+				logger.error("Login request failed!", cee);
+				throw new LoginException(cee.getMessage());
+			}
 		} catch(Exception e) {
 			login = null;
 			logger.error("Login request failed!", e);
