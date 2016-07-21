@@ -11,7 +11,7 @@ public class HtrTrainTool {
 		}
 //		final int colId = 1885;
 
-		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], args[0], args[1])) {			
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], args[0], args[1])) {			
 			
 //			System.out.println(conn.runHtr(colId, 101, "Reichsgericht1"));
 			
@@ -102,8 +102,14 @@ public class HtrTrainTool {
 //					4695, 4696, 4697, 4698, 4699, 4700, 4701, 4702, 4703, 4704, 4705, 4706, 4707};
 //			System.out.println(conn.runHtrTraining("IO_Botany_2", docIds));
 			
-			final Integer[] docIds =  {286};
-			System.out.println(conn.runHtrTraining("Frisch-Sklaverei_2", docIds));
+//			final Integer[] docIds =  {286};
+//			System.out.println(conn.runHtrTraining("Frisch-Sklaverei_2", docIds));
+			
+//			final Integer[] docIds = {4865, 4973, 5010};
+//			System.out.println(conn.runHtrTraining("GeoIII_2", "PRHLT", docIds));
+			
+			final Integer[] docIds = {1192};
+			System.out.println(conn.runHtrTraining("Reichsgericht_v3", "CITlab", docIds));
 			
 		} catch (Exception e){
 			e.printStackTrace();

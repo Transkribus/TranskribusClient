@@ -13,6 +13,9 @@ import java.util.concurrent.Future;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Path;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -831,6 +834,18 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(docTarget);
 	}
 	
+	public String analyzeLayoutBatch(final int colId, final int docId, final String pages, final boolean doBlockSeg, final boolean doLineSeg) 
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_LAYOUT_BATCH_PATH);
+		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
+		target = target.queryParam(RESTConst.PAGES_PARAM, pages);
+		target = target.queryParam(RESTConst.DO_BLOCK_SEG_PARAM, doBlockSeg);
+		target = target.queryParam(RESTConst.DO_LINE_SEG_PARAM, doLineSeg);
+		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
+				String.class, MediaType.APPLICATION_XML_TYPE);
+	}
+			
 	/**
 	 * @param docId
 	 * @param pageNr
@@ -851,6 +866,7 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGE_NR_PARAM, pageNr);
+		target = target.queryParam(RESTConst.PAGES_PARAM, pageNr);
 		return postEntityReturnObject(target, pc, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
@@ -891,6 +907,7 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGE_NR_PARAM, pageNr);
+		target = target.queryParam(RESTConst.PAGES_PARAM, pageNr);
 		if(regIds != null && regIds.size() > 0){
 			for(String r : regIds){
 				target = target.queryParam(RESTConst.REG_ID_PARAM, r);
@@ -933,6 +950,7 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGE_NR_PARAM, pageNr);
+		target = target.queryParam(RESTConst.PAGES_PARAM, pageNr);
 		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
@@ -960,11 +978,15 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public String runHtrTraining(final String modelName, final Integer... docIds) 
+	public String runHtrTraining(final String modelName, String type, final Integer... docIds) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		if(type == null || type.isEmpty()) {
+			type = "PRHLT";
+		}
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_TRAIN_PATH);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, (Object[])docIds);
 		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
+		target = target.queryParam(RESTConst.TYPE_PARAM, type);
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
@@ -1148,6 +1170,7 @@ public class TrpServerConn extends ATrpServerConn {
 		t = t.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		t = t.queryParam(RESTConst.ID_PARAM, docId);
 		t = t.queryParam(RESTConst.PAGE_NR_PARAM, pageNr);
+		t = t.queryParam(RESTConst.PAGES_PARAM, pageNr);
 		
 		t = t.queryParam(RESTConst.DETECT_PAGE_NUMBERS_PARAM, detectPageNumbers);
 		t = t.queryParam(RESTConst.DETECT_RUNNING_TITLES_PARAM, detectRunningTitles);
