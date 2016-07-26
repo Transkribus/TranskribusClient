@@ -34,7 +34,7 @@ public class DocxTest {
 		try {
 			TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], "philip", "test123");
 			//blackening
-			TrpDoc doc3 = conn.getTrpDoc(1, 43, -1);
+			TrpDoc doc3 = conn.getTrpDoc(1, 40, -1);
 			
 			//Konzilsprotokolle - Test_ Textstyleoutput
 			TrpDoc doc4 = conn.getTrpDoc(940, 2867, -1);
@@ -48,7 +48,7 @@ public class DocxTest {
 				
 			@SuppressWarnings("serial")
 			Set<Integer> idxs2 = new HashSet<Integer>() {{
-				  add(2); add(3);
+				  add(0); add(1);
 				}};
 				
 			conn.close();
@@ -56,17 +56,19 @@ public class DocxTest {
 			boolean wordbased = false;
 			
 
-			ExportUtils.storeCustomTagMapForDoc(doc5, wordbased, idxs2, null);
+			ExportUtils.storeCustomTagMapForDoc(doc3, wordbased, idxs2, null, false);
+			//export index
+			DocxBuilder.writeDocxForDoc(doc3, false, true, false, new File("C:/Users/Administrator/DocxIndexTest.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, false, false);
 			//export with substitute abbreviations and preserve line breaks
-			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest1.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, true, true);
-			//export with substitute abbreviations and not preserve line breaks
-			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest2.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, true, false);
-			//export with expand abbreviations and preserve line breaks
-			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest3.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, true, false, true);
-			//export with expand abbreviations and not preserve line breaks
-			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest4.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, true, false, false);
-			//not preserve line breaks
-			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest5.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, false, false);
+//			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest1.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, true, true);
+//			//export with substitute abbreviations and not preserve line breaks
+//			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest2.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, true, false);
+//			//export with expand abbreviations and preserve line breaks
+//			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest3.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, true, false, true);
+//			//export with expand abbreviations and not preserve line breaks
+//			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest4.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, true, false, false);
+//			//not preserve line breaks
+//			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest5.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, false, false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

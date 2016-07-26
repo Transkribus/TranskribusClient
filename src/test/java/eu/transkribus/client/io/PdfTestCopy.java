@@ -50,7 +50,7 @@ public class PdfTestCopy {
 		
 		boolean wordbased = false;
 			
-		ExportUtils.storeCustomTagMapForDoc(doc6, wordbased, idxs2, null);
+		ExportUtils.storeCustomTagMapForDoc(doc6, wordbased, idxs2, null, false);
 		(new PdfExporter()).export(doc6, "C:/Users/Administrator/845_test.pdf", idxs2, ExportUtils.getOnlyWantedTagnames(CustomTagFactory.getRegisteredTagNames()));
 		
 		//TrpRtfBuilder.writeRtfForDoc(doc4, false, new File("C:/Users/Administrator/KonzilsProtokolle_test2.rtf"), idxs2, null);
