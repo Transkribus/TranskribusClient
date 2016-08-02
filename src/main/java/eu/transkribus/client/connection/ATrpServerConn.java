@@ -192,7 +192,7 @@ public abstract class ATrpServerConn implements Closeable {
 		return login;
 	}
 	
-	public TrpUserLogin loginOAuth(final String code, final String state, final String grantType, final OAuthProvider prov) throws LoginException, OAuthTokenRevokedException {
+	public TrpUserLogin loginOAuth(final String code, final String state, final String grantType, final String redirectUri, final OAuthProvider prov) throws LoginException, OAuthTokenRevokedException {
 		if (login != null) {
 			logout();
 		}
@@ -203,6 +203,7 @@ public abstract class ATrpServerConn implements Closeable {
 		form = form.param(RESTConst.STATE_PARAM, state);
 		form = form.param(RESTConst.TYPE_PARAM, grantType);
 		form = form.param(RESTConst.PROVIDER_PARAM, prov.toString());
+		form = form.param(RESTConst.REDIRECT_URI_PARAM, redirectUri);
 		
 		login = null;
 		try {
