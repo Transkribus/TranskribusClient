@@ -13,9 +13,6 @@ import java.util.concurrent.Future;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -60,6 +57,7 @@ import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.program_updater.HttpProgramPackageFile;
+import eu.transkribus.core.rest.JobConst;
 import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
@@ -978,15 +976,26 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public String runHtrTraining(final String modelName, String type, final Integer... docIds) 
+	public String runUpvlcHtrTraining(final String modelName, final Integer... docIds) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		if(type == null || type.isEmpty()) {
-			type = "PRHLT";
-		}
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_TRAIN_PATH);
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_UPVLC_TRAIN_PATH);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, (Object[])docIds);
 		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
-		target = target.queryParam(RESTConst.TYPE_PARAM, type);
+		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
+				String.class, MediaType.APPLICATION_XML_TYPE);
+	}
+	
+	public String runUroHtrTraining(final String modelName, final String numEpochs, final String learningRate,
+			final String noise, final Integer trainSizePerEpoch, final Integer... docIds) 
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_URO_TRAIN_PATH);
+		target = target.queryParam(RESTConst.DOC_ID_PARAM, (Object[])docIds);
+		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
+		target = target.queryParam(JobConst.PROP_NUM_EPOCHS, numEpochs);
+		target = target.queryParam(JobConst.PROP_LEARNING_RATE, learningRate);
+		target = target.queryParam(JobConst.PROP_NOISE, noise);
+		target = target.queryParam(JobConst.PROP_TRAIN_SIZE_PER_EPOCH, trainSizePerEpoch);
+		
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}

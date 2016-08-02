@@ -106,10 +106,7 @@ public class HtrTrainTool {
 //			System.out.println(conn.runHtrTraining("Frisch-Sklaverei_2", docIds));
 			
 //			final Integer[] docIds = {4865, 4973, 5010};
-//			System.out.println(conn.runHtrTraining("GeoIII_2", "PRHLT", docIds));
-			
-			final Integer[] docIds = {1192};
-			System.out.println(conn.runHtrTraining("Reichsgericht_v3", "CITlab", docIds));
+//			System.out.println(conn.runHtrTraining("GeoIII_2", docIds));
 			
 		} catch (Exception e){
 			e.printStackTrace();
