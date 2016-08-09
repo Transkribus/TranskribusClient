@@ -11,11 +11,23 @@ public class HtrUroTrainTool {
 		}
 //		final int colId = 1885;
 
-		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], args[0], args[1])) {			
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], args[0], args[1])) {			
 			
-			final Integer[] docIds = {1192};
+			
+			//TEST Server!!!
+//			final Integer[] docIds = {1192};
+//			System.out.println(conn.runUroHtrTraining(
+//					"Reichsgericht_v4", //netName
+//					"200", //numEpochs
+//					"2e-3", //learningRate
+//					"no", //noise
+//					1000, //TrainSizePerEpoch
+//					docIds));
+			
+			//PROD Server!!!
+			final Integer[] docIds = {6191};
 			System.out.println(conn.runUroHtrTraining(
-					"Reichsgericht_v4", //netName
+					"South_Carolina_1720", //netName
 					"200", //numEpochs
 					"2e-3", //learningRate
 					"no", //noise
