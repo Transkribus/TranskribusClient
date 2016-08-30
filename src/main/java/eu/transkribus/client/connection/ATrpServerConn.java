@@ -59,6 +59,7 @@ public abstract class ATrpServerConn implements Closeable {
 	protected final static MediaType DEFAULT_RESP_TYPE = MediaType.APPLICATION_JSON_TYPE;
 	
 	public static String guiVersion="NA";
+	public static final int clientId = 1;
 	
 	protected ATrpServerConn(final String uriStr) throws LoginException {
 		if (uriStr == null || uriStr.isEmpty()) {
@@ -82,7 +83,10 @@ public abstract class ATrpServerConn implements Closeable {
 			@Override public void filter(ClientRequestContext requestContext) throws IOException {
 				List<Object> vers = new ArrayList<>(1);
 				vers.add(ATrpServerConn.guiVersion);
-				requestContext.getHeaders().put(RESTConst.GUI_VERSION_HEADER_KEY, vers);				
+				List<Object> clientIdList = new ArrayList<>(1);
+				clientIdList.add(clientIdList);
+				requestContext.getHeaders().put(RESTConst.GUI_VERSION_HEADER_KEY, vers);
+				requestContext.getHeaders().put(RESTConst.CLIENT_ID_HEADER_KEY, clientIdList);
 			}
 		});
 		

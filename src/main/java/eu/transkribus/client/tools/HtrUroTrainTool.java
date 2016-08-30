@@ -25,12 +25,21 @@ public class HtrUroTrainTool {
 //					docIds));
 			
 			//PROD Server!!!
-			final Integer[] docIds = {6191};
+//			final Integer[] docIds = {6191};
+//			System.out.println(conn.runUroHtrTraining(
+//					"South_Carolina_1720", //netName
+//					"200", //numEpochs
+//					"2e-3", //;1e-3", //learningRate
+//					"both", //noise
+//					1000, //TrainSizePerEpoch
+//					docIds));
+			
+			final Integer[] docIds = {6068, 6072, 6259};
 			System.out.println(conn.runUroHtrTraining(
-					"South_Carolina_1720", //netName
+					"GEO_1-3", //netName
 					"200", //numEpochs
-					"2e-3", //learningRate
-					"no", //noise
+					"2e-3", //;1e-3", //learningRate
+					"both", //noise
 					1000, //TrainSizePerEpoch
 					docIds));
 			
