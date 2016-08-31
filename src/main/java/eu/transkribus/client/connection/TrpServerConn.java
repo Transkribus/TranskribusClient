@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -54,8 +55,10 @@ import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.auth.TrpRole;
 import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
+import eu.transkribus.core.model.beans.enums.SearchType;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
+import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
 import eu.transkribus.core.program_updater.HttpProgramPackageFile;
 import eu.transkribus.core.rest.JobConst;
 import eu.transkribus.core.rest.RESTConst;
@@ -1324,6 +1327,31 @@ public class TrpServerConn extends ATrpServerConn {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_DICTS_PATH);
 		final String modelsStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
 		return Arrays.asList(modelsStr.split("\n"));
+	}
+	
+	public FulltextSearchResult searchFulltext(String query,
+			SearchType type,
+			Integer start,
+			Integer rows,
+			final List<String> filters
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException { 
+		WebTarget target = baseTarget.path(RESTConst.SEARCH_PATH).path(RESTConst.FULLTEXT_PATH);
+
+		target = target	.queryParam(RESTConst.QUERY_PARAM, query)	
+						.queryParam(RESTConst.TYPE_PARAM, type.toString());
+		if(start != null) {
+			target = target.queryParam(RESTConst.START_PARAM, start);
+		}
+		if(rows != null) {
+			target = target.queryParam(RESTConst.ROWS_PARAM, rows);
+		}
+		if(filters != null && !filters.isEmpty()) {
+			for(String f : filters){
+				target = target.queryParam(RESTConst.FILTER_PARAM, f);
+			}	
+		}
+		
+		return super.getObject(target, FulltextSearchResult.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
 }

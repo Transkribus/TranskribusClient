@@ -84,7 +84,7 @@ public abstract class ATrpServerConn implements Closeable {
 				List<Object> vers = new ArrayList<>(1);
 				vers.add(ATrpServerConn.guiVersion);
 				List<Object> clientIdList = new ArrayList<>(1);
-				clientIdList.add(clientIdList);
+				clientIdList.add(clientId);
 				requestContext.getHeaders().put(RESTConst.GUI_VERSION_HEADER_KEY, vers);
 				requestContext.getHeaders().put(RESTConst.CLIENT_ID_HEADER_KEY, clientIdList);
 			}
