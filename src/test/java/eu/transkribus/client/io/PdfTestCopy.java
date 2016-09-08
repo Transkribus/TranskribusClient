@@ -30,7 +30,7 @@ public class PdfTestCopy {
 		TrpDoc doc2 = conn.getTrpDoc(1394, 3351, -1);
 		//doc3 = Ruma
 		TrpDoc doc3 = conn.getTrpDoc(255, 3088, -1);
-		TrpDoc doc33 = conn.getTrpDoc(255, 2683, -1);
+		TrpDoc doc33 = conn.getTrpDoc(640, 5446, -1);
 		//doc4 = Konzilsprotokolle
 		TrpDoc doc4 = conn.getTrpDoc(940, 2444, -1);
 		TrpDoc doc5 = conn.getTrpDoc(211, 555, -1);
@@ -44,14 +44,14 @@ public class PdfTestCopy {
 			
 		@SuppressWarnings("serial")
 		Set<Integer> idxs2 = new HashSet<Integer>() {{
-			  add(0);
+			add(219);add(220);
 			}};
 			
 		
 		boolean wordbased = false;
 			
-		ExportUtils.storeCustomTagMapForDoc(doc6, wordbased, idxs2, null, false);
-		(new PdfExporter()).export(doc6, "C:/Users/Administrator/845_test.pdf", idxs2, ExportUtils.getOnlyWantedTagnames(CustomTagFactory.getRegisteredTagNames()));
+		ExportUtils.storeCustomTagMapForDoc(doc33, wordbased, idxs2, null, false);
+		(new PdfExporter()).export(doc33, "C:/Users/Schorsch/arabic_test.pdf", idxs2, ExportUtils.getOnlyWantedTagnames(CustomTagFactory.getRegisteredTagNames()));
 		
 		//TrpRtfBuilder.writeRtfForDoc(doc4, false, new File("C:/Users/Administrator/KonzilsProtokolle_test2.rtf"), idxs2, null);
 		//(new PdfExporter()).export(doc2, "C:/Users/Administrator/Reichsgericht_test.pdf", idxs2);

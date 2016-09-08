@@ -30,6 +30,7 @@ import eu.transkribus.core.model.builder.rtf.TrpRtfBuilder;
 public class DocxTest {
 	public static void main(String[] args){
 		
+		
 		//TrpServerBentham - Batch2 - 363 pages
 		try {
 			TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], "philip", "test123");
@@ -44,11 +45,12 @@ public class DocxTest {
 			
 			TrpDoc doc6 = conn.getTrpDoc(255, 3088, -1);
 			
-			TrpDoc doc7 = conn.getTrpDoc(211, 555, -1);
+			//for arabicoutput test
+			TrpDoc doc7 = conn.getTrpDoc(640, 5446, -1);
 				
 			@SuppressWarnings("serial")
 			Set<Integer> idxs2 = new HashSet<Integer>() {{
-				  add(0); add(1);
+				  add(220); add(221);
 				}};
 				
 			conn.close();
@@ -56,9 +58,9 @@ public class DocxTest {
 			boolean wordbased = false;
 			
 
-			ExportUtils.storeCustomTagMapForDoc(doc3, wordbased, idxs2, null, false);
+			ExportUtils.storeCustomTagMapForDoc(doc7, wordbased, idxs2, null, false);
 			//export index
-			DocxBuilder.writeDocxForDoc(doc3, false, true, false, new File("C:/Users/Administrator/DocxIndexTest.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, false, false);
+			DocxBuilder.writeDocxForDoc(doc7, false, true, false, new File("C:/Users/Schorsch/ArabicTest.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, false, true);
 			//export with substitute abbreviations and preserve line breaks
 //			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest1.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, true, true);
 //			//export with substitute abbreviations and not preserve line breaks
