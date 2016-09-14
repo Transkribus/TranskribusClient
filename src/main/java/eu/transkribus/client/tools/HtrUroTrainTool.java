@@ -34,9 +34,34 @@ public class HtrUroTrainTool {
 //					1000, //TrainSizePerEpoch
 //					docIds));
 			
-			final Integer[] docIds = {6068, 6072, 6259};
+//			final Integer[] docIds = {6068, 6072, 6259};
+//			System.out.println(conn.runUroHtrTraining(
+//					"GEO_1-3_v2", //netName
+//					"200", //numEpochs
+//					"2e-3", //;1e-3", //learningRate
+//					"both", //noise
+//					1000, //TrainSizePerEpoch
+//					docIds));
+			
+//			final Integer[] docIds =  {4684, 4685, 4686, 4687, 4688, 4689, 4690, 4691, 4692, 4693, 4694,
+//					4695, 4696, 4697, 4698, 4699, /* 4700,*/ 4701, 4702, 4703, 4704, 4705, 4706, 4707};
+//			
+//			//4700 is the test document
+//			
+//			System.out.println(conn.runUroHtrTraining(
+//					"IO_Botany_v1", //netName
+//					"200", //numEpochs
+//					"2e-3", //;1e-3", //learningRate
+//					"both", //noise
+//					1000, //TrainSizePerEpoch
+//					docIds));
+			
+			final Integer[] docIds =  {6459};
+			
+			//4700 is the test document
+			
 			System.out.println(conn.runUroHtrTraining(
-					"GEO_1-3", //netName
+					"Bozen", //netName
 					"200", //numEpochs
 					"2e-3", //;1e-3", //learningRate
 					"both", //noise
