@@ -550,19 +550,19 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws IOException
 	 * @throws ParseException 
 	 */
-	public String downloadLatestGuiVersion(boolean isRelease, File f, ProgressInputStreamListener l) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, IOException, ParseException, ClientErrorException {
-		WebTarget target = baseTarget
-				.path(RESTConst.DOWNLOAD_LATEST_CLIENT);
-		target = target.queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
-		Response resp = target.request().get();
-		checkStatus(resp, target);
-		
-		String fn = JerseyUtils.getFilenameFromContentDisposition(resp);
-//		logger.debug("fn = "+fn);
-		JerseyUtils.downloadFile(resp, l, f);
-		
-		return fn;
-	}
+//	public String downloadLatestGuiVersion(boolean isRelease, File f, ProgressInputStreamListener l) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, IOException, ParseException, ClientErrorException {
+//		WebTarget target = baseTarget
+//				.path(RESTConst.DOWNLOAD_LATEST_CLIENT);
+//		target = target.queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
+//		Response resp = target.request().get();
+//		checkStatus(resp, target);
+//		
+//		String fn = JerseyUtils.getFilenameFromContentDisposition(resp);
+////		logger.debug("fn = "+fn);
+//		JerseyUtils.downloadFile(resp, l, f);
+//		
+//		return fn;
+//	}
 
 	/**
 	 * Just update the edit status for a transcript in the server
