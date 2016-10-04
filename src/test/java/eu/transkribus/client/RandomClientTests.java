@@ -10,34 +10,57 @@ import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.connection.TrpServerConn;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
+import eu.transkribus.core.program_updater.HttpProgramPackageFile;
+import eu.transkribus.core.util.SebisStopWatch;
 
-public class DoSth {
-	private final static Logger logger = LoggerFactory.getLogger(DoSth.class);
+public class RandomClientTests {
+	private final static Logger logger = LoggerFactory.getLogger(RandomClientTests.class);
 	
 	public static void testAsyncClientCalls(final String user, final String pw) {
 		
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.PROD_SERVER_URI, user, pw)) {
 			
+			System.out.println("logged in!");
 //			List<TrpDocMetadata> docs = conn.getAllDocsByUser(0, 0, null, null);
 //			logger.info("got docs = "+docs.size());
 			
-			Future fut = conn.getAllDocsByUserAsync(0, 0, null, null, new InvocationCallback<List<TrpDocMetadata>>() {
+			SebisStopWatch.SW.start();
+			
+			Future f = conn.getAvailableClientFilesAsync(true, new InvocationCallback<List<HttpProgramPackageFile>>() {
 
-				@Override public void completed(List<TrpDocMetadata> docs) {
-					logger.info("SUCCCCESSSS");
-					logger.info("response = "+docs);
+				@Override public void completed(List<HttpProgramPackageFile> r) {
+					SebisStopWatch.SW.stop(true);
+					System.out.println("SUCCCCESSSS");
+					System.out.println("response = "+r);
 				}
 
 				@Override public void failed(Throwable throwable) {
-					logger.info("ERRRROOORr");
-					logger.error("error getting my docs: "+throwable.getMessage(), throwable);
+					System.out.println("ERRRROOORr");
+					System.out.println("error getting my docs: "+throwable.getMessage());
+					throwable.printStackTrace();
 				}
 				
 			});
 			
-			fut.get();
+//			Future fut = conn.getAllDocsByUserAsync(0, 0, null, null, new InvocationCallback<List<TrpDocMetadata>>() {
+//
+//				@Override public void completed(List<TrpDocMetadata> docs) {
+//					SebisStopWatch.SW.stop(true);
+//					System.out.println("SUCCCCESSSS");
+//					System.out.println("response = "+docs);
+//				}
+//
+//				@Override public void failed(Throwable throwable) {
+//					System.out.println("ERRRROOORr");
+//					System.out.println("error getting my docs: "+throwable.getMessage());
+//					throwable.printStackTrace();
+//				}
+//				
+//			});
+			
+			f.get();
 		
-			logger.info("HERE");
+			System.out.println("HERE");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -73,9 +96,8 @@ public class DoSth {
 		}
 	}
 	
-	
 	public static void main(String[] args) {
-		if(args.length != 2){
+		if(args.length != 2) {
 			throw new IllegalArgumentException("No credentials");
 		}
 		

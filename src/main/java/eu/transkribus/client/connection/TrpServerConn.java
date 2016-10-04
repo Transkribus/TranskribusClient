@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
@@ -104,6 +105,8 @@ public class TrpServerConn extends ATrpServerConn {
 	// Singleton instance of this
 //	private static TrpServerConn conn = null;
 //	public ClientStatus status = new ClientStatus();
+	
+	
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
@@ -471,11 +474,25 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(target, new  GenericType<List<HttpProgramPackageFile>>(){});
 	}
 	
-	public Future<Response> getAvailableClientFilesAsync(boolean isRelease, InvocationCallback<Response> callback) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+	public Future<List<HttpProgramPackageFile>> getAvailableClientFilesAsync(boolean isRelease, InvocationCallback<List<HttpProgramPackageFile>> callback) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		final WebTarget target = baseTarget
-				.path(RESTConst.CLIENT_AVAILABLE_FILES_ASYNC).queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
-
+				.path(RESTConst.CLIENT_AVAILABLE_FILES).queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
+		
 		return target.request().async().get(callback);
+	}
+	
+	public String test() {
+		return "";
+	}
+	
+	public <T> Future<T> invokeAsync(Supplier<T> supp) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		// TODO
+//		Arrays.sort(a, c);
+		String s="";
+		
+		invokeAsync(this::test);
+		
+		return null;
 	}
 		
 	/**
