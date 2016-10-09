@@ -184,13 +184,22 @@ public class TrpServerConnTest {
 	}
 	
 	public static void testGetDocsPaging(final String user, final String pw) throws Exception {
-		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
-			List<TrpDocMetadata> docs = conn.getAllDocs(1, 0, 10, "title", "desc");
+		SebisStopWatch.SW.start();
+		
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw)) {
+//			List<TrpDocMetadata> docs = conn.getAllDocs(1, 0, 10, "title", "desc");
+//			List<TrpDocMetadata> docs = conn.getAllDocs(2, 0, 0, "title", "desc");
+//			List<TrpDocMetadata> docs = conn.getAllDocs(2, -1, -1, "title", "desc");
+			List<TrpDocMetadata> docs = conn.getAllDocs(2, -1, -1, null, null);
+//			List<TrpDocMetadata> docs = conn.getAllDocs(2, 0, 10, null, null);
 			System.out.println("got "+docs.size()+" docs");
-			for (TrpDocMetadata m : docs) {
-				System.out.println(m);
-			}
+			
+//			for (TrpDocMetadata m : docs) {
+//				System.out.println(m);
+//			}
 		}
+		
+		SebisStopWatch.SW.stop();
 	}
 	
 	static void testUsersForCollectionPaging(final String user, final String pw) throws Exception {
@@ -308,7 +317,7 @@ public class TrpServerConnTest {
 			throw new IllegalArgumentException("No credentials");
 		}
 		
-		testDeleteUser("adam.cernikovski@gmx.at", args[0], args[1]);
+//		testDeleteUser("whoever@gmx.at", args[0], args[1]);
 		
 //		testListingPageLocks(args[0], args[1]);
 		
@@ -328,7 +337,7 @@ public class TrpServerConnTest {
 		
 //		testCountDocs(args[0], args[1]);
 		
-//		testGetDocsPaging(args[0], args[1]);
+		testGetDocsPaging(args[0], args[1]);
 		
 //		testSetTranscriptStatus(args[0], args[1]);
 		

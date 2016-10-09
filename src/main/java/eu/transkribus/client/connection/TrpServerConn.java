@@ -255,18 +255,29 @@ public class TrpServerConn extends ATrpServerConn {
 		WebTarget target = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.COUNT_MY_DOCS_PATH);
 		return Integer.parseInt(getObject(target, String.class));
 	}
-	
-	public List<TrpDocMetadata> getAllDocs(final int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return getAllDocs(colId, 0, 0, null, null);
-	}
-	
-	public List<TrpDocMetadata> getAllDocs(final int colId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		
+	private WebTarget getAllDocsTarget(final int colId, int index, int nValues, String sortFieldName, String sortDirection) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.LIST_PATH)
 				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
 				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
 				.queryParam(RESTConst.SORT_COLUMN_PARAM, sortFieldName)
-				.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);		
+				.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
+		return docTarget;
+	}
+	
+	public List<TrpDocMetadata> getAllDocs(final int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		return getAllDocs(colId, 0, 0, null, null);
+	}	
+	
+	public List<TrpDocMetadata> getAllDocs(final int colId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget docTarget = getAllDocsTarget(colId, index, nValues, sortFieldName, sortDirection);
 		return getList(docTarget, DOC_MD_LIST_TYPE);
+	}
+	
+	public Future<List<TrpDocMetadata>> getAllDocsAsync(final int colId, int index, int nValues, String sortFieldName, String sortDirection, InvocationCallback<List<TrpDocMetadata>> callback) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
+		WebTarget docTarget = getAllDocsTarget(colId, index, nValues, sortFieldName, sortDirection);
+//		return docTarget.request(DOC_MD_LIST_TYPE).async().get(callback);
+		return docTarget.request(DEFAULT_RESP_TYPE).async().get(callback);
 	}
 	
 	public List<TrpDocMetadata> getDocCount(final int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
@@ -274,23 +285,21 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(docTarget, DOC_MD_LIST_TYPE);
 	}	
 	
+	private WebTarget getAllDocsByUserTarget(int index, int nValues, String sortFieldName, String sortDirection) {
+		return baseTarget.path(RESTConst.USER_PATH).path(RESTConst.LIST_MY_DOCS_PATH)
+						.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
+						.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
+						.queryParam(RESTConst.SORT_COLUMN_PARAM, sortFieldName)
+						.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
+	}
+	
 	public List<TrpDocMetadata> getAllDocsByUser(int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget docTarget = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.LIST_MY_DOCS_PATH)
-					.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
-					.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
-					.queryParam(RESTConst.SORT_COLUMN_PARAM, sortFieldName)
-					.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);					
+		WebTarget docTarget = getAllDocsByUserTarget(index, nValues, sortFieldName, sortDirection);
 		return getList(docTarget, DOC_MD_LIST_TYPE);
 	}
 	
-	// test
-	public Future<List<TrpDocMetadata>> getAllDocsByUserAsync(int index, int nValues, String sortFieldName, String sortDirection, InvocationCallback<List<TrpDocMetadata>> callback) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		final WebTarget docTarget = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.LIST_MY_DOCS_PATH)
-					.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
-					.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
-					.queryParam(RESTConst.SORT_COLUMN_PARAM, sortFieldName)
-					.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
-		
+	public Future<List<TrpDocMetadata>> getAllDocsByUserAsync(int index, int nValues, String sortFieldName, String sortDirection, InvocationCallback<List<TrpDocMetadata>> callback) {
+		WebTarget docTarget = getAllDocsByUserTarget(index, nValues, sortFieldName, sortDirection);
 		return docTarget.request(DEFAULT_RESP_TYPE).async().get(callback);
 	}
 	
