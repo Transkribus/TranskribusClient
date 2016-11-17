@@ -14,7 +14,6 @@ import java.util.function.Supplier;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -50,6 +49,7 @@ import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpEvent;
+import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.TrpWordgraph;
@@ -1017,6 +1017,12 @@ public class TrpServerConn extends ATrpServerConn {
 	public String runUroHtrTraining(final String modelName, final String numEpochs, final String learningRate,
 			final String noise, final Integer trainSizePerEpoch, final Integer... docIds) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		return runUroHtrTraining(modelName, numEpochs, learningRate, noise, trainSizePerEpoch, null, docIds);
+	}
+	
+	public String runUroHtrTraining(final String modelName, final String numEpochs, final String learningRate,
+			final String noise, final Integer trainSizePerEpoch, final String baseModel, final Integer... docIds) 
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_URO_TRAIN_PATH);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, (Object[])docIds);
 		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
@@ -1024,6 +1030,7 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(JobConst.PROP_LEARNING_RATE, learningRate);
 		target = target.queryParam(JobConst.PROP_NOISE, noise);
 		target = target.queryParam(JobConst.PROP_TRAIN_SIZE_PER_EPOCH, trainSizePerEpoch);
+		target = target.queryParam(JobConst.PROP_BASE_MODEL, baseModel);
 		
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
@@ -1037,10 +1044,26 @@ public class TrpServerConn extends ATrpServerConn {
 		return Arrays.asList(modelsStr.split("\n"));
 	}
 	
+	/**
+	 * LEGACY. Only used for HMM UPVLC HTR
+	 * @return
+	 * @throws SessionExpiredException
+	 * @throws ServerErrorException
+	 * @throws IllegalArgumentException
+	 * @throws ClientErrorException
+	 */
+	@Deprecated
 	public List<HtrModel> getHtrModelList() 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_MODEL_PATH);
 		return super.getList(target, new GenericType<List<HtrModel>>(){});
+	}
+	
+	public List<TrpHtr> getHtrs(final int colId, final String provider) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.LIST_PATH);
+		target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		target.queryParam(RESTConst.PROVIDER_PARAM, provider);
+		return super.getList(target, new GenericType<List<TrpHtr>>(){});
 	}
 	
 	public void addOrModifyUserInCollection(int colId, int userId, TrpRole role) throws SessionExpiredException, ServerErrorException, ClientErrorException  {
