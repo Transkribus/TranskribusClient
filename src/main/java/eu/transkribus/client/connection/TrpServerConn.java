@@ -53,6 +53,7 @@ import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.TrpWordgraph;
+import eu.transkribus.core.model.beans.UroHtrTrainConfig;
 import eu.transkribus.core.model.beans.auth.TrpRole;
 import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
@@ -1036,6 +1037,17 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
+	public String runUroHtrTraining(UroHtrTrainConfig config) 
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		if(config == null) {
+			throw new IllegalArgumentException("Config is null!");
+		}
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_CITLAB_TRAIN_PATH);
+				
+		return postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, 
+				String.class, MediaType.APPLICATION_XML_TYPE);
+	}
+	
 	@Deprecated
 	public List<String> getHtrModelListText() 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
@@ -1061,8 +1073,8 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public List<TrpHtr> getHtrs(final int colId, final String provider) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.LIST_PATH);
-		target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
-		target.queryParam(RESTConst.PROVIDER_PARAM, provider);
+		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		target = target.queryParam(RESTConst.PROVIDER_PARAM, provider);
 		return super.getList(target, new GenericType<List<TrpHtr>>(){});
 	}
 	
