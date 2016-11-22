@@ -14,6 +14,10 @@ import java.util.function.Supplier;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -1415,4 +1419,15 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getObject(target, FulltextSearchResult.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
+	public void updatePageStatus(final int colId, final int docId, final int pageNr, final int transcriptId,
+			final EditStatus status, final String note) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId)
+				.path(""+docId)
+				.path(""+pageNr)
+				.path(""+transcriptId);
+		target = target.queryParam(RESTConst.STATUS_PARAM, status.toString());
+		target = target.queryParam(RESTConst.NOTE_PARAM, note);
+		super.postNull(target);
+	}
 }
