@@ -20,6 +20,10 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -1113,16 +1117,6 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
-	/*
-	 * 	// TODO
-	@POST
-	@Path("/{" + RESTConst.COLLECTION_ID_PARAM + "}/" + RESTConst.REMOVE_DOC_FROM_COLLECTION)
-	public Response removeDocumentFromCollection(
-			@PathParam(RESTConst.COLLECTION_ID_PARAM) int colId, 
-			@QueryParam(RESTConst.DOC_ID_PARAM) int docId, 
-			@Context HttpServletRequest req) throws SQLException {
-		try {
-	 */
 	public void removeDocFromCollection(int colId, int docId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
@@ -1477,4 +1471,15 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getObject(target, FulltextSearchResult.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
+	public void updatePageStatus(final int colId, final int docId, final int pageNr, final int transcriptId,
+			final EditStatus status, final String note) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId)
+				.path(""+docId)
+				.path(""+pageNr)
+				.path(""+transcriptId);
+		target = target.queryParam(RESTConst.STATUS_PARAM, status.toString());
+		target = target.queryParam(RESTConst.NOTE_PARAM, note);
+		super.postNull(target);
+	}
 }
