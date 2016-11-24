@@ -23,6 +23,6 @@ public class PdfTest {
 		TrpDoc doc = conn.getTrpDoc(2, 107, -1);
 		conn.close();
 		
-		(new PdfExporter()).export(doc, "/tmp/doc107.pdf", null, null);
+		(new PdfExporter()).export(doc, "/tmp/doc107.pdf", null);
 	}
 }

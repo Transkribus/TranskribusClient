@@ -2,6 +2,7 @@ package eu.transkribus.client.connection;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -14,11 +15,17 @@ import java.util.function.Supplier;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -1106,12 +1113,67 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
+	/*
+	 * 	// TODO
+	@POST
+	@Path("/{" + RESTConst.COLLECTION_ID_PARAM + "}/" + RESTConst.REMOVE_DOC_FROM_COLLECTION)
+	public Response removeDocumentFromCollection(
+			@PathParam(RESTConst.COLLECTION_ID_PARAM) int colId, 
+			@QueryParam(RESTConst.DOC_ID_PARAM) int docId, 
+			@Context HttpServletRequest req) throws SQLException {
+		try {
+	 */
 	public void removeDocFromCollection(int colId, int docId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
 				.path(RESTConst.REMOVE_DOC_FROM_COLLECTION)
 				.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		
+		postNull(target);
+	} 
+	
+	public void exportDocument(int colId, int docId, String pages, boolean doWriteMets, boolean doWriteImages, boolean doExportPageXml, 
+			boolean doExportAltoXml, boolean splitIntoWordsInAltoXml, boolean doWritePdf, boolean doWriteTei, boolean doWriteDocx,
+			boolean doWriteTagsXlsx, boolean doWriteTablesXlsx, boolean doPdfImagesOnly, boolean doPdfImagesPlusText, boolean doPdfWithTextPages,
+			boolean doPdfWithTags, boolean doTeiWithNoZones, boolean doTeiWithZonePerRegion, boolean doTeiWithZonePerLine, boolean doTeiWithZonePerWord,
+			boolean doTeiWithLineTags, boolean doTeiWithLineBreaks, boolean doDocxWithTags, boolean doDocxPreserveLineBreaks, boolean doDocxMarkUnclear,
+			boolean doDocxKeepAbbrevs, boolean doDocxExpandAbbrevs, boolean doDocxSubstituteAbbrevs, boolean doWordBased, boolean doBlackening,
+			boolean doCreateTitle, String useVersionStatus) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId)
+				.path(""+docId)
+				.path(RESTConst.EXPORT_PATH)
+				.queryParam(RESTConst.PAGES_PARAM, pages)
+				.queryParam(RESTConst.WRITE_METS_PARAM, doWriteMets)
+				.queryParam(RESTConst.DO_WRITE_IMAGES_PARAM, doWriteImages)
+				.queryParam(RESTConst.DO_EXPORT_PAGE_PARAM, doExportPageXml)
+				.queryParam(RESTConst.DO_EXPORT_ALTO_PARAM, doExportAltoXml)
+				.queryParam(RESTConst.DO_SPLIT_WORDS_IN_ALTO_PARAM, splitIntoWordsInAltoXml)
+				.queryParam(RESTConst.WRITE_PDF_PARAM, doWritePdf)
+				.queryParam(RESTConst.WRITE_TEI_PARAM, doWriteTei)
+				.queryParam(RESTConst.WRITE_DOCX_PARAM, doWriteDocx)
+				.queryParam(RESTConst.WRITE_TAGS_EXCEL_PARAM, doWriteTagsXlsx)
+				.queryParam(RESTConst.WRITE_TABLES_EXCEL_PARAM, doWriteTablesXlsx)
+				.queryParam(RESTConst.DO_PDF_IMAGES_ONLY_PARAM, doPdfImagesOnly)
+				.queryParam(RESTConst.DO_PDF_IMAGES_PLUS_TEXT_PARAM, doPdfImagesPlusText)
+				.queryParam(RESTConst.DO_PDF_EXTRA_TEXT_PARAM, doPdfWithTextPages)
+				.queryParam(RESTConst.DO_PDF_HIGHLIGHT_TAGS_PARAM, doPdfWithTags)
+				.queryParam(RESTConst.DO_TEI_NO_ZONES_PARAM, doTeiWithNoZones)
+				.queryParam(RESTConst.DO_TEI_REGION_ZONE_PARAM, doTeiWithZonePerRegion)
+				.queryParam(RESTConst.DO_TEI_LINE_ZONE_PARAM, doTeiWithZonePerLine)
+				.queryParam(RESTConst.DO_TEI_WORD_ZONE_PARAM, doTeiWithZonePerWord)
+				.queryParam(RESTConst.DO_TEI_LINE_TAGS_PARAM, doTeiWithLineTags)
+				.queryParam(RESTConst.DO_TEI_LINE_BREAKS_PARAM, doTeiWithLineBreaks)
+				.queryParam(RESTConst.DO_DOCX_EXPORT_TAGS, doDocxWithTags)
+				.queryParam(RESTConst.DO_DOCX_PRESERVE_BREAKS_PARAM, doDocxPreserveLineBreaks)
+				.queryParam(RESTConst.DO_DOCX_MARK_UNCLEAR_PARAM, doDocxMarkUnclear)
+				.queryParam(RESTConst.DO_DOCX_KEEP_ABBREVS_PARAM, doDocxKeepAbbrevs)
+				.queryParam(RESTConst.DO_DOCX_EXPAND_ABBREVS_PARAM, doDocxExpandAbbrevs)
+				.queryParam(RESTConst.DO_DOCX_SUBSTITUTE_ABBREVS_PARAM, doDocxSubstituteAbbrevs)
+				.queryParam(RESTConst.DO_WORD_BASED_EXPORT_PARAM, doWordBased)
+				.queryParam(RESTConst.DO_BLACKENING_PARAM, doBlackening)
+				.queryParam(RESTConst.DO_CREATE_TITLE_PARAM, doCreateTitle)
+				.queryParam(RESTConst.USE_VERSION_STATUS_PARAM, useVersionStatus);
 		postNull(target);
 	} 
 	
