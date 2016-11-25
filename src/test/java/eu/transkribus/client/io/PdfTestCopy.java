@@ -47,11 +47,10 @@ public class PdfTestCopy {
 			add(219);add(220);
 			}};
 			
-		
 		boolean wordbased = false;
 			
 		ExportUtils.storeCustomTagMapForDoc(doc33, wordbased, idxs2, null, false);
-		(new PdfExporter()).export(doc33, "C:/Users/Schorsch/arabic_test.pdf", idxs2, ExportUtils.getOnlyWantedTagnames(CustomTagFactory.getRegisteredTagNames()));
+		(new PdfExporter()).export(doc33, "C:/Users/Schorsch/arabic_test.pdf", idxs2);
 		
 		//TrpRtfBuilder.writeRtfForDoc(doc4, false, new File("C:/Users/Administrator/KonzilsProtokolle_test2.rtf"), idxs2, null);
 		//(new PdfExporter()).export(doc2, "C:/Users/Administrator/Reichsgericht_test.pdf", idxs2);
