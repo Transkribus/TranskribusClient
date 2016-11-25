@@ -312,6 +312,18 @@ public class TrpServerConnTest {
 		}
 	}
 	
+	static void testUpdatePageStatus(final String user, final String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			conn.updatePageStatus(2, 681, 1, 8269, EditStatus.DONE, "A test");
+		}
+	}
+	
+	static void testServerExport(final String user, final String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			conn.exportDocument(2, 1312, "1-31", true, true, true, true, false, true, true, true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false, "Latest");
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 		if(args.length != 2){
 			throw new IllegalArgumentException("No credentials");
@@ -337,7 +349,7 @@ public class TrpServerConnTest {
 		
 //		testCountDocs(args[0], args[1]);
 		
-		testGetDocsPaging(args[0], args[1]);
+//		testGetDocsPaging(args[0], args[1]);
 		
 //		testSetTranscriptStatus(args[0], args[1]);
 		
@@ -350,6 +362,10 @@ public class TrpServerConnTest {
 //		testBugReport(args[0], args[1]);
 		
 //		testPostTranscript(args[0], args[1]);
+		
+//		testUpdatePageStatus(args[0], args[1]);
+		
+		testServerExport(args[0], args[1]);
 		
 		if (true)
 			return;
