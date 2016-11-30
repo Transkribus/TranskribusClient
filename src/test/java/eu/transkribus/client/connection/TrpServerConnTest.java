@@ -184,22 +184,49 @@ public class TrpServerConnTest {
 	}
 	
 	public static void testGetDocsPaging(final String user, final String pw) throws Exception {
-		SebisStopWatch.SW.start();
+		
+		SebisStopWatch sw = new SebisStopWatch();
+		
+		int colId = 2;
 		
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw)) {
-//			List<TrpDocMetadata> docs = conn.getAllDocs(1, 0, 10, "title", "desc");
-//			List<TrpDocMetadata> docs = conn.getAllDocs(2, 0, 0, "title", "desc");
-//			List<TrpDocMetadata> docs = conn.getAllDocs(2, -1, -1, "title", "desc");
-			List<TrpDocMetadata> docs = conn.getAllDocs(2, -1, -1, null, null);
-//			List<TrpDocMetadata> docs = conn.getAllDocs(2, 0, 10, null, null);
-			System.out.println("got "+docs.size()+" docs");
 			
-//			for (TrpDocMetadata m : docs) {
-//				System.out.println(m);
-//			}
+			sw.start();
+			List<TrpDocMetadata> docs = conn.getAllDocs(colId, 0, 0, null, null);
+			sw.stop(true);
+			System.out.println("got all docs: "+docs.size());
+			
+			
+			sw.start();
+			final int nDocs = conn.countDocs(2);
+			int ps = 20;
+			sw.stop(true);			
+			System.out.println("nDocs = "+nDocs);
+			
+			for (int i=0; i<nDocs; i += ps) {
+				System.out.println("i = "+i);
+				
+				sw.start();
+				docs = conn.getAllDocs(colId, i, ps, null, null);
+				sw.stop(true);
+				System.out.println("got docs: "+docs.size());
+			}
 		}
-		
-		SebisStopWatch.SW.stop();
+
+//		sw.start();
+//		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw)) {
+////			List<TrpDocMetadata> docs = conn.getAllDocs(1, 0, 10, "title", "desc");
+////			List<TrpDocMetadata> docs = conn.getAllDocs(2, 0, 0, "title", "desc");
+////			List<TrpDocMetadata> docs = conn.getAllDocs(2, -1, -1, "title", "desc");
+//			List<TrpDocMetadata> docs = conn.getAllDocs(2, -1, -1, null, null);
+////			List<TrpDocMetadata> docs = conn.getAllDocs(2, 0, 10, null, null);
+//			System.out.println("got "+docs.size()+" docs");
+//			
+////			for (TrpDocMetadata m : docs) {
+////				System.out.println(m);
+////			}
+//		}
+//		sw.stop();
 	}
 	
 	static void testUsersForCollectionPaging(final String user, final String pw) throws Exception {
