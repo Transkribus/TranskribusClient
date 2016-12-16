@@ -2,7 +2,6 @@ package eu.transkribus.client.connection;
 
 import java.io.File;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -15,21 +14,11 @@ import java.util.function.Supplier;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -95,7 +84,7 @@ public class TrpServerConn extends ATrpServerConn {
 	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
 	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";
 	public static final String OLD_TEST_SERVER_URI = "https://dbis-faxe.uibk.ac.at/TrpServerTesting";
-	
+		
 	public static final String[] SERVER_URIS = new String[] {
 		PROD_SERVER_URI, 
 		TEST_SERVER_URI,
@@ -1126,7 +1115,7 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	} 
 	
-	public void exportDocument(int colId, int docId, String pages, boolean doWriteMets, boolean doWriteImages, boolean doExportPageXml, 
+	public String exportDocument(int colId, int docId, String pages, boolean doWriteMets, boolean doWriteImages, boolean doExportPageXml, 
 			boolean doExportAltoXml, boolean splitIntoWordsInAltoXml, boolean doWritePdf, boolean doWriteTei, boolean doWriteDocx,
 			boolean doWriteTagsXlsx, boolean doWriteTablesXlsx, boolean doPdfImagesOnly, boolean doPdfImagesPlusText, boolean doPdfWithTextPages,
 			boolean doPdfWithTags, boolean doTeiWithNoZones, boolean doTeiWithZonePerRegion, boolean doTeiWithZonePerLine, boolean doTeiWithZonePerWord,
@@ -1168,7 +1157,7 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.DO_BLACKENING_PARAM, doBlackening)
 				.queryParam(RESTConst.DO_CREATE_TITLE_PARAM, doCreateTitle)
 				.queryParam(RESTConst.USE_VERSION_STATUS_PARAM, useVersionStatus);
-		postNull(target);
+		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, String.class, MediaType.APPLICATION_XML_TYPE);
 	} 
 	
 	public List<TrpUser> findUsers(String username, String firstName, String lastName, boolean exactMatch, boolean caseSensitive) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
@@ -1418,6 +1407,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getList(docTarget, new GenericType<List<KwsDocHit>>() {});
 	}
 	
+	@Deprecated
 	public String runRnnHtr(final int colId, final int docId, final String pageStr, final String modelName, final String dictName) 
 				throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 			WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_RNN_PATH);
@@ -1428,6 +1418,18 @@ public class TrpServerConn extends ATrpServerConn {
 			target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
 			return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 					String.class, MediaType.APPLICATION_XML_TYPE);
+	}
+	
+
+	public String runCitLabHtr(int colId, int docId, String pages, final int modelId, final String dictName) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_CITLAB_TEST_PATH);
+		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
+		target = target.queryParam(RESTConst.PAGES_PARAM, pages);
+		target = target.queryParam(RESTConst.HTR_MODEL_ID_PARAM, ""+modelId);
+		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
+		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
+				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
 	@Deprecated
@@ -1496,4 +1498,5 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.NR_OF_TRANSCRIPTS_PARAM, ""+nrOfTranscriptsPerPage);
 		return getObject(docTarget, TrpDoc.class);
 	}
+
 }
