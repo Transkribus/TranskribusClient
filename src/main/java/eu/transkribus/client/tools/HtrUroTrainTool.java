@@ -177,7 +177,7 @@ public class HtrUroTrainTool {
 			
 			final Integer[] docIds = {7996};
 			
-			System.out.println(conn.runUroHtrTraining(
+			System.out.println(conn.runCitLabHtrTraining(
 					"Sutor", //netName
 					"200", //numEpochs
 					"2e-3", //;1e-3", //learningRate
