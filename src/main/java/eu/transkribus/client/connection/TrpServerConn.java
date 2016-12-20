@@ -1126,7 +1126,7 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	} 
 	
-	public void exportDocument(int colId, int docId, String pages, boolean doWriteMets, boolean doWriteImages, boolean doExportPageXml, 
+	public String exportDocument(int colId, int docId, String pages, boolean doWriteMets, boolean doWriteImages, boolean doExportPageXml, 
 			boolean doExportAltoXml, boolean splitIntoWordsInAltoXml, boolean doWritePdf, boolean doWriteTei, boolean doWriteDocx,
 			boolean doWriteTagsXlsx, boolean doWriteTablesXlsx, boolean doPdfImagesOnly, boolean doPdfImagesPlusText, boolean doPdfWithTextPages,
 			boolean doPdfWithTags, boolean doTeiWithNoZones, boolean doTeiWithZonePerRegion, boolean doTeiWithZonePerLine, boolean doTeiWithZonePerWord,
@@ -1168,7 +1168,9 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.DO_BLACKENING_PARAM, doBlackening)
 				.queryParam(RESTConst.DO_CREATE_TITLE_PARAM, doCreateTitle)
 				.queryParam(RESTConst.USE_VERSION_STATUS_PARAM, useVersionStatus);
-		postNull(target);
+		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
+				String.class, MediaType.APPLICATION_XML_TYPE);
+		//postNull(target);
 	} 
 	
 	public List<TrpUser> findUsers(String username, String firstName, String lastName, boolean exactMatch, boolean caseSensitive) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
