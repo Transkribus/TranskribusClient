@@ -14,6 +14,9 @@ import java.util.function.Supplier;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -53,10 +56,11 @@ import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.TrpWordgraph;
-import eu.transkribus.core.model.beans.UroHtrTrainConfig;
+import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
 import eu.transkribus.core.model.beans.auth.TrpRole;
 import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
+import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
@@ -945,30 +949,17 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public String runOcr(final int colId, final int docId, final int pageNr, final String pageStr) 
+	public String runOcr(final int colId, final int docId, final String pageStr,
+			final ScriptType typeFace, final String languages) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.OCR_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
-		target = target.queryParam(RESTConst.PAGE_NR_PARAM, pageNr);
 		target = target.queryParam(RESTConst.PAGES_PARAM, pageStr);
+		target = target.queryParam(RESTConst.TYPE_FACE_PARAM, typeFace.toString());
+		target = target.queryParam(RESTConst.LANGUAGE_PARAM, languages);
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
-	}
-	
-	public String runOcr(final int colId, final int docId, final String pageStr) 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return runOcr(colId, docId, -1, pageStr);
-	}
-	
-	public String runOcr(final int colId, final int docId, final int pageNr) 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return runOcr(colId, docId, pageNr, null);
-	}
-	
-	public String runOcr(final int colId, final int docId) 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return runOcr(colId, docId, -1);
 	}
 	
 	@Deprecated
@@ -1015,13 +1006,13 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public String runUroHtrTraining(final String modelName, final String numEpochs, final String learningRate,
+	public String runCitLabHtrTraining(final String modelName, final String numEpochs, final String learningRate,
 			final String noise, final Integer trainSizePerEpoch, final Integer... docIds) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return runUroHtrTraining(modelName, numEpochs, learningRate, noise, trainSizePerEpoch, null, docIds);
+		return runCitLabHtrTraining(modelName, numEpochs, learningRate, noise, trainSizePerEpoch, null, docIds);
 	}
 	
-	public String runUroHtrTraining(final String modelName, final String numEpochs, final String learningRate,
+	public String runCitLabHtrTraining(final String modelName, final String numEpochs, final String learningRate,
 			final String noise, final Integer trainSizePerEpoch, final String baseModel, final Integer... docIds) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_URO_TRAIN_PATH);
@@ -1037,7 +1028,7 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public String runUroHtrTraining(UroHtrTrainConfig config) 
+	public String runCitLabHtrTraining(CitLabHtrTrainConfig config) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		if(config == null) {
 			throw new IllegalArgumentException("Config is null!");
@@ -1046,6 +1037,25 @@ public class TrpServerConn extends ATrpServerConn {
 				
 		return postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
+	}
+
+	public void addHtrToCollection(final int htrId, final int colId, final int toColId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget
+				.path(RESTConst.RECOGNITION_PATH)
+				.path(""+colId)
+				.path(""+htrId)
+				.path(RESTConst.ADD_PATH);
+		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, toColId);
+		postNull(target);
+	}
+	
+	public void removeHtrFromCollection(final int htrId, final int colId, final int toColId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget
+				.path(RESTConst.RECOGNITION_PATH)
+				.path(""+colId)
+				.path(""+htrId)
+				.path(RESTConst.REMOVE_PATH);
+		super.delete(target);
 	}
 	
 	@Deprecated
@@ -1072,8 +1082,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public List<TrpHtr> getHtrs(final int colId, final String provider) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.LIST_PATH);
-		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path(RESTConst.LIST_PATH);
 		target = target.queryParam(RESTConst.PROVIDER_PARAM, provider);
 		return super.getList(target, new GenericType<List<TrpHtr>>(){});
 	}
@@ -1422,11 +1431,12 @@ public class TrpServerConn extends ATrpServerConn {
 	
 
 	public String runCitLabHtr(int colId, int docId, String pages, final int modelId, final String dictName) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_CITLAB_TEST_PATH);
-		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH)
+				.path(""+colId)
+				.path(""+modelId)
+				.path(RESTConst.HTR_CITLAB_TEST_PATH);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGES_PARAM, pages);
-		target = target.queryParam(RESTConst.HTR_MODEL_ID_PARAM, ""+modelId);
 		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
