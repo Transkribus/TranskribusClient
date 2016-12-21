@@ -1049,7 +1049,7 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
-	public void removeHtrFromCollection(final int htrId, final int colId, final int toColId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public void removeHtrFromCollection(final int htrId, final int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.RECOGNITION_PATH)
 				.path(""+colId)
@@ -1166,7 +1166,8 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.DO_BLACKENING_PARAM, doBlackening)
 				.queryParam(RESTConst.DO_CREATE_TITLE_PARAM, doCreateTitle)
 				.queryParam(RESTConst.USE_VERSION_STATUS_PARAM, useVersionStatus);
-		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, String.class, MediaType.APPLICATION_XML_TYPE);
+		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
+				String.class, MediaType.APPLICATION_XML_TYPE);
 	} 
 	
 	public List<TrpUser> findUsers(String username, String firstName, String lastName, boolean exactMatch, boolean caseSensitive) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
