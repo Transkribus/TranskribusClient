@@ -5,9 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collection;
 
 import javax.mail.internet.ContentDisposition;
 import javax.mail.internet.ParseException;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
@@ -50,6 +52,26 @@ public class JerseyUtils {
 			input.addProgressInputStreamListener(l);
 				
 		IOUtils.copy(input, new FileOutputStream(f));
+	}
+	
+	public static WebTarget queryParam(WebTarget t, String param, Collection<?> c) {
+		if (c != null) {
+			for (Object o : c) {
+				t = t.queryParam(param, o);	
+			}
+		}
+	
+		return t;
+	}
+	
+	public static WebTarget queryParam(WebTarget t, String param, Object o) {
+		if ( o == null || (o instanceof String && ((String)o).isEmpty()) )
+			return t;
+		
+		if (o instanceof Collection<?>) { // needed?? -> function with Collection type parameter should be called anyway...
+			return queryParam(t, param, (Collection<?>) o);
+		}
+		else return t.queryParam(param, o);
 	}
 
 }

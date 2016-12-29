@@ -2,7 +2,9 @@ package eu.transkribus.client.connection;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
@@ -13,12 +15,11 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.transkribus.client.connection.TrpServerConn;
-import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.io.LocalDocReader;
 import eu.transkribus.core.io.UnsupportedFormatException;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TrpCollection;
+import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpPage;
@@ -27,6 +28,7 @@ import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
+import eu.transkribus.core.util.CoreUtils;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.SebisStopWatch;
 
@@ -34,6 +36,32 @@ public class TrpServerConnTest {
 	private static final Logger logger = LoggerFactory.getLogger(TrpServerConnTest.class);
 	
 	static SebisStopWatch sw = new SebisStopWatch();
+	
+	public static void testSearchTags(final String user, final String pw) throws Exception  {
+		TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw);
+		
+		int docid = 62;
+		int cid = 2;
+		int pid = 1;
+		
+//		String tagName = "abbrev";
+		String tagName = "sic";
+		String value = null;
+		String regionType = "Line";
+		
+		Map<String, Object> attributes = new HashMap<>();
+		
+		boolean exactMatch = true;
+		boolean caseSensitive = false;
+		
+		List<TrpDbTag> tags = conn.searchTags(CoreUtils.createSet(cid), null, null, tagName, value, regionType, exactMatch, caseSensitive, attributes);
+		
+		System.out.println("nr of selected tags: "+tags.size());
+		tags.forEach((t) -> {
+			System.out.println(t);
+		});
+		
+	}
 	
 	public static void testBugReport(final String user, final String pw) throws Exception {
 //		TrpServerConn conn = TrpServerConn.getInstance(TrpServerConn.SERVER_URIS[1], user, pw);
@@ -392,7 +420,9 @@ public class TrpServerConnTest {
 		
 //		testUpdatePageStatus(args[0], args[1]);
 		
-		testServerExport(args[0], args[1]);
+//		testServerExport(args[0], args[1]);
+		
+		testSearchTags(args[0], args[1]);
 		
 		if (true)
 			return;

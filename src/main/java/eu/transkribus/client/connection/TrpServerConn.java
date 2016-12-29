@@ -2,21 +2,21 @@ package eu.transkribus.client.connection;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -36,18 +36,23 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.Gson;
+
 import eu.transkribus.client.io.ASingleDocUpload;
 import eu.transkribus.client.io.TrpDocUploadMultipart;
 import eu.transkribus.client.io.TrpDocUploadZipHttp;
 import eu.transkribus.client.util.BufferedFileBodyWriter;
 import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.SessionExpiredException;
+import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.EdOption;
 import eu.transkribus.core.model.beans.HtrModel;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
+import eu.transkribus.core.model.beans.TestBean;
 import eu.transkribus.core.model.beans.TrpCollection;
+import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
@@ -56,7 +61,6 @@ import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.TrpWordgraph;
-import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
 import eu.transkribus.core.model.beans.auth.TrpRole;
 import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
@@ -105,6 +109,11 @@ public class TrpServerConn extends ATrpServerConn {
 	private static final GenericType<List<EdFeature>> ED_FEATURE_LIST_TYPE = new GenericType<List<EdFeature>>() {};
 	private static final GenericType<List<TrpDocDir>> DOC_DIR_LIST_TYPE = new GenericType<List<TrpDocDir>>() {};
 	private static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
+	private static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
+	
+	private static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
+	
+	
 	
 	
 	// Singleton instance of this
@@ -1482,6 +1491,44 @@ public class TrpServerConn extends ATrpServerConn {
 		}
 		
 		return super.getObject(target, FulltextSearchResult.class, MediaType.APPLICATION_JSON_TYPE);
+	}
+
+	public List<TrpDbTag> searchTags(
+				Set<Integer> collIds,
+				Set<Integer> docIds,
+				Set<Integer> pageIds,
+				String tagName,
+				String tagValue,
+				String regionType,
+				boolean exactMatch,
+				boolean caseSensitive,		
+				Map<String, Object> attributes
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		
+		Gson gson = new Gson();
+		String attributesJson;
+		try {
+			attributesJson = URLEncoder.encode(gson.toJson(attributes),"UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Unable to encode attributes map: "+e.getMessage());
+			attributesJson = null;
+		}
+		logger.debug("attributesJson = "+attributesJson);
+		
+		WebTarget t = baseTarget.path(RESTConst.SEARCH_PATH).path(RESTConst.TAGS_PATH);
+		
+		
+		t = JerseyUtils.queryParam(t, RESTConst.COLLECTION_ID_PARAM, collIds);
+		t = JerseyUtils.queryParam(t, RESTConst.DOC_ID_PARAM, docIds);
+		t = JerseyUtils.queryParam(t, RESTConst.PAGE_ID_PARAM, pageIds);
+		t = JerseyUtils.queryParam(t, RESTConst.TAG_NAME_PARAM, tagName);
+		t = JerseyUtils.queryParam(t, RESTConst.TAG_VALUE_PARAM, tagValue);
+		t = JerseyUtils.queryParam(t, RESTConst.REGION_TYPE_PARAM, regionType);
+		t = JerseyUtils.queryParam(t, RESTConst.EXACT_MATCH_PARAM, exactMatch);
+		t = JerseyUtils.queryParam(t, RESTConst.CASE_SENSITIVE_PARAM, caseSensitive);
+		t = JerseyUtils.queryParam(t, RESTConst.ATTRIBUTES_PARAM, attributesJson);
+				
+		return getList(t, DB_TAG_LIST_TYPE);
 	}
 	
 	public void updatePageStatus(final int colId, final int docId, final int pageNr, final int transcriptId,
