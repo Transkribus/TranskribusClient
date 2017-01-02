@@ -1489,18 +1489,18 @@ public class TrpServerConn extends ATrpServerConn {
 		
 		return super.getObject(target, FulltextSearchResult.class, MediaType.APPLICATION_JSON_TYPE);
 	}
-
-	public List<TrpDbTag> searchTags(
-				Set<Integer> collIds,
-				Set<Integer> docIds,
-				Set<Integer> pageIds,
-				String tagName,
-				String tagValue,
-				String regionType,
-				boolean exactMatch,
-				boolean caseSensitive,		
-				Map<String, Object> attributes
-			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	
+	public WebTarget getSearchTagsTarget(
+			Set<Integer> collIds,
+			Set<Integer> docIds,
+			Set<Integer> pageIds,
+			String tagName,
+			String tagValue,
+			String regionType,
+			boolean exactMatch,
+			boolean caseSensitive,
+			Map<String, Object> attributes
+			) {
 		
 		Gson gson = new Gson();
 		String attributesJson;
@@ -1513,8 +1513,6 @@ public class TrpServerConn extends ATrpServerConn {
 		logger.debug("attributesJson = "+attributesJson);
 		
 		WebTarget t = baseTarget.path(RESTConst.SEARCH_PATH).path(RESTConst.TAGS_PATH);
-		
-		
 		t = JerseyUtils.queryParam(t, RESTConst.COLLECTION_ID_PARAM, collIds);
 		t = JerseyUtils.queryParam(t, RESTConst.DOC_ID_PARAM, docIds);
 		t = JerseyUtils.queryParam(t, RESTConst.PAGE_ID_PARAM, pageIds);
@@ -1524,6 +1522,37 @@ public class TrpServerConn extends ATrpServerConn {
 		t = JerseyUtils.queryParam(t, RESTConst.EXACT_MATCH_PARAM, exactMatch);
 		t = JerseyUtils.queryParam(t, RESTConst.CASE_SENSITIVE_PARAM, caseSensitive);
 		t = JerseyUtils.queryParam(t, RESTConst.ATTRIBUTES_PARAM, attributesJson);
+		
+		return t;
+	}
+	
+	public Future<List<TrpDbTag>> searchTagsAsync(
+			Set<Integer> collIds,
+			Set<Integer> docIds,
+			Set<Integer> pageIds,
+			String tagName,
+			String tagValue,
+			String regionType,
+			boolean exactMatch,
+			boolean caseSensitive,		
+			Map<String, Object> attributes, InvocationCallback<List<TrpDbTag>> callback) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
+		WebTarget t = getSearchTagsTarget(collIds, docIds, pageIds, tagName, tagValue, regionType, exactMatch, caseSensitive, attributes);
+//		return docTarget.request(DOC_MD_LIST_TYPE).async().get(callback);
+		return t.request(DEFAULT_RESP_TYPE).async().get(callback);
+	}
+
+	public List<TrpDbTag> searchTags(
+				Set<Integer> collIds,
+				Set<Integer> docIds,
+				Set<Integer> pageIds,
+				String tagName,
+				String tagValue,
+				String regionType,
+				boolean exactMatch,
+				boolean caseSensitive,		
+				Map<String, Object> attributes
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget t = getSearchTagsTarget(collIds, docIds, pageIds, tagName, tagValue, regionType, exactMatch, caseSensitive, attributes);
 				
 		return getList(t, DB_TAG_LIST_TYPE);
 	}
