@@ -380,10 +380,7 @@ public class TrpServerConn extends ATrpServerConn {
 		delete(docTarget);
 	}
 	
-	public void deletePage(int colId, int docId, int pageNr) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
-		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr);
-		delete(docTarget);
-	}
+
 	
 //	public PcGtsType getTranscript(URL url) throws JAXBException, URISyntaxException, SessionExpiredException, ServerErrorException, IllegalArgumentException{
 //		PcGtsType pc;
@@ -1557,4 +1554,39 @@ public class TrpServerConn extends ATrpServerConn {
 		return getObject(docTarget, TrpDoc.class);
 	}
 
+	public void addPage(final int colId, final int docId, final int pageNr, File imgFile, IProgressMonitor monitor) {
+		final WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(""+docId).path(""+pageNr);
+		MultiPart mp = new MultiPart();
+		mp.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+		
+		if(monitor != null){
+			BufferedFileBodyWriter bfbw = new BufferedFileBodyWriter();
+			bfbw.addObserver(new Observer(){
+				@Override
+				public void update(Observable o, Object arg) {
+					if(arg instanceof Integer){
+						monitor.worked((Integer)arg);
+					}
+				}});
+			target.register(bfbw);
+			
+		}
+		
+		FileDataBodyPart imgPart = new FileDataBodyPart("img", imgFile, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+		mp.bodyPart(imgPart);
+		
+		target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA));
+	}
+	
+	public void movePage(final int colId, final int docId, final int pageNr, final int toPageNr) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		final WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(""+docId).path(""+pageNr).queryParam(RESTConst.MOVE_TO_PARAM, ""+toPageNr);
+		super.postNull(target);		
+	}
+	
+	public void deletePage(int colId, int docId, int pageNr) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
+		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr);
+		delete(docTarget);
+	}
 }
