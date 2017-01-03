@@ -1556,7 +1556,7 @@ public class TrpServerConn extends ATrpServerConn {
 
 	public void addPage(final int colId, final int docId, final int pageNr, File imgFile, IProgressMonitor monitor) {
 		final WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
-				.path(""+colId).path(""+docId).path(""+pageNr);
+				.path(""+colId).path(""+docId).path(""+pageNr).path(RESTConst.ADD_PATH);
 		MultiPart mp = new MultiPart();
 		mp.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
 		
