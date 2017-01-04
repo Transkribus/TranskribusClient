@@ -60,7 +60,7 @@ public class DocxTest {
 
 			ExportUtils.storeCustomTagMapForDoc(doc7, wordbased, idxs2, null, false);
 			//export index
-			DocxBuilder.writeDocxForDoc(doc7, false, true, false, new File("C:/Users/Schorsch/ArabicTest.docx"), idxs2, null, false, false, false, false, true);
+			DocxBuilder.writeDocxForDoc(doc7, false, true, false, new File("C:/Users/Schorsch/ArabicTest.docx"), idxs2, null, false, false, false, false, true, false, false);
 			//export with substitute abbreviations and preserve line breaks
 //			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest1.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, true, true);
 //			//export with substitute abbreviations and not preserve line breaks
