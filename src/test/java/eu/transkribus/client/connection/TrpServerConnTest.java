@@ -2,6 +2,7 @@ package eu.transkribus.client.connection;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,9 @@ import org.slf4j.LoggerFactory;
 
 import eu.transkribus.core.io.LocalDocReader;
 import eu.transkribus.core.io.UnsupportedFormatException;
+import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
+import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
+import eu.transkribus.core.model.beans.DocumentSelectionDescriptor.PageDescriptor;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpDbTag;
@@ -379,12 +383,82 @@ public class TrpServerConnTest {
 		}
 	}
 	
+	static List<DocumentSelectionDescriptor> getDds(TrpServerConn conn, int collId) throws Exception {
+		List<TrpDocMetadata> docMds = conn.getAllDocs(collId, 0, 0, null, null);
+		System.out.println("n-docs = "+docMds.size());
+		List<DocumentSelectionDescriptor> dds = new ArrayList<>();
+		
+		for (TrpDocMetadata dm : docMds) {
+			TrpDoc d = conn.getTrpDoc(collId, dm.getDocId(), 1);
+			
+			DocumentSelectionDescriptor dd = new DocumentSelectionDescriptor();
+			dd.setDocId(d.getId());
+			
+			for (TrpPage p : d.getPages()) {
+				PageDescriptor pd = new PageDescriptor();
+				TrpTranscriptMetadata tmd = p.getCurrentTranscript();
+				
+//				System.out.println(""+tmd);
+				
+				pd.setPageId(p.getPageId());
+				pd.setTsId(tmd.getTsId());
+				
+				dd.getPages().add(pd);
+			}
+			
+			dds.add(dd);
+		}
+		
+		return dds;
+	}
+	
+	static void startHtrTraining(final String user, final String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw)) {
+			
+			CitLabHtrTrainConfig conf = new CitLabHtrTrainConfig();
+			
+			conf.setDescription("");
+			conf.setModelName("Goettingen");
+			conf.setLanguage("German");
+			
+			conf.setNumEpochs(150);
+			conf.setNoise("both");
+			conf.setLearningRate("2e-3");
+			conf.setTrainSizePerEpoch(1000);
+			
+			conf.setColId(4486);
+			
+			List<DocumentSelectionDescriptor> dds = getDds(conn, 4486);
+			conf.getTrain().addAll(dds);
+			
+			System.out.println("conf = "+conf.toString());
+			System.out.println("nr of docs = "+conf.getTrain().size());
+			
+			int c = 0;
+			for (DocumentSelectionDescriptor dd : dds) {
+				c += dd.getPages().size();
+			}
+			
+			System.out.println("nf of pages = "+c);
+
+			String jobID = conn.runCitLabHtrTraining(conf);
+			System.out.println("Started training with jobId = "+jobID);
+			
+//			conn.exportDocument(2, 1312, "1-31", true, true, true, true, false, true, true, true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false, "Latest");
+		}
+		
+		
+		
+	}
+	
 	public static void main(String[] args) throws Exception {
 		if(args.length != 2){
 			throw new IllegalArgumentException("No credentials");
 		}
 		
-//		testDeleteUser("whoever@gmx.at", args[0], args[1]);
+		startHtrTraining(args[0], args[1]);
+		
+//		testDeleteUser("sebi.c@test.com", args[0], args[1]);
 		
 //		testListingPageLocks(args[0], args[1]);
 		
@@ -422,7 +496,7 @@ public class TrpServerConnTest {
 		
 //		testServerExport(args[0], args[1]);
 		
-		testSearchTags(args[0], args[1]);
+//		testSearchTags(args[0], args[1]);
 		
 		if (true)
 			return;
