@@ -1465,6 +1465,32 @@ public class TrpServerConn extends ATrpServerConn {
 		return Arrays.asList(modelsStr.split("\n"));
 	}
 	
+	public Future<FulltextSearchResult> searchFulltextAsync(String query,
+			SearchType type,
+			Integer start,
+			Integer rows,
+			final List<String> filters,
+			InvocationCallback<FulltextSearchResult> callback
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException, UnsupportedEncodingException { 
+		WebTarget target = baseTarget.path(RESTConst.SEARCH_PATH).path(RESTConst.FULLTEXT_PATH);
+		
+		target = target	.queryParam(RESTConst.QUERY_PARAM, query)	
+						.queryParam(RESTConst.TYPE_PARAM, type.toString());
+		if(start != null) {
+			target = target.queryParam(RESTConst.START_PARAM, start);
+		}
+		if(rows != null) {
+			target = target.queryParam(RESTConst.ROWS_PARAM, rows);
+		}
+		if(filters != null && !filters.isEmpty()) {
+			for(String f : filters){
+				target = target.queryParam(RESTConst.FILTER_PARAM, f);
+			}	
+		}
+//		return super.getObject(target, FulltextSearchResult.class, MediaType.APPLICATION_JSON_TYPE);
+		return target.request(MediaType.APPLICATION_JSON_TYPE).async().get(callback);
+	}
+	
 	public FulltextSearchResult searchFulltext(String query,
 			SearchType type,
 			Integer start,
