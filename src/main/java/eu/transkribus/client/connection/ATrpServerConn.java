@@ -26,6 +26,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -36,9 +37,21 @@ import org.slf4j.LoggerFactory;
 import eu.transkribus.client.util.ClientRequestAuthFilter2;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
+import eu.transkribus.core.model.beans.EdFeature;
+import eu.transkribus.core.model.beans.PageLock;
+import eu.transkribus.core.model.beans.TestBean;
+import eu.transkribus.core.model.beans.TrpCollection;
+import eu.transkribus.core.model.beans.TrpDbTag;
+import eu.transkribus.core.model.beans.TrpDocDir;
+import eu.transkribus.core.model.beans.TrpDocMetadata;
+import eu.transkribus.core.model.beans.TrpEvent;
+import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
+import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.auth.TrpUserLogin;
 import eu.transkribus.core.model.beans.enums.OAuthProvider;
+import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.rest.RESTConst;
+import eu.transkribus.core.util.CoreUtils;
 
 /**
  * Abstract TRP Server Connection class that encapsulates the Jersey Client boilerplate.
@@ -48,6 +61,29 @@ import eu.transkribus.core.rest.RESTConst;
  */
 public abstract class ATrpServerConn implements Closeable {
 	private final static Logger logger = LoggerFactory.getLogger(ATrpServerConn.class);
+	
+	public static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
+	public static final GenericType<List<TrpCollection>> COL_LIST_TYPE = new GenericType<List<TrpCollection>>() {};
+	public static final GenericType<List<TrpDocMetadata>> DOC_MD_LIST_TYPE = new GenericType<List<TrpDocMetadata>>() {};
+	public static final GenericType<List<TrpJobStatus>> JOB_LIST_TYPE = new GenericType<List<TrpJobStatus>>() {};
+	public static final GenericType<List<TrpWordgraph>> WORDGRAPH_LIST_TYPE = new GenericType<List<TrpWordgraph>>() {};
+	public static final GenericType<List<PageLock>> PAGELOCK_LIST_TYPE = new GenericType<List<PageLock>>() {};
+	public static final GenericType<List<EdFeature>> ED_FEATURE_LIST_TYPE = new GenericType<List<EdFeature>>() {};
+	public static final GenericType<List<TrpDocDir>> DOC_DIR_LIST_TYPE = new GenericType<List<TrpDocDir>>() {};
+	public static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
+	public static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
+	public static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
+	
+	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
+	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";
+	public static final String OLD_TEST_SERVER_URI = "https://dbis-faxe.uibk.ac.at/TrpServerTesting";
+		
+	public static final String[] SERVER_URIS = new String[] {
+		PROD_SERVER_URI, 
+		TEST_SERVER_URI,
+		OLD_TEST_SERVER_URI
+	};	
+	public static final int DEFAULT_URI_INDEX = 0;
 	
 	private /*static*/ Client client;
 	private /*static*/ TrpUserLogin login;
@@ -235,6 +271,20 @@ public abstract class ATrpServerConn implements Closeable {
 		logger.debug("Logged in as: " + login.toString());
 		
 		return login;
+	}
+	
+	public static WebTarget queryParam(WebTarget t, String param, String value) {
+		if (t != null && !StringUtils.isEmpty(param) && !StringUtils.isEmpty((String)value)) {
+			return t.queryParam(param, value);
+		}
+		return t;
+	}
+	
+	public static WebTarget queryParam(WebTarget t, String param, Iterable<?> value) {
+		if (t != null && !StringUtils.isEmpty(param) && value!=null) {
+			return t.queryParam(param, value);
+		}
+		return t;
 	}
 
 	public void logout() throws ServerErrorException, ClientErrorException {

@@ -89,38 +89,33 @@ public class TrpServerConn extends ATrpServerConn {
 	// HTTPS URL. If using self-signed certificates, add it to the java keystore using $JAVA_HOME/bin/keytool.
 //	public static final String DEFAULT_URI = "https://dbis-faxe.uibk.ac.at/TrpServer";
 	
-	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
-	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";
-	public static final String OLD_TEST_SERVER_URI = "https://dbis-faxe.uibk.ac.at/TrpServerTesting";
-		
-	public static final String[] SERVER_URIS = new String[] {
-		PROD_SERVER_URI, 
-		TEST_SERVER_URI,
-		OLD_TEST_SERVER_URI
-	};	
-	public static final int DEFAULT_URI_INDEX = 0;
+//	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
+//	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";
+//	public static final String OLD_TEST_SERVER_URI = "https://dbis-faxe.uibk.ac.at/TrpServerTesting";
+//		
+//	public static final String[] SERVER_URIS = new String[] {
+//		PROD_SERVER_URI, 
+//		TEST_SERVER_URI,
+//		OLD_TEST_SERVER_URI
+//	};	
+//	public static final int DEFAULT_URI_INDEX = 0;
 	
-	private static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
-	private static final GenericType<List<TrpCollection>> COL_LIST_TYPE = new GenericType<List<TrpCollection>>() {};
-	private static final GenericType<List<TrpDocMetadata>> DOC_MD_LIST_TYPE = new GenericType<List<TrpDocMetadata>>() {};
-	private static final GenericType<List<TrpJobStatus>> JOB_LIST_TYPE = new GenericType<List<TrpJobStatus>>() {};
-	private static final GenericType<List<TrpWordgraph>> WORDGRAPH_LIST_TYPE = new GenericType<List<TrpWordgraph>>() {};
-	private static final GenericType<List<PageLock>> PAGELOCK_LIST_TYPE = new GenericType<List<PageLock>>() {};
-	private static final GenericType<List<EdFeature>> ED_FEATURE_LIST_TYPE = new GenericType<List<EdFeature>>() {};
-	private static final GenericType<List<TrpDocDir>> DOC_DIR_LIST_TYPE = new GenericType<List<TrpDocDir>>() {};
-	private static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
-	private static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
-	
-	private static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
-	
-	
-	
-	
+//	private static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
+//	private static final GenericType<List<TrpCollection>> COL_LIST_TYPE = new GenericType<List<TrpCollection>>() {};
+//	private static final GenericType<List<TrpDocMetadata>> DOC_MD_LIST_TYPE = new GenericType<List<TrpDocMetadata>>() {};
+//	private static final GenericType<List<TrpJobStatus>> JOB_LIST_TYPE = new GenericType<List<TrpJobStatus>>() {};
+//	private static final GenericType<List<TrpWordgraph>> WORDGRAPH_LIST_TYPE = new GenericType<List<TrpWordgraph>>() {};
+//	private static final GenericType<List<PageLock>> PAGELOCK_LIST_TYPE = new GenericType<List<PageLock>>() {};
+//	private static final GenericType<List<EdFeature>> ED_FEATURE_LIST_TYPE = new GenericType<List<EdFeature>>() {};
+//	private static final GenericType<List<TrpDocDir>> DOC_DIR_LIST_TYPE = new GenericType<List<TrpDocDir>>() {};
+//	private static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
+//	private static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
+//	private static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
+
 	// Singleton instance of this
 //	private static TrpServerConn conn = null;
 //	public ClientStatus status = new ClientStatus();
-	
-	
+
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
