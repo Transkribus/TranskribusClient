@@ -45,11 +45,16 @@ public class TrpJobsConnectionTest {
 		jobsRetrieved.stream().forEach((j) -> {
 			System.out.println(j.toString());
 		});
-		
-		Set<String> jobIds = new HashSet<>();
-		for (TrpJobStatus j : jobsRetrieved) {
-			jobIds.add(j.getJobId());
-		}
+				
+		Set<Integer> jobIds = new HashSet<>();
+		jobsRetrieved.stream().forEach((j) -> {
+			try {
+				Integer ji = Integer.parseInt(j.getJobId());				
+				jobIds.add(ji);
+			} catch (NumberFormatException e) {
+				logger.error("Cannot parse jobId: "+j.getJobId(), e);
+			}
+		});
 		
 		List<TrpJobStatus> jobsScheduled = conn.scheduleJobs(jobIds);
 		
@@ -62,8 +67,8 @@ public class TrpJobsConnectionTest {
 
 	public static void main(String[] args) throws Exception {
 		
-//		testRetrieveAndSchedule();
-		testRegister();
+		testRetrieveAndSchedule();
+//		testRegister();
 	}
 
 }

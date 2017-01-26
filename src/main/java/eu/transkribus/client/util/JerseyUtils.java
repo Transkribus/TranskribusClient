@@ -70,7 +70,7 @@ public class JerseyUtils {
 		
 		if (o instanceof Collection<?>) { // needed?? -> function with Collection type parameter should be called anyway...
 			return queryParam(t, param, (Collection<?>) o);
-		}
+		}		
 		else return t.queryParam(param, o);
 	}
 
