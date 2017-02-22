@@ -465,6 +465,7 @@ public class TrpServerConnTest {
 			Integer tsId = 21303;
 			
 			DocumentSelectionDescriptor dd1 = new DocumentSelectionDescriptor(docId, pageId);
+			
 			DocumentSelectionDescriptor dd2 = new DocumentSelectionDescriptor(63, 321);
 			dd2.getPages().get(0).setTsId(1234);
 			dd2.getPages().get(0).getRegionIds().add("r1");
@@ -472,9 +473,10 @@ public class TrpServerConnTest {
 			
 			List<DocumentSelectionDescriptor> dds = new ArrayList<>();
 			dds.add(dd1);
-			dds.add(dd2);
+//			dds.add(dd2);
 			
-			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, true, true, false, JobImpl.CITlabLaJob, null);
+//			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, true, true, false, JobImpl.CITlabLaJob, null);
+			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, false, false, true, JobImpl.NcsrLaJob, null);
 			
 			System.out.println("jobs inserted: "+jobs.size());
 			for (TrpJobStatus j : jobs) {
