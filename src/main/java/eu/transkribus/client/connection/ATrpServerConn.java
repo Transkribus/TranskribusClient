@@ -73,6 +73,7 @@ public abstract class ATrpServerConn implements Closeable {
 	public static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
 	public static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
 	public static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
+	public static final GenericType<List<String>> STRING_LIST_TYPE = new GenericType<List<String>>() {};
 	
 	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
 	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";

@@ -31,6 +31,7 @@ import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
+import eu.transkribus.core.model.beans.job.enums.JobImpl;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.util.CoreUtils;
 import eu.transkribus.core.util.PageXmlUtils;
@@ -446,9 +447,40 @@ public class TrpServerConnTest {
 			
 //			conn.exportDocument(2, 1312, "1-31", true, true, true, true, false, true, true, true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false, "Latest");
 		}
-		
-		
-		
+	}
+	
+	public static void testGetStringListTest(String user, String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {	
+			List<String> list = conn.getStringListTest();			
+			System.out.println("list = "+CoreUtils.join(list));
+		}
+	}
+	
+	public static void testStartLa(final String user, final String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {			
+			int colId = 2;
+			Integer docId = 62;
+			Integer pageId = 1;
+//			1/21303
+			Integer tsId = 21303;
+			
+			DocumentSelectionDescriptor dd1 = new DocumentSelectionDescriptor(docId, pageId);
+			DocumentSelectionDescriptor dd2 = new DocumentSelectionDescriptor(63, 321);
+			dd2.getPages().get(0).setTsId(1234);
+			dd2.getPages().get(0).getRegionIds().add("r1");
+			dd2.getPages().get(0).getRegionIds().add("rasdfasdf_asdfasdf");
+			
+			List<DocumentSelectionDescriptor> dds = new ArrayList<>();
+			dds.add(dd1);
+			dds.add(dd2);
+			
+			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, true, true, false, JobImpl.CITlabLaJob, null);
+			
+			System.out.println("jobs inserted: "+jobs.size());
+			for (TrpJobStatus j : jobs) {
+				System.out.println(j);
+			}
+		}
 	}
 	
 	public static void main(String[] args) throws Exception {
@@ -456,7 +488,9 @@ public class TrpServerConnTest {
 			throw new IllegalArgumentException("No credentials");
 		}
 		
-		startHtrTraining(args[0], args[1]);
+		testStartLa(args[0], args[1]);
+		
+//		startHtrTraining(args[0], args[1]);
 		
 //		testDeleteUser("sebi.c@test.com", args[0], args[1]);
 		

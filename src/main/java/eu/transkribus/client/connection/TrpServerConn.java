@@ -3,6 +3,7 @@ package eu.transkribus.client.connection;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,11 +23,13 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -37,6 +40,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import eu.transkribus.client.io.ASingleDocUpload;
 import eu.transkribus.client.io.TrpDocUploadMultipart;
@@ -45,12 +49,12 @@ import eu.transkribus.client.util.BufferedFileBodyWriter;
 import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
+import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.EdOption;
 import eu.transkribus.core.model.beans.HtrModel;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
-import eu.transkribus.core.model.beans.TestBean;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
@@ -67,11 +71,13 @@ import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
+import eu.transkribus.core.model.beans.job.enums.JobImpl;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
 import eu.transkribus.core.program_updater.HttpProgramPackageFile;
 import eu.transkribus.core.rest.JobConst;
 import eu.transkribus.core.rest.RESTConst;
+import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
 
@@ -115,6 +121,8 @@ public class TrpServerConn extends ATrpServerConn {
 	// Singleton instance of this
 //	private static TrpServerConn conn = null;
 //	public ClientStatus status = new ClientStatus();
+	
+	static Gson gson = new Gson();
 
 	
 	public TrpServerConn(String uriStr) throws LoginException {
@@ -865,6 +873,37 @@ public class TrpServerConn extends ATrpServerConn {
 	public void killJob(final String jobId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		final WebTarget docTarget = baseTarget.path(RESTConst.JOBS_PATH).path("" + jobId).path(RESTConst.KILL_JOB_PATH);
 		postNull(docTarget);
+	}
+	
+	// NEW layout analysis client method
+	public List<TrpJobStatus> analyzeLayout(int colId, List<DocumentSelectionDescriptor> dsds, boolean doBlockSeg, boolean doLineSeg, boolean doWordSeg, JobImpl jobImpl, String pars) 
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		
+		if (!jobImpl.toString().endsWith("LaJob")) {
+			throw new IllegalArgumentException("Not a valid layout analysis job: "+jobImpl.toString());
+		}
+		
+		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_PATH);
+		
+		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		
+		target = target.queryParam(RESTConst.DO_BLOCK_SEG_PARAM, doBlockSeg);
+		target = target.queryParam(RESTConst.DO_LINE_SEG_PARAM, doLineSeg);
+		target = target.queryParam(RESTConst.DO_WORD_SEG_PARAM, doWordSeg);
+		
+		target = target.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl.toString());
+		target = target.queryParam(RESTConst.PARS_PARAM, pars);
+		
+		GenericEntity<List<DocumentSelectionDescriptor>> entity = new GenericEntity<List<DocumentSelectionDescriptor>>(dsds) {};
+		return postEntityReturnList(target, entity, MediaType.APPLICATION_XML_TYPE, 
+				JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);
+	}
+	
+	public List<String> getStringListTest() throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path("getStringListTest");
+		
+		String json = getObject(target, String.class);
+		return GsonUtil.toStrList2(json);
 	}
 	
 	public String analyzeLayoutBatch(final int colId, final int docId, final String pages, final boolean doBlockSeg, final boolean doLineSeg) 
