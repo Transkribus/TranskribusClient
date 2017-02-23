@@ -476,7 +476,7 @@ public class TrpServerConnTest {
 //			dds.add(dd2);
 			
 //			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, true, true, false, JobImpl.CITlabLaJob, null);
-			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, false, false, true, JobImpl.NcsrLaJob, null);
+			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, false, false, true, JobImpl.NcsrLaJob.toString(), null);
 			
 			System.out.println("jobs inserted: "+jobs.size());
 			for (TrpJobStatus j : jobs) {

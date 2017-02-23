@@ -876,11 +876,11 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	// NEW layout analysis client method
-	public List<TrpJobStatus> analyzeLayout(int colId, List<DocumentSelectionDescriptor> dsds, boolean doBlockSeg, boolean doLineSeg, boolean doWordSeg, JobImpl jobImpl, String pars) 
+	public List<TrpJobStatus> analyzeLayout(int colId, List<DocumentSelectionDescriptor> dsds, boolean doBlockSeg, boolean doLineSeg, boolean doWordSeg, String jobImpl, String pars) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		
-		if (!jobImpl.toString().endsWith("LaJob")) {
-			throw new IllegalArgumentException("Not a valid layout analysis job: "+jobImpl.toString());
+		if (jobImpl==null || !jobImpl.endsWith("LaJob")) {
+			throw new IllegalArgumentException("Not a valid layout analysis job: "+jobImpl);
 		}
 		
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_PATH);
@@ -891,7 +891,7 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.DO_LINE_SEG_PARAM, doLineSeg);
 		target = target.queryParam(RESTConst.DO_WORD_SEG_PARAM, doWordSeg);
 		
-		target = target.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl.toString());
+		target = target.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl);
 		target = target.queryParam(RESTConst.PARS_PARAM, pars);
 		
 		GenericEntity<List<DocumentSelectionDescriptor>> entity = new GenericEntity<List<DocumentSelectionDescriptor>>(dsds) {};
