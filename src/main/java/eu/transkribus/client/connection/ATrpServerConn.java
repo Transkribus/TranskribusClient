@@ -36,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.util.ClientRequestAuthFilter2;
 import eu.transkribus.client.util.SessionExpiredException;
+import eu.transkribus.core.exceptions.ClientVersionNotSupportedException;
 import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.PageLock;
@@ -204,7 +205,7 @@ public abstract class ATrpServerConn implements Closeable {
 		close();
 	};
 
-	public TrpUserLogin login(final String user, final String pw) throws LoginException {
+	public TrpUserLogin login(final String user, final String pw) throws ClientVersionNotSupportedException, LoginException {
 		if (login != null) {
 			logout();
 		}
@@ -223,7 +224,21 @@ public abstract class ATrpServerConn implements Closeable {
 					);
 			
 			initTargets();
-		} catch(Exception e) {
+		}
+		catch (ClientErrorException e) {
+//			throw e;
+
+//			String entity = readStringEntity(e.getResponse());
+			
+			login = null;
+			if(e.getResponse().getStatus() == ClientVersionNotSupportedException.STATUS_CODE) {
+				logger.debug("ClientVersionNotSupportedException on login!");
+				throw new ClientVersionNotSupportedException(e.getMessage());
+			} else {
+				throw new LoginException(e.getMessage());
+			}
+		}
+		catch(Exception e) {
 			login = null;
 			logger.error("Login request failed!", e);
 			throw new LoginException(e.getMessage());
@@ -429,7 +444,7 @@ public abstract class ATrpServerConn implements Closeable {
 		return list;
 	}
 	
-	private String readStringEntity(Response resp) {
+	private static String readStringEntity(Response resp) {
 		try {
 			return resp.readEntity(String.class);
 		} catch (ProcessingException e) {
@@ -461,6 +476,9 @@ public abstract class ATrpServerConn implements Closeable {
 		} else if(status == 405) {
 			throw new ClientErrorException(loc + " - Method not allowed! (405) "+readStringEntity(resp), resp);
 		} 
+//		else if(status == ClientVersionNotSupportedException.STATUS_CODE) {
+//			throw new RuntimeException(loc + " - Method not allowed! (405) "+readStringEntity(resp)/*, resp*/);
+//		}
 		else if (status < 500) {
 			throw new ClientErrorException("Client error: "+readStringEntity(resp), resp);
 		}
