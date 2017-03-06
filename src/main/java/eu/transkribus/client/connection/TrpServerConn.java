@@ -1496,7 +1496,7 @@ public class TrpServerConn extends ATrpServerConn {
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_DICTS_PATH);
 		final String modelsStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
-		return Arrays.asList(modelsStr.split("\n"));
+		return new ArrayList<String>(Arrays.asList(modelsStr.split("\n")));
 	}
 	
 	public Future<FulltextSearchResult> searchFulltextAsync(String query,
