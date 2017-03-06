@@ -28,11 +28,11 @@ public class ClientRequestAuthFilter2 implements ClientRequestFilter {
 	
 	private List<Object> getCookies() {
 		if (conn.getUserLogin() == null) {
-			logger.debug("no user login - setting no cookies");
+			logger.trace("no user login - setting no cookies");
 			return null;
 		}
 		if (conn.getUserLogin().getSessionId() == null) {
-			logger.debug("no sessionid in login - setting no cookies");	
+			logger.trace("no sessionid in login - setting no cookies");	
 			return null;
 		}
 		
