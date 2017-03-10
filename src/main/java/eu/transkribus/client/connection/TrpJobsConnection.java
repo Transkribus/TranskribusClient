@@ -83,7 +83,9 @@ public class TrpJobsConnection extends ATrpServerConn {
 	
 	public void updateJob(TrpJobStatus job) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.JOB_MGMT_PATH).path(RESTConst.UPDATE_JOB_PATH);
-		t = t.queryParam(RESTConst.JOB_PARAM, job);
+		
+		//FIXME is job as entity enough? HTR Training jobs exceed max. query param size
+//		t = t.queryParam(RESTConst.JOB_PARAM, job);
 		
 		postEntity(t, job, MediaType.APPLICATION_XML_TYPE);
 	}
