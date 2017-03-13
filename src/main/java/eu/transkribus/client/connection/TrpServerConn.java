@@ -813,6 +813,12 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(target, DOC_DIR_LIST_TYPE);
 	}
 	
+	public Boolean checkDirOnFtp(final String dirName) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.FILES_PATH).path(RESTConst.CHECK_PATH);
+		target = target.queryParam(RESTConst.FILE_NAME_PARAM, dirName);
+		return Boolean.valueOf(super.getObject(target, String.class));
+	}
+	
 	public void ingestDocFromFtp(final int colId, final String dirName, boolean checkForDuplicateTitle) throws Exception {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.INGEST_PATH);
 		target = target.queryParam(RESTConst.FILE_NAME_PARAM, dirName).queryParam(RESTConst.CHECK_FOR_DUPLICATE_TITLE_PARAM, checkForDuplicateTitle);
