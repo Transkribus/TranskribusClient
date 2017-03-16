@@ -21,10 +21,15 @@ import org.slf4j.LoggerFactory;
 import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
+import eu.transkribus.core.model.beans.TrpPage;
+import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
+import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
+import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.CoreUtils;
 import eu.transkribus.core.util.GsonUtil;
+import eu.transkribus.core.util.xpath.XPathPage.TranscriptionLevel;
 
 public class TrpJobsConnection extends ATrpServerConn {	
 	private static final Logger logger = LoggerFactory.getLogger(TrpJobsConnection.class);
@@ -107,6 +112,45 @@ public class TrpJobsConnection extends ATrpServerConn {
 		return GsonUtil.toStrList2(json);		
 	}
 	
+	public TrpTranscriptMetadata getCurrentTranscript(int pid) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget t = baseTarget.path(RESTConst.JOB_MGMT_PATH).path(RESTConst.GET_TRANSCRIPT_PATH);
+		t = t.queryParam(RESTConst.PAGE_ID_PARAM, pid);
+
+		return getObject(t, TrpTranscriptMetadata.class);
+	}
+	
+	public TrpTranscriptMetadata getTranscriptById(int tsid) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget t = baseTarget.path(RESTConst.JOB_MGMT_PATH).path(RESTConst.GET_TRANSCRIPT_PATH);
+		t = t.queryParam(RESTConst.TRANSCRIPT_ID_PARAM, tsid);
+
+		return getObject(t, TrpTranscriptMetadata.class);
+	}
+
+	public TrpTranscriptMetadata updateTranscript(int pageId, EditStatus newStatus, int userId, String userName,
+			PcGtsType page, String toolName, boolean overwrite, int parentId, String note) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget t = baseTarget.path(RESTConst.JOB_MGMT_PATH).path(RESTConst.UPDATE_TRANSCRIPT_PATH);
+		
+		t = t.queryParam(RESTConst.PAGE_ID_PARAM, pageId);
+		if (newStatus != null)
+			t = t.queryParam(RESTConst.STATUS_PARAM, newStatus.toString());
+		
+		t = t.queryParam(RESTConst.USER_ID_PARAM, userId);
+		t = queryParam(t, RESTConst.USER_PARAM, userName);
+		t = queryParam(t, RESTConst.TOOL_NAME_PARAM, toolName);
+		t = t.queryParam(RESTConst.OVERWRITE_PARAM, overwrite);
+		t = t.queryParam(RESTConst.PARENT_ID_PARAM, parentId);
+		t = queryParam(t, RESTConst.NOTE_PARAM, note);
+		
+		return postEntityReturnObject(t, page, MediaType.APPLICATION_XML_TYPE, TrpTranscriptMetadata.class, MediaType.APPLICATION_XML_TYPE);
+	}
+
+	public TrpPage getPageById(int pageId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget t = baseTarget.path(RESTConst.JOB_MGMT_PATH).path(RESTConst.GET_PAGE_PATH);
+		t = t.queryParam(RESTConst.PAGE_ID_PARAM, pageId);
+
+		return getObject(t, TrpPage.class);
+	}
+
 //	public List<TrpJobStatus> retrieveJobs(String jobType, String jobTask, String toolProvider, String toolVersion, String host) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 //		WebTarget t = baseTarget.path(RESTConst.JOB_MGMT_PATH).path(RESTConst.RETRIEVE_JOBS_PATH);
 //
