@@ -3,7 +3,6 @@ package eu.transkribus.client.connection;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +28,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -40,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import eu.transkribus.client.io.ASingleDocUpload;
 import eu.transkribus.client.io.TrpDocUploadMultipart;
@@ -71,7 +68,6 @@ import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
-import eu.transkribus.core.model.beans.job.enums.JobImpl;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
 import eu.transkribus.core.program_updater.HttpProgramPackageFile;
@@ -1683,5 +1679,11 @@ public class TrpServerConn extends ATrpServerConn {
 	public void deletePage(int colId, int docId, int pageNr) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr);
 		delete(docTarget);
+	}
+
+	public void checkSession() throws SessionExpiredException, ClientErrorException, ServerErrorException {
+		final WebTarget target = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.CHECK_SESSION);
+		Response resp = target.request().get();
+		checkStatus(resp, target);
 	}
 }
