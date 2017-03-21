@@ -42,6 +42,13 @@ public class TrpServerConnTest {
 	
 	static SebisStopWatch sw = new SebisStopWatch();
 	
+	public static void testIsUserAllowedForJob(String user, String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			boolean isAllowed = conn.isUserAllowedForJob(JobImpl.CITlabLaJob.toString());
+			System.out.println("isAllowed = "+isAllowed);
+		}
+	}
+	
 	public static void testSearchTags(final String user, final String pw) throws Exception  {
 		TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw);
 		
@@ -490,7 +497,9 @@ public class TrpServerConnTest {
 			throw new IllegalArgumentException("No credentials");
 		}
 		
-		testStartLa(args[0], args[1]);
+		testIsUserAllowedForJob(args[0], args[1]);
+		
+//		testStartLa(args[0], args[1]);
 		
 //		startHtrTraining(args[0], args[1]);
 		
@@ -533,6 +542,7 @@ public class TrpServerConnTest {
 //		testServerExport(args[0], args[1]);
 		
 //		testSearchTags(args[0], args[1]);
+	
 		
 		if (true)
 			return;

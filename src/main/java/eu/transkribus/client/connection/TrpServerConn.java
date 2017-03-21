@@ -28,6 +28,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -1685,5 +1686,14 @@ public class TrpServerConn extends ATrpServerConn {
 		final WebTarget target = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.CHECK_SESSION);
 		Response resp = target.request().get();
 		checkStatus(resp, target);
+	}
+		
+	public boolean isUserAllowedForJob(String jobImpl) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget t = baseTarget.path(RESTConst.USER_PATH)
+										.path(RESTConst.IS_USER_ALLOWED_FOR_JOB_PATH)
+										.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl);
+		
+		String isAllowed = getObject(t, String.class);
+		return StringUtils.equals("true", isAllowed);
 	}
 }
