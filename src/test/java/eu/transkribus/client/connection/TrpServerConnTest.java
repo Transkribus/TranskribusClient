@@ -33,7 +33,9 @@ import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.job.enums.JobImpl;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
+import eu.transkribus.core.model.builder.tei.TeiExportPars;
 import eu.transkribus.core.util.CoreUtils;
+import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.SebisStopWatch;
 
@@ -387,7 +389,8 @@ public class TrpServerConnTest {
 	
 	static void testServerExport(final String user, final String pw) throws Exception {
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
-			conn.exportDocument(2, 1312, "1-31", true, true, true, true, false, true, true, true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false, "Latest");
+//			conn.exportDocument(2, 1312, "1-31", true, true, true, true, false, true, true, true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false, "Latest");
+			conn.exportDocumentTest(2, 1312, "1-31");
 		}
 	}
 	
@@ -496,8 +499,8 @@ public class TrpServerConnTest {
 		if(args.length != 2){
 			throw new IllegalArgumentException("No credentials");
 		}
-		
-		testIsUserAllowedForJob(args[0], args[1]);
+				
+//		testIsUserAllowedForJob(args[0], args[1]);
 		
 //		testStartLa(args[0], args[1]);
 		
@@ -539,7 +542,7 @@ public class TrpServerConnTest {
 		
 //		testUpdatePageStatus(args[0], args[1]);
 		
-//		testServerExport(args[0], args[1]);
+		testServerExport(args[0], args[1]);
 		
 //		testSearchTags(args[0], args[1]);
 	
