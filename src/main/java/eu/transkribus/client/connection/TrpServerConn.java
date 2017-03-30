@@ -1212,7 +1212,15 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.DO_BLACKENING_PARAM, doBlackening)
 				.queryParam(RESTConst.DO_CREATE_TITLE_PARAM, doCreateTitle)
 				.queryParam(RESTConst.USE_VERSION_STATUS_PARAM, useVersionStatus);
-				
+		
+		// TODO: structure parameters in different beans (CommonExportPars, TeiExportPars, DocxExportPars etc.) and
+		// store them as json into a Map<String, String>. This map is then also converted into a json string and 
+		// posted as entity to the export server call. On the server side, those map values are stored into the properties for the job
+		// which can then unmarshall the json string (GsonUtil.fromJson method!) into the respective beans (CommonExportPars etc.) again!
+		// This way, the server must not be updated all the time the export parameter are changing (which can occur very often especially
+		// for the export) - only the ExportDocumentJob in the Utility app server module must be re-deployed to reflect the changes in the
+		// parameters!
+
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
