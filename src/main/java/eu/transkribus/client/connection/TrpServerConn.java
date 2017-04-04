@@ -40,7 +40,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 
 import eu.transkribus.client.io.ASingleDocUpload;
 import eu.transkribus.client.io.TrpDocUploadMultipart;
@@ -73,6 +72,11 @@ import eu.transkribus.core.model.beans.enums.SearchType;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
+import eu.transkribus.core.model.builder.CommonExportPars;
+import eu.transkribus.core.model.builder.alto.AltoExportPars;
+import eu.transkribus.core.model.builder.docx.DocxExportPars;
+import eu.transkribus.core.model.builder.docx.XlsxExportPars;
+import eu.transkribus.core.model.builder.pdf.PdfExportPars;
 import eu.transkribus.core.model.builder.tei.TeiExportPars;
 import eu.transkribus.core.program_updater.HttpProgramPackageFile;
 import eu.transkribus.core.rest.JobConst;
@@ -1168,14 +1172,52 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		
 		postNull(target);
-	} 
+	}
 	
-	public String exportDocument(int colId, int docId, String pages, boolean doWriteMets, boolean doWriteImages, boolean doExportPageXml, 
+	public String exportDocument2(int colId, int docId,			
+			CommonExportPars commonPars,
+			AltoExportPars altoPars,
+			XlsxExportPars xlsxPars,
+			PdfExportPars pdfPars,
+			TeiExportPars teiPars,
+			DocxExportPars docxPars
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.EXPORT_PATH);
+				
+		Map<String, String> parAsJsonMap = new HashMap<>();
+		if (commonPars != null) {
+			parAsJsonMap.put(CommonExportPars.PARAMETER_KEY, GsonUtil.toJson(commonPars));
+		}
+		if (altoPars != null) {
+			parAsJsonMap.put(AltoExportPars.PARAMETER_KEY, GsonUtil.toJson(altoPars));
+		}
+		if (xlsxPars != null) {
+			parAsJsonMap.put(XlsxExportPars.PARAMETER_KEY, GsonUtil.toJson(xlsxPars));
+		}
+		if (pdfPars != null) {
+			parAsJsonMap.put(PdfExportPars.PARAMETER_KEY, GsonUtil.toJson(pdfPars));
+		}
+		if (teiPars != null) {
+			parAsJsonMap.put(TeiExportPars.PARAMETER_KEY, GsonUtil.toJson(teiPars));
+		}
+		if (docxPars != null) {
+			parAsJsonMap.put(DocxExportPars.PARAMETER_KEY, GsonUtil.toJson(docxPars));
+		}
+				
+		return postEntityReturnObject(target, GsonUtil.toJson(parAsJsonMap), MediaType.APPLICATION_JSON_TYPE, 
+		String.class, MediaType.APPLICATION_XML_TYPE);		
+	}
+	
+	public String exportDocument(int colId, int docId, 
+			String pages, 
+			boolean doWriteMets, boolean doWriteImages, boolean doExportPageXml, 
 			boolean doExportAltoXml, boolean splitIntoWordsInAltoXml, boolean doWritePdf, boolean doWriteTei, boolean doWriteDocx,
-			boolean doWriteTagsXlsx, boolean doWriteTablesXlsx, boolean doPdfImagesOnly, boolean doPdfImagesPlusText, boolean doPdfWithTextPages,
-			boolean doPdfWithTags, boolean doTeiWithNoZones, boolean doTeiWithZonePerRegion, boolean doTeiWithZonePerLine, boolean doTeiWithZonePerWord,
-			boolean doTeiWithLineTags, boolean doTeiWithLineBreaks, boolean doDocxWithTags, boolean doDocxPreserveLineBreaks, boolean doDocxMarkUnclear,
-			boolean doDocxKeepAbbrevs, boolean doDocxExpandAbbrevs, boolean doDocxSubstituteAbbrevs, boolean doWordBased, boolean doBlackening,
+			boolean doWriteTagsXlsx, boolean doWriteTablesXlsx, 
+			boolean doPdfImagesOnly, boolean doPdfImagesPlusText, boolean doPdfWithTextPages, boolean doPdfWithTags, 
+			boolean doTeiWithNoZones, boolean doTeiWithZonePerRegion, boolean doTeiWithZonePerLine, boolean doTeiWithZonePerWord, boolean doTeiWithLineTags, boolean doTeiWithLineBreaks, 
+			boolean doDocxWithTags, boolean doDocxPreserveLineBreaks, boolean doDocxMarkUnclear, boolean doDocxKeepAbbrevs, boolean doDocxExpandAbbrevs, boolean doDocxSubstituteAbbrevs, 
+			boolean doWordBased, boolean doBlackening,
 			boolean doCreateTitle, String useVersionStatus) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
