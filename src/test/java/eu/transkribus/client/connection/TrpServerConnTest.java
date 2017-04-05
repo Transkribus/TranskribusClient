@@ -33,6 +33,11 @@ import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.job.enums.JobImpl;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
+import eu.transkribus.core.model.builder.CommonExportPars;
+import eu.transkribus.core.model.builder.alto.AltoExportPars;
+import eu.transkribus.core.model.builder.alto.AltoExporter;
+import eu.transkribus.core.model.builder.docx.DocxExportPars;
+import eu.transkribus.core.model.builder.pdf.PdfExportPars;
 import eu.transkribus.core.model.builder.tei.TeiExportPars;
 import eu.transkribus.core.util.CoreUtils;
 import eu.transkribus.core.util.GsonUtil;
@@ -390,7 +395,21 @@ public class TrpServerConnTest {
 	static void testServerExport(final String user, final String pw) throws Exception {
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
 //			conn.exportDocument(2, 1312, "1-31", true, true, true, true, false, true, true, true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false, "Latest");
-			conn.exportDocumentTest(2, 1312, "1-31");
+			
+			CommonExportPars commonPars = new CommonExportPars();
+			commonPars.setDoWriteTei(true);
+			commonPars.setDoWritePdf(true);
+			commonPars.setDoWriteDocx(true);
+			commonPars.setDoWriteTagsXlsx(true);
+			commonPars.setDoWriteTablesXlsx(true);
+			
+			AltoExportPars altoPars = new AltoExportPars();
+			PdfExportPars pdfPars = new PdfExportPars();
+			TeiExportPars teiPars = new TeiExportPars();
+			DocxExportPars docxPars = new DocxExportPars();
+			
+			String jobID = conn.exportDocument(2, 1312, commonPars, altoPars, pdfPars, teiPars, docxPars);
+			System.out.println("Started export job "+jobID);
 		}
 	}
 	
