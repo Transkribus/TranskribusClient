@@ -885,7 +885,10 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	// NEW layout analysis client method
-	public List<TrpJobStatus> analyzeLayout(int colId, List<DocumentSelectionDescriptor> dsds, boolean doBlockSeg, boolean doLineSeg, boolean doWordSeg, String jobImpl, String pars) 
+	public List<TrpJobStatus> analyzeLayout(int colId, List<DocumentSelectionDescriptor> dsds, 
+			boolean doBlockSeg, boolean doLineSeg, boolean doWordSeg, boolean doPolygonToBaseline, 
+			
+			String jobImpl, String pars) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		
 		if (jobImpl==null || !jobImpl.endsWith("LaJob")) {
@@ -896,9 +899,13 @@ public class TrpServerConn extends ATrpServerConn {
 		
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		
-		target = target.queryParam(RESTConst.DO_BLOCK_SEG_PARAM, doBlockSeg);
-		target = target.queryParam(RESTConst.DO_LINE_SEG_PARAM, doLineSeg);
-		target = target.queryParam(RESTConst.DO_WORD_SEG_PARAM, doWordSeg);
+		if (doPolygonToBaseline) {
+			target = target.queryParam(RESTConst.DO_POLYGON_TO_BASELINE_PARAM, doPolygonToBaseline);
+		} else {
+			target = target.queryParam(RESTConst.DO_BLOCK_SEG_PARAM, doBlockSeg);
+			target = target.queryParam(RESTConst.DO_LINE_SEG_PARAM, doLineSeg);
+			target = target.queryParam(RESTConst.DO_WORD_SEG_PARAM, doWordSeg);
+		}
 		
 		target = target.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl);
 		target = target.queryParam(RESTConst.PARS_PARAM, pars);
