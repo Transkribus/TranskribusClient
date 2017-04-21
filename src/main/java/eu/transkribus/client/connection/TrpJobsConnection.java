@@ -60,10 +60,12 @@ public class TrpJobsConnection extends ATrpServerConn {
 		postNull(t);
 	}
 	
-	public List<TrpJobStatus> getPendingJobs(List<String> tasks) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public List<TrpJobStatus> getPendingJobs(List<String> tasks, int nValues, List<Integer> excludeUsers) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.JOB_MGMT_PATH).path(RESTConst.GET_PENDING_JOBS_PATH);
 		
 		t = queryParam(t, RESTConst.TASKS_PARAM, CoreUtils.join(tasks));
+		t = queryParam(t, RESTConst.PAGING_NVALUES_PARAM, ""+nValues);
+		t = queryParam(t, RESTConst.USERS_PARAM, CoreUtils.join(excludeUsers));
 		
 		return getList(t, JOB_LIST_TYPE);
 	}
