@@ -552,11 +552,11 @@ public class TrpServerConnTest {
 		
 //		testStartLa(args[0], args[1]);
 		
-		testStartPolygon2Baseline(args[0], args[1]);
+//		testStartPolygon2Baseline(args[0], args[1]);
 		
 //		startHtrTraining(args[0], args[1]);
 		
-//		testDeleteUser("sebi.c@test.com", args[0], args[1]);
+		testDeleteUser("fivarep@axon7zte.com", args[0], args[1]);
 		
 //		testListingPageLocks(args[0], args[1]);
 		

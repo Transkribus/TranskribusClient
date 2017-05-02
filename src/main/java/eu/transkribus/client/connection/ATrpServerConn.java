@@ -483,7 +483,9 @@ public abstract class ATrpServerConn implements Closeable {
 			throw new ClientErrorException("Client error: "+readStringEntity(resp), resp);
 		}
 		else { // 500 etc.
-			throw new ServerErrorException(loc + " - Some server error occured! " + status + " - " + resp.getStatusInfo(), status);
+			String ent = readStringEntity(resp);
+			
+			throw new ServerErrorException(loc + " - Some server error occured! " + status + " - " + resp.getStatusInfo() + (StringUtils.isEmpty(ent)?"":" - "+ent), status);
 		}
 	}
 	
