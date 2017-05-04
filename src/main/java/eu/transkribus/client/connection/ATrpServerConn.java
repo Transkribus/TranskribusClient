@@ -53,6 +53,7 @@ import eu.transkribus.core.model.beans.enums.OAuthProvider;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.CoreUtils;
+import eu.transkribus.core.util.SebisStopWatch;
 
 /**
  * Abstract TRP Server Connection class that encapsulates the Jersey Client boilerplate.
@@ -326,9 +327,25 @@ public abstract class ATrpServerConn implements Closeable {
 	}
 	
 	protected <T> List<T> getList(WebTarget target, GenericType<List<T>> returnType) throws SessionExpiredException, ServerErrorException, ClientErrorException{
-		Response resp = target.request(DEFAULT_RESP_TYPE).get();
+		return getList(target, returnType, DEFAULT_RESP_TYPE);
+	}
+	
+	protected <T> List<T> getList(WebTarget target, GenericType<List<T>> returnType, MediaType responseType) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+		if (responseType == null)
+			responseType = DEFAULT_RESP_TYPE;
+		
+//		SebisStopWatch.SW.start();
+		Response resp = target.request(responseType).get();
+//		SebisStopWatch.SW.stop(true, "time for request ");
+		
+//		SebisStopWatch.SW.start();
 		checkStatus(resp, target);
+//		SebisStopWatch.SW.stop(true, "time for checking status ");
+		
+//		SebisStopWatch.SW.start();
+//		resp.bufferEntity();
 		final List<T> genericList = extractList(resp, returnType);
+//		SebisStopWatch.SW.stop(true, "time for extracting list ");
 		return genericList;
 	}
 		

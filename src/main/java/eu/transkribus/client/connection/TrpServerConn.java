@@ -83,6 +83,7 @@ import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
+import eu.transkribus.core.util.SebisStopWatch;
 
 /**
  * Singleton implementation of ATrpServerConn.
@@ -858,7 +859,8 @@ public class TrpServerConn extends ATrpServerConn {
 //		if(docId != null){
 //			t = t.queryParam(RESTConst.DOC_ID_PARAM, docId);
 //		}
-		return getList(t, JOB_LIST_TYPE);
+		
+		return getList(t, JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);		
 	}
 	
 	public int countJobs(boolean filterByUser, String status, Integer docId) throws NumberFormatException, SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
