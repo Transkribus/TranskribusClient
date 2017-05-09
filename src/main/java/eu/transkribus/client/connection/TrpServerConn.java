@@ -83,7 +83,6 @@ import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
-import eu.transkribus.core.util.SebisStopWatch;
 
 /**
  * Singleton implementation of ATrpServerConn.
@@ -829,9 +828,16 @@ public class TrpServerConn extends ATrpServerConn {
 		super.postNull(target);
 	}
 		
-	public void ingestDocFromUrl(final int colId, final String metsUrl) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+	public void ingestDocFromUrl(final int colId, final String metsUrlStr) throws SessionExpiredException, ServerErrorException, ClientErrorException, UnsupportedEncodingException{
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("createDocFromMetsUrl");
-		target = target.queryParam(RESTConst.FILE_NAME_PARAM, metsUrl);
+		String encodedUrlStr;
+		try {
+			encodedUrlStr = URLEncoder.encode(metsUrlStr, DEFAULT_URI_ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Encoding not supported on this platform: " + DEFAULT_URI_ENCODING, e);
+			throw e;
+		}
+		target = target.queryParam(RESTConst.FILE_NAME_PARAM, encodedUrlStr);
 		super.postNull(target);
 
 	}

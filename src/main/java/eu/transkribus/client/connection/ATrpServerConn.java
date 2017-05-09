@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.concurrent.Future;
 
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
@@ -18,7 +17,6 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
@@ -52,8 +50,6 @@ import eu.transkribus.core.model.beans.auth.TrpUserLogin;
 import eu.transkribus.core.model.beans.enums.OAuthProvider;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.rest.RESTConst;
-import eu.transkribus.core.util.CoreUtils;
-import eu.transkribus.core.util.SebisStopWatch;
 
 /**
  * Abstract TRP Server Connection class that encapsulates the Jersey Client boilerplate.
@@ -99,6 +95,8 @@ public abstract class ATrpServerConn implements Closeable {
 	
 	public static String guiVersion="NA";
 	public static final int clientId = 1;
+	
+	public final static String DEFAULT_URI_ENCODING = "UTF-8";
 	
 	protected ATrpServerConn(final String uriStr) throws LoginException {
 		if (uriStr == null || uriStr.isEmpty()) {
