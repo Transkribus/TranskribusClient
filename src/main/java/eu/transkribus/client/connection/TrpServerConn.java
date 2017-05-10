@@ -258,11 +258,21 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
+	@Deprecated
 	public void modifyCollection(int colId, String name) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.MODIFY_COLLECTION_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_NAME_PARAM, name);
 		
 		postNull(target);
+	}
+	
+	public void updateCollectionMd(TrpCollection colMd) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(colMd == null) {
+			throw new IllegalArgumentException("Collection object is null!");
+		}
+		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colMd.getColId())
+				.path(RESTConst.MD_PATH);
+		postEntity(docTarget, colMd, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
 	public int countDocs(int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
@@ -375,6 +385,17 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(docTarget, WORDGRAPH_LIST_TYPE);
 	}
 	
+	
+	/**
+	 * FIXME docId is not really needed as param. as it is included in docMd
+	 * 
+	 * @param colId
+	 * @param docId
+	 * @param docMd
+	 * @throws SessionExpiredException
+	 * @throws IllegalArgumentException
+	 * @throws ClientErrorException
+	 */
 	public void updateDocMd(final int colId, final int docId, TrpDocMetadata docMd) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId)
 				.path(RESTConst.MD_PATH);
