@@ -35,12 +35,10 @@ import eu.transkribus.core.model.beans.job.enums.JobImpl;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.builder.CommonExportPars;
 import eu.transkribus.core.model.builder.alto.AltoExportPars;
-import eu.transkribus.core.model.builder.alto.AltoExporter;
 import eu.transkribus.core.model.builder.docx.DocxExportPars;
 import eu.transkribus.core.model.builder.pdf.PdfExportPars;
 import eu.transkribus.core.model.builder.tei.TeiExportPars;
 import eu.transkribus.core.util.CoreUtils;
-import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.SebisStopWatch;
 
@@ -48,6 +46,23 @@ public class TrpServerConnTest {
 	private static final Logger logger = LoggerFactory.getLogger(TrpServerConnTest.class);
 	
 	static SebisStopWatch sw = new SebisStopWatch();
+	
+	public static void testDocMdDescriptionSizeLimit(String user, String pw) throws Exception {
+		final int colId = 2;
+		final int docId = 87;
+		String testString = "";
+		while (testString.length() < 4000) {
+			testString += "REDRUM ";
+		}
+		testString = testString.substring(0, 4000);
+		System.out.println("TestString size is: " + testString.length());
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			TrpDoc doc = conn.getTrpDoc(colId, docId, -1);
+			TrpDocMetadata md = doc.getMd();
+			md.setDesc(testString);
+			conn.updateDocMd(colId, docId, md);
+		}
+	}
 	
 	public static void testIsUserAllowedForJob(String user, String pw) throws Exception {
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
@@ -548,6 +563,9 @@ public class TrpServerConnTest {
 			throw new IllegalArgumentException("No credentials");
 		}
 				
+		testDocMdDescriptionSizeLimit(args[0], args[1]);
+		if(true) return;
+		
 //		testIsUserAllowedForJob(args[0], args[1]);
 		
 //		testStartLa(args[0], args[1]);
@@ -556,7 +574,7 @@ public class TrpServerConnTest {
 		
 //		startHtrTraining(args[0], args[1]);
 		
-		testDeleteUser("fivarep@axon7zte.com", args[0], args[1]);
+//		testDeleteUser("fivarep@axon7zte.com", args[0], args[1]);
 		
 //		testListingPageLocks(args[0], args[1]);
 		
