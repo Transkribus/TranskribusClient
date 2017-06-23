@@ -251,11 +251,13 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
-	public void createCollection(String name) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public int createCollection(String name) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(RESTConst.CREATE_COLLECTION_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_NAME_PARAM, name);
 		
-		postNull(target);
+//		postNull(target);
+		Integer cid = postNullReturnObject(target, Integer.class);
+		return cid==null ? 0 : cid;
 	}
 	
 	@Deprecated
