@@ -29,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -1219,6 +1220,40 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		
 		postNull(target);
+	}
+	
+	public String exportDocuments(int colId, List<DocumentSelectionDescriptor> dsds,			
+			CommonExportPars commonPars,
+			AltoExportPars altoPars,
+			PdfExportPars pdfPars,
+			TeiExportPars teiPars,
+			DocxExportPars docxPars
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.EXPORT_PATH);
+				
+		Map<String, String> parAsJsonMap = new HashMap<>();
+		if (!CollectionUtils.isEmpty(dsds)) {
+			parAsJsonMap.put(JobConst.PROP_DOC_DESCS, GsonUtil.toJson(dsds));
+		}
+		if (commonPars != null) {
+			parAsJsonMap.put(CommonExportPars.PARAMETER_KEY, GsonUtil.toJson(commonPars));
+		}
+		if (altoPars != null) {
+			parAsJsonMap.put(AltoExportPars.PARAMETER_KEY, GsonUtil.toJson(altoPars));
+		}
+		if (pdfPars != null) {
+			parAsJsonMap.put(PdfExportPars.PARAMETER_KEY, GsonUtil.toJson(pdfPars));
+		}
+		if (teiPars != null) {
+			parAsJsonMap.put(TeiExportPars.PARAMETER_KEY, GsonUtil.toJson(teiPars));
+		}
+		if (docxPars != null) {
+			parAsJsonMap.put(DocxExportPars.PARAMETER_KEY, GsonUtil.toJson(docxPars));
+		}
+				
+		return postEntityReturnObject(target, GsonUtil.toJson(parAsJsonMap), MediaType.APPLICATION_JSON_TYPE, 
+		String.class, MediaType.APPLICATION_XML_TYPE);		
 	}
 	
 	public String exportDocument(int colId, int docId,			

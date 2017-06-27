@@ -423,7 +423,14 @@ public class TrpServerConnTest {
 			TeiExportPars teiPars = new TeiExportPars();
 			DocxExportPars docxPars = new DocxExportPars();
 			
-			String jobID = conn.exportDocument(2, 1312, commonPars, altoPars, pdfPars, teiPars, docxPars);
+//			String jobID = conn.exportDocument(2, 1312, commonPars, altoPars, pdfPars, teiPars, docxPars);
+//			System.out.println("Started export job "+jobID);
+			
+			List<DocumentSelectionDescriptor> dsds = new ArrayList<>();
+			dsds.add(new DocumentSelectionDescriptor(1732));
+			dsds.add(new DocumentSelectionDescriptor(1676));
+//			dsds.add(new DocumentSelectionDescriptor(123456789)); // does not exist!
+			String jobID = conn.exportDocuments(2, dsds, commonPars, altoPars, pdfPars, teiPars, docxPars);
 			System.out.println("Started export job "+jobID);
 		}
 	}
@@ -592,7 +599,6 @@ public class TrpServerConnTest {
 		}
 				
 //		testDocMdDescriptionSizeLimit(args[0], args[1]);
-		if(true) return;
 		
 //		testIsUserAllowedForJob(args[0], args[1]);
 		
@@ -638,7 +644,7 @@ public class TrpServerConnTest {
 		
 //		testUpdatePageStatus(args[0], args[1]);
 		
-//		testServerExport(args[0], args[1]);
+		testServerExport(args[0], args[1]);
 		
 //		testSearchTags(args[0], args[1]);
 	
