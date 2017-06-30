@@ -1231,6 +1231,10 @@ public class TrpServerConn extends ATrpServerConn {
 			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.EXPORT_PATH);
+		
+		if (commonPars!=null && !StringUtils.isEmpty(commonPars.getPages())) {
+			target = target.queryParam(RESTConst.PAGES_PARAM, commonPars.getPages());
+		}
 				
 		Map<String, String> parAsJsonMap = new HashMap<>();
 		if (!CollectionUtils.isEmpty(dsds)) {
@@ -1265,6 +1269,10 @@ public class TrpServerConn extends ATrpServerConn {
 			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.EXPORT_PATH);
+		
+		if (commonPars!=null && !StringUtils.isEmpty(commonPars.getPages())) {
+			target = target.queryParam(RESTConst.PAGES_PARAM, commonPars.getPages());
+		}
 				
 		Map<String, String> parAsJsonMap = new HashMap<>();
 		if (commonPars != null) {
