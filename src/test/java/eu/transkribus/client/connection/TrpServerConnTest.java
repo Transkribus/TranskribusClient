@@ -423,7 +423,14 @@ public class TrpServerConnTest {
 			TeiExportPars teiPars = new TeiExportPars();
 			DocxExportPars docxPars = new DocxExportPars();
 			
-			String jobID = conn.exportDocument(2, 1312, commonPars, altoPars, pdfPars, teiPars, docxPars);
+//			String jobID = conn.exportDocument(2, 1312, commonPars, altoPars, pdfPars, teiPars, docxPars);
+//			System.out.println("Started export job "+jobID);
+			
+			List<DocumentSelectionDescriptor> dsds = new ArrayList<>();
+			dsds.add(new DocumentSelectionDescriptor(1732));
+			dsds.add(new DocumentSelectionDescriptor(1676));
+//			dsds.add(new DocumentSelectionDescriptor(123456789)); // does not exist!
+			String jobID = conn.exportDocuments(2, dsds, commonPars, altoPars, pdfPars, teiPars, docxPars);
 			System.out.println("Started export job "+jobID);
 		}
 	}
@@ -520,7 +527,35 @@ public class TrpServerConnTest {
 //			dds.add(dd2);
 			
 //			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, true, true, false, JobImpl.CITlabLaJob, null);
-			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, false, false, false, true, JobImpl.NcsrLaJob.toString(), null);
+			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, false, false, false, true, false, JobImpl.NcsrLaJob.toString(), null);
+			
+			System.out.println("jobs inserted: "+jobs.size());
+			for (TrpJobStatus j : jobs) {
+				System.out.println(j);
+			}
+		}
+	}
+	
+	public static void testStartBaseline2Polygon(final String user, final String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {			
+			int colId = 1;
+			Integer docId = 447;
+			Integer pageId = 2249;
+//			1/21303
+			Integer tsId = 5155;
+			
+			DocumentSelectionDescriptor dd1 = new DocumentSelectionDescriptor(docId, pageId);
+			
+//			DocumentSelectionDescriptor dd2 = new DocumentSelectionDescriptor(63, 321);
+//			dd2.getPages().get(0).setTsId(1234);
+//			dd2.getPages().get(0).getRegionIds().add("r1");
+//			dd2.getPages().get(0).getRegionIds().add("rasdfasdf_asdfasdf");
+			
+			List<DocumentSelectionDescriptor> dds = new ArrayList<>();
+			dds.add(dd1);
+//			dds.add(dd2);
+			
+			List<TrpJobStatus> jobs = conn.analyzeLayout(colId, dds, false, false, false, false, true, JobImpl.NcsrOldLaJob.toString(), null);
 			
 			System.out.println("jobs inserted: "+jobs.size());
 			for (TrpJobStatus j : jobs) {
@@ -549,7 +584,7 @@ public class TrpServerConnTest {
 //			dds.add(dd2);
 			
 //			List<TrpJobStatus> jobs = conn.analyzeLayout(2, dds, true, true, false, JobImpl.CITlabLaJob, null);
-			List<TrpJobStatus> jobs = conn.analyzeLayout(colId, dds, false, false, false, true, JobImpl.NcsrOldLaJob.toString(), null);
+			List<TrpJobStatus> jobs = conn.analyzeLayout(colId, dds, false, false, false, true, false, JobImpl.NcsrOldLaJob.toString(), null);
 			
 			System.out.println("jobs inserted: "+jobs.size());
 			for (TrpJobStatus j : jobs) {
@@ -563,8 +598,7 @@ public class TrpServerConnTest {
 			throw new IllegalArgumentException("No credentials");
 		}
 				
-		testDocMdDescriptionSizeLimit(args[0], args[1]);
-		if(true) return;
+//		testDocMdDescriptionSizeLimit(args[0], args[1]);
 		
 //		testIsUserAllowedForJob(args[0], args[1]);
 		
@@ -610,7 +644,7 @@ public class TrpServerConnTest {
 		
 //		testUpdatePageStatus(args[0], args[1]);
 		
-//		testServerExport(args[0], args[1]);
+		testServerExport(args[0], args[1]);
 		
 //		testSearchTags(args[0], args[1]);
 	
