@@ -29,6 +29,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -55,6 +56,7 @@ import eu.transkribus.core.model.beans.HtrModel;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TrpCollection;
+import eu.transkribus.core.model.beans.TrpCrowdProject;
 import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
@@ -251,11 +253,13 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
-	public void createCollection(String name) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public int createCollection(String name) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(RESTConst.CREATE_COLLECTION_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_NAME_PARAM, name);
 		
-		postNull(target);
+//		postNull(target);
+		Integer cid = postNullReturnObject(target, Integer.class);
+		return cid==null ? 0 : cid;
 	}
 	
 	@Deprecated
@@ -915,7 +919,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	// NEW layout analysis client method
 	public List<TrpJobStatus> analyzeLayout(int colId, List<DocumentSelectionDescriptor> dsds, 
-			boolean doBlockSeg, boolean doLineSeg, boolean doWordSeg, boolean doPolygonToBaseline, 
+			boolean doBlockSeg, boolean doLineSeg, boolean doWordSeg, boolean doPolygonToBaseline, boolean doBaselineToPolygon,
 			
 			String jobImpl, String pars) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
@@ -929,8 +933,18 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		
 		if (doPolygonToBaseline) {
+			target = target.queryParam(RESTConst.DO_BLOCK_SEG_PARAM, false);
+			target = target.queryParam(RESTConst.DO_LINE_SEG_PARAM, false);
+			target = target.queryParam(RESTConst.DO_WORD_SEG_PARAM, false);
 			target = target.queryParam(RESTConst.DO_POLYGON_TO_BASELINE_PARAM, doPolygonToBaseline);
-		} else {
+		} 
+		else if (doBaselineToPolygon) {
+			target = target.queryParam(RESTConst.DO_BLOCK_SEG_PARAM, false);
+			target = target.queryParam(RESTConst.DO_LINE_SEG_PARAM, false);
+			target = target.queryParam(RESTConst.DO_WORD_SEG_PARAM, false);
+			target = target.queryParam(RESTConst.DO_BASELINE_TO_POLYGON_PARAM, doBaselineToPolygon);
+		}
+		else {
 			target = target.queryParam(RESTConst.DO_BLOCK_SEG_PARAM, doBlockSeg);
 			target = target.queryParam(RESTConst.DO_LINE_SEG_PARAM, doLineSeg);
 			target = target.queryParam(RESTConst.DO_WORD_SEG_PARAM, doWordSeg);
@@ -1209,6 +1223,44 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
+	public String exportDocuments(int colId, List<DocumentSelectionDescriptor> dsds,			
+			CommonExportPars commonPars,
+			AltoExportPars altoPars,
+			PdfExportPars pdfPars,
+			TeiExportPars teiPars,
+			DocxExportPars docxPars
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.EXPORT_PATH);
+		
+		if (commonPars!=null && !StringUtils.isEmpty(commonPars.getPages())) {
+			target = target.queryParam(RESTConst.PAGES_PARAM, commonPars.getPages());
+		}
+				
+		Map<String, String> parAsJsonMap = new HashMap<>();
+		if (!CollectionUtils.isEmpty(dsds)) {
+			parAsJsonMap.put(JobConst.PROP_DOC_DESCS, GsonUtil.toJson(dsds));
+		}
+		if (commonPars != null) {
+			parAsJsonMap.put(CommonExportPars.PARAMETER_KEY, GsonUtil.toJson(commonPars));
+		}
+		if (altoPars != null) {
+			parAsJsonMap.put(AltoExportPars.PARAMETER_KEY, GsonUtil.toJson(altoPars));
+		}
+		if (pdfPars != null) {
+			parAsJsonMap.put(PdfExportPars.PARAMETER_KEY, GsonUtil.toJson(pdfPars));
+		}
+		if (teiPars != null) {
+			parAsJsonMap.put(TeiExportPars.PARAMETER_KEY, GsonUtil.toJson(teiPars));
+		}
+		if (docxPars != null) {
+			parAsJsonMap.put(DocxExportPars.PARAMETER_KEY, GsonUtil.toJson(docxPars));
+		}
+				
+		return postEntityReturnObject(target, GsonUtil.toJson(parAsJsonMap), MediaType.APPLICATION_JSON_TYPE, 
+		String.class, MediaType.APPLICATION_XML_TYPE);		
+	}
+	
 	public String exportDocument(int colId, int docId,			
 			CommonExportPars commonPars,
 			AltoExportPars altoPars,
@@ -1218,6 +1270,10 @@ public class TrpServerConn extends ATrpServerConn {
 			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.EXPORT_PATH);
+		
+		if (commonPars!=null && !StringUtils.isEmpty(commonPars.getPages())) {
+			target = target.queryParam(RESTConst.PAGES_PARAM, commonPars.getPages());
+		}
 				
 		Map<String, String> parAsJsonMap = new HashMap<>();
 		if (commonPars != null) {
@@ -1463,6 +1519,12 @@ public class TrpServerConn extends ATrpServerConn {
 				.path(""+colId).path(RESTConst.DELETE_EDIT_DECL_FEATURE)
 				.queryParam(RESTConst.ID_PARAM, feature.getFeatureId());
 		super.postNull(docTarget);
+	}
+	
+	public void postCrowdProject(Integer colId, TrpCrowdProject project) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
+		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.STORE_CROWD_PROJECT);
+		super.postEntity(docTarget, project, MediaType.APPLICATION_XML_TYPE);
 	}
 	
 	public void postEditDeclOption(Integer colId, EdOption option) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
