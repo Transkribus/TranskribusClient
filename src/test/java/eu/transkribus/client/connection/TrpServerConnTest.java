@@ -335,19 +335,28 @@ public class TrpServerConnTest {
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
 			SebisStopWatch sw = new SebisStopWatch();
 			
-			int N = conn.countJobs(true, null, null);
+			int N = conn.countJobs(true, null, null, null);
 			sw.stop(true);
 
 			System.out.println("Njobs = "+N);
 			sw.start();
-			List<TrpJobStatus> list = conn.getJobs(false, null, null, 2, 4, null, null);
+			List<TrpJobStatus> list = conn.getJobs(false, null, null, null, 2, 4, null, null);
 			sw.stop(true);
 			for (TrpJobStatus j : list) {
 				System.out.println(""+j);
 			}
 			
 		}
-		
+	}
+	
+	static void testGetJobsByType(String user, String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			List<TrpJobStatus> jobs = conn.getJobs(true, TrpJobStatus.UNFINISHED, "Export Document", null, 0, 0, null, null);
+			System.out.println("got jobs: "+jobs.size());
+			for (TrpJobStatus j : jobs) {
+				System.out.println(""+j);
+			}		
+		}
 	}
 	
 	static void testTranscriptsPagination(final String user, final String pw) throws Exception {
@@ -644,7 +653,9 @@ public class TrpServerConnTest {
 		
 //		testUpdatePageStatus(args[0], args[1]);
 		
-		testServerExport(args[0], args[1]);
+//		testServerExport(args[0], args[1]);
+		
+		testGetJobsByType(args[0], args[1]);
 		
 //		testSearchTags(args[0], args[1]);
 	

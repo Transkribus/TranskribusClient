@@ -874,11 +874,12 @@ public class TrpServerConn extends ATrpServerConn {
 		checkStatus(response, target);
 	}
 	
-	public List<TrpJobStatus> getJobs(boolean filterByUser, String status, Integer docId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+	public List<TrpJobStatus> getJobs(boolean filterByUser, String status, String type, Integer docId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.JOBS_PATH).path(RESTConst.LIST_PATH);
 		//only get jobs of the logged in user?
 		t = t.queryParam(RESTConst.FILTER_BY_USER_PARAM, filterByUser);
 		t = t.queryParam(RESTConst.STATUS_PARAM, status);
+		t = queryParam(t, RESTConst.TYPE_PARAM, type);
 		t = t.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		t = t.queryParam(RESTConst.PAGING_INDEX_PARAM, index);
 		t = t.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues);
@@ -893,10 +894,11 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(t, JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);		
 	}
 	
-	public int countJobs(boolean filterByUser, String status, Integer docId) throws NumberFormatException, SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+	public int countJobs(boolean filterByUser, String status, String type, Integer docId) throws NumberFormatException, SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.JOBS_PATH).path(RESTConst.COUNT_PATH);
 		t = t.queryParam(RESTConst.FILTER_BY_USER_PARAM, filterByUser);
 		t = t.queryParam(RESTConst.STATUS_PARAM, status);
+		t = queryParam(t, RESTConst.TYPE_PARAM, type);
 		t = t.queryParam(RESTConst.DOC_ID_PARAM, docId);
 			
 		return Integer.parseInt(getObject(t, String.class));
