@@ -56,7 +56,6 @@ import eu.transkribus.core.model.beans.HtrModel;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TrpCollection;
-import eu.transkribus.core.model.beans.TrpCrowdProject;
 import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
@@ -1522,19 +1521,12 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.ID_PARAM, feature.getFeatureId());
 		super.postNull(docTarget);
 	}
-	
-	public void postCrowdProject(Integer colId, TrpCrowdProject project) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
-		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
-				.path(""+colId).path(RESTConst.STORE_CROWD_PROJECT);
-		super.postEntity(docTarget, project, MediaType.APPLICATION_XML_TYPE);
-	}
-	
+		
 	public void postEditDeclOption(Integer colId, EdOption option) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.STORE_EDIT_DECL_OPTION);
 		super.postEntity(docTarget, option, MediaType.APPLICATION_XML_TYPE);
 	}
-	
 
 	public void deleteEditDeclOption(int colId, EdOption opt) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
