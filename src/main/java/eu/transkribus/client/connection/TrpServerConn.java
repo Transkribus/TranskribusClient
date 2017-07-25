@@ -57,6 +57,8 @@ import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpCrowdProject;
+import eu.transkribus.core.model.beans.TrpCrowdProjectMessage;
+import eu.transkribus.core.model.beans.TrpCrowdProjectMilestone;
 import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
@@ -1527,6 +1529,59 @@ public class TrpServerConn extends ATrpServerConn {
 		super.postEntity(docTarget, project, MediaType.APPLICATION_XML_TYPE);
 	}
 	
+	public int postCrowdProjectMilestone(Integer colId, TrpCrowdProjectMilestone currMst) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.STORE_CROWD_PROJECT_MILESTONE);
+		//target = target.queryParam(RESTConst.CROWD_PROJECT_MILESTONE, currMst);
+		
+//		postNull(target);
+		Integer cid = postNullReturnObject(target, currMst, MediaType.APPLICATION_XML_TYPE, Integer.class);
+		return cid==null ? 0 : cid;
+	}
+	
+	public int postCrowdProjectMessage(Integer colId, TrpCrowdProjectMessage currMsg) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.STORE_CROWD_PROJECT_MESSAGE);
+		//target = target.queryParam(RESTConst.CROWD_PROJECT_MESSAGE, currMsg);
+		
+//		postNull(target);
+		//Integer cid = postNullReturnObject(target, Integer.class);
+		Integer cid = postNullReturnObject(target, currMsg, MediaType.APPLICATION_XML_TYPE, Integer.class);
+		return cid==null ? 0 : cid;
+	}
+	
+	public void deleteCrowdProjectMilestones(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.DELETE_CROWD_PROJECT_MILESTONES)
+				.queryParam(RESTConst.ID_PARAM, -1);
+		delete(target);
+		//super.postNull(docTarget);
+	}
+	
+	public void deleteCrowdProjectMilestone(int colId, int id) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.DELETE_CROWD_PROJECT_MILESTONES)
+				.queryParam(RESTConst.ID_PARAM, id);
+		delete(target);
+		
+	}
+	
+	public void deleteCrowdProjectMessages(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.DELETE_CROWD_PROJECT_MESSAGES)
+				.queryParam(RESTConst.ID_PARAM, -1);
+		delete(target);
+		//super.postNull(docTarget);
+	}
+	
+	public void deleteCrowdProjectMessage(int colId, int id) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.DELETE_CROWD_PROJECT_MESSAGES)
+				.queryParam(RESTConst.ID_PARAM, id);
+		delete(target);
+		
+	}
+
 	public void postEditDeclOption(Integer colId, EdOption option) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.STORE_EDIT_DECL_OPTION);
@@ -1835,4 +1890,16 @@ public class TrpServerConn extends ATrpServerConn {
 		String isAllowed = getObject(t, String.class);
 		return StringUtils.equals("true", isAllowed);
 	}
+
+	public TrpCrowdProject getCrowdProject(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.CROWD_PROJECT);
+		return getObject(target, TrpCrowdProject.class);
+	}
+
+
+
+
+
+
+
 }

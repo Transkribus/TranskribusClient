@@ -390,6 +390,12 @@ public abstract class ATrpServerConn implements Closeable {
 		return extractObject(resp, returnType);
 	}
 	
+	protected <T, R> R postNullReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		Response resp = target.request().post(Entity.entity(entity, postMediaType));
+		checkStatus(resp, target);
+		return extractObject(resp, returnType);
+	}
+	
 	protected <T, R> R postXmlEntityReturnObject(WebTarget target, T entity, Class<R> returnType) throws SessionExpiredException, ServerErrorException, ClientErrorException{
 		return postEntityReturnObject(target, entity, MediaType.APPLICATION_XML_TYPE, returnType, DEFAULT_RESP_TYPE);
 	}
