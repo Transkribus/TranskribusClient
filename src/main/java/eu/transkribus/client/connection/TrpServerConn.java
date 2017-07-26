@@ -1524,6 +1524,12 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.ID_PARAM, feature.getFeatureId());
 		super.postNull(docTarget);
 	}
+	
+	public void postCrowdProject(Integer colId, TrpCrowdProject project) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
+		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.STORE_CROWD_PROJECT);
+		super.postEntity(docTarget, project, MediaType.APPLICATION_XML_TYPE);
+	}
 		
 	public int postCrowdProjectMilestone(Integer colId, TrpCrowdProjectMilestone currMst) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
