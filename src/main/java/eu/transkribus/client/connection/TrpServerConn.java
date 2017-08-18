@@ -63,10 +63,12 @@ import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
+import eu.transkribus.core.model.beans.TrpDocStructure;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
+import eu.transkribus.core.model.beans.TrpUpload;
 import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.auth.TrpRole;
 import eu.transkribus.core.model.beans.auth.TrpUser;
@@ -74,6 +76,7 @@ import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
+import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
 import eu.transkribus.core.model.builder.CommonExportPars;
@@ -869,6 +872,16 @@ public class TrpServerConn extends ATrpServerConn {
 
 	}
 	
+	/**
+	 * ingest a document that has been upload via FTP
+	 * 
+	 * this is no longer supported in TRP server
+	 *  
+	 * @param colId
+	 * @param zipFn
+	 * @throws Exception
+	 */
+	@Deprecated
 	public void processTrpDocFromFtp(final int colId, String zipFn) throws Exception {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH_FTP);
 
@@ -1897,4 +1910,55 @@ public class TrpServerConn extends ATrpServerConn {
 		return getObject(target, TrpCrowdProject.class);
 	}
 
+	/*
+	 * Upload
+	 */
+	
+	public TrpUpload createNewUpload(final int colId, Mets mets) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(colId < 1 || mets == null) {
+			throw new IllegalArgumentException("bad parameters.");
+		}
+		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH)
+				.queryParam(RESTConst.COLLECTION_ID_PARAM, "" + colId);
+		TrpUpload u = postEntityReturnObject(t, mets, MediaType.APPLICATION_XML_TYPE, 
+				TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
+		return u;
+	}
+	
+	public TrpUpload createNewUpload(final int colId, TrpDocStructure struct) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(colId < 1 || struct == null) {
+			throw new IllegalArgumentException("bad parameters.");
+		}
+		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH)
+				.queryParam(RESTConst.COLLECTION_ID_PARAM, "" + colId);
+		TrpUpload u = postEntityReturnObject(t, struct, MediaType.APPLICATION_JSON_TYPE, 
+				TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
+		return u;
+	}
+	
+	public TrpUpload putPage(final int uploadId, File img, File xml) throws SessionExpiredException, ClientErrorException, ServerErrorException {
+		if(uploadId < 1) {
+			throw new IllegalArgumentException("No valid uploadId!");
+		}
+		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH).path(""+uploadId);
+		MultiPart mp = new MultiPart();
+		mp.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+		
+		FileDataBodyPart imgPart = new FileDataBodyPart("img", img, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+		mp.bodyPart(imgPart);
+		
+		if(xml != null) {
+			FileDataBodyPart xmlPart = new FileDataBodyPart("xml", xml, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+			mp.bodyPart(xmlPart);
+		}
+		return super.putEntityReturnObject(t, mp, MediaType.MULTIPART_FORM_DATA_TYPE, TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
+	}
+
+	public TrpUpload getUploadStatus(int uploadId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(uploadId < 1) {
+			throw new IllegalArgumentException("No valid uploadId!");
+		}
+		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH).path(""+uploadId);
+		return super.getObject(t, TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
+	}
 }

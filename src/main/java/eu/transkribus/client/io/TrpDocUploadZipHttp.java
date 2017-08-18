@@ -2,15 +2,14 @@ package eu.transkribus.client.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.concurrent.Callable;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,26 +17,24 @@ import eu.transkribus.client.util.BufferedFileBodyWriter;
 import eu.transkribus.core.io.TrpDocPacker;
 import eu.transkribus.core.model.beans.TrpDoc;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.OperationCanceledException;
-
 /**
  * Zip files with more than MAX_INTEGER-1 bytes of content will run into Jersey internal file size limit.
  */
 //@Deprecated
 public class TrpDocUploadZipHttp extends ASingleDocUpload {
 	private static final Logger logger = LoggerFactory.getLogger(TrpDocUploadZipHttp.class);
-//	protected final String TEMP_DIR;
 	protected final WebTarget target;
-//	protected final TrpDoc doc;
 	public Throwable error=null;
 	IProgressMonitor monitor=null;
+	
+	protected final String TEMP_DIR;
+	protected File zipFile;
 	
 	public static final int MAX_UPLOAD_SIZE_MB = 500; // max size in MB
 
 	public TrpDocUploadZipHttp(WebTarget target, TrpDoc entity, IProgressMonitor monitor) throws IOException {
 		super(entity, monitor);
-		
+		TEMP_DIR = System.getProperty("java.io.tmpdir");
 		this.target = target;
 	}
 
@@ -48,7 +45,6 @@ public class TrpDocUploadZipHttp extends ASingleDocUpload {
 			if (monitor != null)
 				monitor.beginTask("Uploading document at "+doc.getMd().getLocalFolder().getAbsolutePath(), 100);
 			
-			PassThroughObserver o = new PassThroughObserver();
 			updateStatus("Running process...");
 	
 			// create zip file:
@@ -69,7 +65,7 @@ public class TrpDocUploadZipHttp extends ASingleDocUpload {
 					+ "\"; " + "size=" + zipFile.length();
 	
 			BufferedFileBodyWriter bfbw = new BufferedFileBodyWriter();
-			bfbw.addObserver(o);
+			bfbw.addObserver(passthroughObserver);
 			
 			target.register(bfbw);
 			
@@ -93,17 +89,25 @@ public class TrpDocUploadZipHttp extends ASingleDocUpload {
 		
 		return null;
 	}
-
-//	protected void updateStatus(String string) {
-//		setChanged();
-//		notifyObservers(string);
-//	}
 	
-//	protected class PassThroughObserver implements Observer {
-//		public void update(Observable obj, Object arg) {
-//			if (arg instanceof String) {
-//				updateStatus((String) arg);
-//			}
-//		}
-//	}
+	protected void createZipFile(TrpDoc doc) throws IOException {
+		updateStatus("Create zip file...");
+		
+		final String zipFilePath = TEMP_DIR + File.separator + "TRP_DOC_"
+				+ System.currentTimeMillis() + ".zip";
+		try {			
+			TrpDocPacker p = new TrpDocPacker();
+			p.addObserver(super.passthroughObserver);
+//			try {
+//				conn.invalidate();
+//			} catch (SessionExpiredException | ServerErrorException e) {
+//				e.printStackTrace();
+//			}				
+			zipFile = p.packDocFiles(doc, zipFilePath);
+		} catch (IOException e) {
+			throw new IOException("Packaging document failed: "+e.getMessage());
+		}
+
+		updateStatus("Temp zip file at " + zipFile.getAbsoluteFile());
+	}
 }

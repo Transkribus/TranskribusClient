@@ -18,6 +18,7 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -27,6 +28,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
+import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.message.GZipEncoder;
 import org.slf4j.Logger;
@@ -45,6 +47,7 @@ import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
+import eu.transkribus.core.model.beans.TrpUpload;
 import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.auth.TrpUserLogin;
 import eu.transkribus.core.model.beans.enums.OAuthProvider;
@@ -98,6 +101,8 @@ public abstract class ATrpServerConn implements Closeable {
 	
 	public final static String DEFAULT_URI_ENCODING = "UTF-8";
 	
+	public final static boolean DEBUG = true;
+	
 	protected ATrpServerConn(final String uriStr) throws LoginException {
 		if (uriStr == null || uriStr.isEmpty()) {
 			throw new LoginException("Server URI is not set!");
@@ -132,6 +137,10 @@ public abstract class ATrpServerConn implements Closeable {
 
 //		//register auth filter with the jSessionId and update the WebTarget accordingly
 //		client.register(new ClientRequestAuthFilter(login.getSessionId()));
+		
+//		if(DEBUG) {
+//			Feature feature = new LoggingFeature(logger, Level.DEBUG, null, null);
+//		}
 	}
 			
 	protected boolean isSameServer(final String uriStr) {
@@ -406,6 +415,14 @@ public abstract class ATrpServerConn implements Closeable {
 		checkStatus(resp, target);
 		R object = extractObject(resp, returnType);
 		return object;
+	}
+	
+	public <T, R> R putEntityReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType, MediaType returnMediaType) throws SessionExpiredException, ClientErrorException, ServerErrorException {
+		Entity<T> ent = buildEntity(entity, postMediaType);
+		Response resp = target.request(returnMediaType).put(ent);
+		checkStatus(resp, target);
+		R object = extractObject(resp, returnType);
+		return object;		
 	}
 	
 	/**
