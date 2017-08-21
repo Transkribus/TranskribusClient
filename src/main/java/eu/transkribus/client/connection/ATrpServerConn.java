@@ -2,7 +2,9 @@ package eu.transkribus.client.connection;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -28,13 +30,14 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
-import org.glassfish.jersey.media.multipart.MultiPart;
+import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.message.GZipEncoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.util.ClientRequestAuthFilter2;
+import eu.transkribus.client.util.JulFacade;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.exceptions.ClientVersionNotSupportedException;
 import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
@@ -47,7 +50,6 @@ import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
-import eu.transkribus.core.model.beans.TrpUpload;
 import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.auth.TrpUserLogin;
 import eu.transkribus.core.model.beans.enums.OAuthProvider;
@@ -132,15 +134,16 @@ public abstract class ATrpServerConn implements Closeable {
 			}
 		});
 		
+		if(DEBUG) {
+			LoggingFilter lf = new LoggingFilter(new JulFacade(logger), true);
+			client.register(lf);
+		}
+		
 		initTargets();
 //		initBaseTarget();	
 
 //		//register auth filter with the jSessionId and update the WebTarget accordingly
 //		client.register(new ClientRequestAuthFilter(login.getSessionId()));
-		
-//		if(DEBUG) {
-//			Feature feature = new LoggingFeature(logger, Level.DEBUG, null, null);
-//		}
 	}
 			
 	protected boolean isSameServer(final String uriStr) {
@@ -454,9 +457,23 @@ public abstract class ATrpServerConn implements Closeable {
 		return genericList;
 	}	
 	
-	private <T> Entity<T> buildEntity(T entity, final MediaType postMediaType){
+	private <T> Entity<T> buildEntity(T entity, MediaType postMediaType){
+		if(entity == null) {
+			return null;
+		}
+		if(postMediaType == null) {
+			postMediaType = MediaType.APPLICATION_JSON_TYPE;
+		}
 		Entity<T> ent = null;
-		if (entity != null) {
+		if(MediaType.APPLICATION_FORM_URLENCODED_TYPE.equals(postMediaType)) {
+			/* FIXME
+			 * there is a bug that prevents form params to be properly decoded from UTF-8 on the server 
+			 * if the charset is not set explicitly!
+			 * No idea where to fix this properly...
+			 * Issue is solved by stating the charset here
+			 */
+			ent = Entity.entity(entity, postMediaType.toString() + ";charset=utf-8");
+		} else {
 			ent = Entity.entity(entity, postMediaType);
 		}
 		return ent;
