@@ -87,6 +87,20 @@ public abstract class ATrpServerConn implements Closeable {
 		TEST_SERVER_URI,
 		OLD_TEST_SERVER_URI
 	};	
+	
+	public enum TrpServer {
+		Prod(PROD_SERVER_URI),
+		Test(TEST_SERVER_URI),
+		OldTest(OLD_TEST_SERVER_URI);
+		private final String uri;
+		private TrpServer(String uri) {
+			this.uri = uri;
+		}
+		public String getUriStr() {
+			return uri;
+		}
+	}
+	
 	public static final int DEFAULT_URI_INDEX = 0;
 	
 	private /*static*/ Client client;
@@ -106,7 +120,7 @@ public abstract class ATrpServerConn implements Closeable {
 	public final static boolean DEBUG = true;
 	
 	protected ATrpServerConn(final String uriStr) throws LoginException {
-		if (uriStr == null || uriStr.isEmpty()) {
+		if (StringUtils.isEmpty(uriStr)) {
 			throw new LoginException("Server URI is not set!");
 		}
 		serverUri = UriBuilder.fromUri(uriStr).build();

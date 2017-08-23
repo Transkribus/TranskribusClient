@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 
 import eu.transkribus.client.io.ASingleDocUpload;
+import eu.transkribus.client.io.TrpDocUploadHttp;
 import eu.transkribus.client.io.TrpDocUploadMultipart;
 import eu.transkribus.client.io.TrpDocUploadZipHttp;
 import eu.transkribus.client.util.BufferedFileBodyWriter;
@@ -50,6 +51,7 @@ import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
+import eu.transkribus.core.model.beans.DocumentUploadDescriptor;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.EdOption;
 import eu.transkribus.core.model.beans.HtrModel;
@@ -63,12 +65,12 @@ import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
-import eu.transkribus.core.model.beans.TrpDocStructure;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.TrpUpload;
+import eu.transkribus.core.model.beans.TrpUpload.UploadType;
 import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.auth.TrpRole;
 import eu.transkribus.core.model.beans.auth.TrpUser;
@@ -133,7 +135,6 @@ public class TrpServerConn extends ATrpServerConn {
 //	public ClientStatus status = new ClientStatus();
 	
 	static Gson gson = new Gson();
-
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
@@ -142,6 +143,14 @@ public class TrpServerConn extends ATrpServerConn {
 	public TrpServerConn(String uriStr, final String username, final String password) throws LoginException {
 		super(uriStr);
 		login(username, password);
+	}
+	
+	public TrpServerConn(TrpServer server) throws LoginException {
+		this(server.getUriStr());
+	}
+	
+	public TrpServerConn(TrpServer server, final String username, final String password) throws LoginException {
+		this(server.getUriStr(), username, password);
 	}
 	
 //	private TrpServerConn(String uriStr, final String user, final String pw) throws LoginException {
@@ -838,6 +847,24 @@ public class TrpServerConn extends ATrpServerConn {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH);
 		ASingleDocUpload upload = new TrpDocUploadZipHttp(target, doc, monitor);
 		
+		upload.call();
+	}
+	
+	/**
+	 * @param colId
+	 * @param doc
+	 * @param monitor
+	 * @param obs only for debugging
+	 * @throws Exception
+	 */
+	public void uploadTrpDoc(final int colId, TrpDoc doc, IProgressMonitor monitor, Observer obs) throws Exception {
+		if (doc == null) {
+			throw new IllegalArgumentException("TrpDoc is null!");
+		}
+		ASingleDocUpload upload = new TrpDocUploadHttp(this, colId, doc, UploadType.JSON, true, monitor);
+		if(obs != null) {
+			upload.addObserver(obs);
+		}
 		upload.call();
 	}
 	
@@ -1925,7 +1952,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return u;
 	}
 	
-	public TrpUpload createNewUpload(final int colId, TrpDocStructure struct) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public TrpUpload createNewUpload(final int colId, DocumentUploadDescriptor struct) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(colId < 1 || struct == null) {
 			throw new IllegalArgumentException("bad parameters.");
 		}

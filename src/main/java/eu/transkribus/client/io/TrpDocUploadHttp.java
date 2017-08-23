@@ -13,16 +13,23 @@ import org.slf4j.LoggerFactory;
 import eu.transkribus.client.connection.TrpServerConn;
 import eu.transkribus.core.io.util.Md5SumComputer;
 import eu.transkribus.core.model.beans.TrpDoc;
-import eu.transkribus.core.model.beans.TrpDocStructure;
+import eu.transkribus.core.model.beans.DocumentUploadDescriptor;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpUpload;
 import eu.transkribus.core.model.beans.TrpUpload.UploadType;
 import eu.transkribus.core.model.beans.mets.Mets;
-import eu.transkribus.core.model.builder.TrpDocStructureBuilder;
+import eu.transkribus.core.model.builder.TrpDocUploadBuilder;
 import eu.transkribus.core.model.builder.mets.TrpMetsBuilder;
 
 /**
- * New upload that sends a separate PUT request per page
+ * New upload that sends a separate PUT request per page<br/><br/>
+ * 
+ * TODO-list
+ *  <ul>
+ *  	<li>do retries if a single page upload fails</li>
+ *  	<li>cache upload processes locally (on disk?) in order to allow resuming if application crashed</li>
+ *  </ul>
+ * 
  */
 public class TrpDocUploadHttp extends ASingleDocUpload {
 	private static final Logger logger = LoggerFactory.getLogger(TrpDocUploadHttp.class);
@@ -67,8 +74,8 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 				Mets mets = TrpMetsBuilder.buildMets(doc, true, false, true, null);
 				upload = conn.createNewUpload(colId, mets);
 				break;
-			case TrpDocStructure:
-				TrpDocStructure struct = TrpDocStructureBuilder.build(doc);
+			case JSON:
+				DocumentUploadDescriptor struct = TrpDocUploadBuilder.build(doc);
 				upload = conn.createNewUpload(colId, struct);
 				break;
 			case NoStructure:
@@ -77,6 +84,8 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 				throw new IllegalArgumentException("type is null.");	
 			}
 			uploadId = upload.getUploadId();
+			
+//			if(true) return null;
 			
 			// put files
 			final int percentPerPage = 100 / doc.getNPages();
