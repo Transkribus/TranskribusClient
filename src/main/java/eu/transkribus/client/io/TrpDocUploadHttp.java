@@ -85,8 +85,6 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 			}
 			uploadId = upload.getUploadId();
 			
-//			if(true) return null;
-			
 			// put files
 			final int percentPerPage = 100 / doc.getNPages();
 			for(TrpPage p : doc.getPages()) {
@@ -101,15 +99,18 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 				updateStatus(Integer.valueOf(percentPerPage * p.getPageNr()));
 			}
 			
-			updateStatus("Upload done. Waiting for server...");
-			while(upload.getJobId() == null) {
-				Thread.sleep(3000);
-				//poll service for jobId
-				upload = conn.getUploadStatus(uploadId);
-				if(upload.isUploadComplete()) {
-					updateStatus("Server is starting ingest job...");
-				}
-			}
+			// the last PUT request's response includes the job ID
+			logger.info("Ingest-job ID = " + upload.getJobId());
+			
+//			updateStatus("Upload done. Waiting for server...");
+//			while(upload.getJobId() == null) {
+//				Thread.sleep(3000);
+//				//poll service for jobId
+//				upload = conn.getUploadStatus(uploadId);
+//				if(upload.isUploadComplete()) {
+//					updateStatus("Server is starting ingest job...");
+//				}
+//			}
 			
 		} catch (OperationCanceledException oce) {
 			logger.info("upload canceled: " + oce.getMessage());
