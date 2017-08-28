@@ -839,6 +839,15 @@ public class TrpServerConn extends ATrpServerConn {
 //		return upload;
 	}
 	
+	/**
+	 * Use uploadTrpDoc() instead
+	 * 
+	 * @param colId
+	 * @param doc
+	 * @param monitor
+	 * @throws Exception
+	 */
+	@Deprecated
 	public void postTrpDoc(final int colId, TrpDoc doc, IProgressMonitor monitor) throws Exception {
 		if (doc == null) {
 			throw new IllegalArgumentException("TrpDoc is null!");
@@ -851,14 +860,15 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	/**
-	 * @param colId
-	 * @param doc
+	 * @param colId the collection where the created document will be linked to
+	 * @param doc the local document entity
 	 * @param type specifies the type of object that is used to submit the document's structure (JSON|METS)
-	 * @param monitor
-	 * @param obs only for debugging
+	 * @param monitor IProgressMonitor
+	 * @param obs only for debugging, can be null
+	 * @return
 	 * @throws Exception
 	 */
-	public void uploadTrpDoc(final int colId, TrpDoc doc, UploadType type, IProgressMonitor monitor, Observer obs) throws Exception {
+	public TrpUpload uploadTrpDoc(final int colId, TrpDoc doc, UploadType type, IProgressMonitor monitor, Observer obs) throws Exception {
 		if (doc == null) {
 			throw new IllegalArgumentException("TrpDoc is null!");
 		}
@@ -869,7 +879,31 @@ public class TrpServerConn extends ATrpServerConn {
 		if(obs != null) {
 			upload.addObserver(obs);
 		}
-		upload.call();
+		return (TrpUpload)upload.call();
+	}
+	
+	/**
+	 * @param colId the collection where the created document will be linked to
+	 * @param doc the local document entity
+	 * @param type specifies the type of object that is used to submit the document's structure (JSON|METS)
+	 * @param monitor IProgressMonitor
+	 * @return
+	 * @throws Exception
+	 */
+	public TrpUpload uploadTrpDoc(final int colId, TrpDoc doc, UploadType type, IProgressMonitor monitor) throws Exception {
+		return uploadTrpDoc(colId, doc, type, monitor, null);
+	}
+	/**
+	 * will use JSON for POSTing doc structure
+	 * 
+	 * @param colId the collection where the created document will be linked to
+	 * @param doc the local document entity
+	 * @param monitor IProgressMonitor
+	 * @return
+	 * @throws Exception
+	 */
+	public TrpUpload uploadTrpDoc(final int colId, TrpDoc doc, IProgressMonitor monitor) throws Exception {
+		return uploadTrpDoc(colId, doc, UploadType.JSON, monitor, null);
 	}
 	
 	public List<TrpDocDir> listDocsOnFtp() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {

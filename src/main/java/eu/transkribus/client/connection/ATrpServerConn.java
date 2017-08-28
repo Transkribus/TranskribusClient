@@ -2,9 +2,7 @@ package eu.transkribus.client.connection;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
@@ -20,14 +18,12 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Feature;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
-import org.apache.bcel.generic.NEW;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
@@ -56,17 +52,21 @@ import eu.transkribus.core.model.beans.adapters.MetsMessageBodyWriter;
 import eu.transkribus.core.model.beans.auth.TrpUserLogin;
 import eu.transkribus.core.model.beans.enums.OAuthProvider;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
-import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.rest.RESTConst;
 
 /**
  * Abstract TRP Server Connection class that encapsulates the Jersey Client boilerplate.
- * On instantiation, a session at the TRP Server is created via login.
+ * 
  * @author philip
  *
  */
 public abstract class ATrpServerConn implements Closeable {
 	private final static Logger logger = LoggerFactory.getLogger(ATrpServerConn.class);
+	
+	/**
+	 * Set DEBUG=true if you want this Connection to log all requests/responses in detail
+	 */
+	public final static boolean DEBUG = false;
 	
 	public static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
 	public static final GenericType<List<TrpCollection>> COL_LIST_TYPE = new GenericType<List<TrpCollection>>() {};
@@ -120,8 +120,6 @@ public abstract class ATrpServerConn implements Closeable {
 	
 	public final static String DEFAULT_URI_ENCODING = "UTF-8";
 	
-	public final static boolean DEBUG = true;
-	
 	protected ATrpServerConn(final String uriStr) throws LoginException {
 		if (StringUtils.isEmpty(uriStr)) {
 			throw new LoginException("Server URI is not set!");
@@ -155,6 +153,7 @@ public abstract class ATrpServerConn implements Closeable {
 		client.register(new MetsMessageBodyWriter());
 		
 		if(DEBUG) {
+			//when updating Jersey, LoggingFilter has to be replaced with LoggingFeature
 			LoggingFilter lf = new LoggingFilter(new JulFacade(logger), true);
 			client.register(lf);
 		}

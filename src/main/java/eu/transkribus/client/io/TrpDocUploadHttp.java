@@ -33,6 +33,9 @@ import eu.transkribus.core.model.builder.mets.TrpMetsBuilder;
  */
 public class TrpDocUploadHttp extends ASingleDocUpload {
 	private static final Logger logger = LoggerFactory.getLogger(TrpDocUploadHttp.class);
+	/**
+	 * If a single page upload fails there will be this many retries before the upload fails
+	 */
 	private static final int NR_OF_RETRIES_ON_FAIL = 3;
 	protected final TrpServerConn conn;
 	IProgressMonitor monitor = null;
@@ -62,6 +65,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 						100);
 
 			if (doMd5SumCheck) {
+				updateStatus("Computing checksums...");
 				Md5SumComputer md5Comp = new Md5SumComputer();
 				md5Comp.addObserver(passthroughObserver);
 				doc = md5Comp.computeAndSetMd5Sums(doc);
