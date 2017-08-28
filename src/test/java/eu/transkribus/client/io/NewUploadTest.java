@@ -17,7 +17,10 @@ public class NewUploadTest {
 	public static void main(String[] args) {
 
 		final String BASE = "/mnt/dea_scratch/TRP/";
-		final String docPath = BASE + "Bentham_box_035/";
+//		final String docPath = BASE + "Bentham_box_035/";
+		
+		final String docPath = BASE + "VeryLargeDocument/";
+		
 //		final String docPath2 = BASE + "TrpTestDoc_20140127/";
 //		final String docPath3 = BASE + "test/I._ZvS_1902_4.Q";
 //		final String docPath4 = BASE + "Schauplatz_Small2/";

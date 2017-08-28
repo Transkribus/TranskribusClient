@@ -91,7 +91,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 			uploadId = upload.getUploadId();
 			
 			// put files
-			final int percentPerPage = 100 / doc.getNPages();
+			final float percentPerPage = 100f / doc.getNPages();			
 			for(TrpPage p : doc.getPages()) {
 				File img = FileUtils.toFile(p.getUrl());
 				File xml = null;
@@ -114,8 +114,9 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 				if(ex != null) {
 					throw ex;
 				}
-				
-				updateStatus(Integer.valueOf(percentPerPage * p.getPageNr()));
+				logger.debug("Page nr.: " + p.getPageNr() + " | percentPerPage = " + percentPerPage);
+				final int percent = new Double(percentPerPage * p.getPageNr()).intValue();
+				updateStatus(Integer.valueOf(percent));
 			}
 			
 			// the last PUT request's response includes the job ID
