@@ -1,7 +1,10 @@
 package eu.transkribus.client.io;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NotImplementedException;
@@ -12,14 +15,17 @@ import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.connection.TrpServerConn;
 import eu.transkribus.core.io.util.Md5SumComputer;
-import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.DocumentUploadDescriptor;
+import eu.transkribus.core.model.beans.DocumentUploadDescriptor.PageUploadDescriptor;
+import eu.transkribus.core.model.beans.TrpDoc;
+import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpUpload;
 import eu.transkribus.core.model.beans.TrpUpload.UploadType;
 import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.model.builder.TrpDocUploadBuilder;
 import eu.transkribus.core.model.builder.mets.TrpMetsBuilder;
+import eu.transkribus.core.util.JaxbUtils;
 
 /**
  * New upload that sends a separate PUT request per page<br/><br/>
@@ -33,8 +39,10 @@ import eu.transkribus.core.model.builder.mets.TrpMetsBuilder;
  */
 public class TrpDocUploadHttp extends ASingleDocUpload {
 	private static final Logger logger = LoggerFactory.getLogger(TrpDocUploadHttp.class);
+	private static final String UPLOAD_XML_NAME = "upload.xml";
+	
 	/**
-	 * If a single page upload fails there will be this many retries before the upload fails
+	 * If a single page upload fails there will be this many retries before the complete upload fails
 	 */
 	private static final int NR_OF_RETRIES_ON_FAIL = 3;
 	protected final TrpServerConn conn;
@@ -58,6 +66,11 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 	@Override
 	public TrpUpload call() throws Exception {
 
+		/*
+		 * TODO check for existence of upload.xml on local folder of doc and try resume.
+		 * check if user ID matches before! (might be NAS storage).
+		 * (optional: get current state from server via GET)
+		 */
 		TrpUpload upload = null;
 		try {
 			if (monitor != null)
@@ -134,10 +147,24 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 			
 		} catch (OperationCanceledException oce) {
 			logger.info("Upload canceled: " + oce.getMessage());
+			storeUploadXmlOnDisk(upload, doc.getMd().getLocalFolder());
 		} catch (Exception e) {
 			logger.error("Upload failed!", e);
+			storeUploadXmlOnDisk(upload, doc.getMd().getLocalFolder());
 		}
 
 		return upload;
+	}
+
+	private void storeUploadXmlOnDisk(TrpUpload upload, File localFolder) {
+		if(upload == null) {
+			return;
+		}
+		File xml = new File(localFolder.getAbsolutePath() + File.separator + UPLOAD_XML_NAME);
+		try {
+			JaxbUtils.marshalToFile(upload, xml, TrpDocMetadata.class, PageUploadDescriptor.class);
+		} catch (FileNotFoundException | JAXBException e) {
+			logger.error("Could not store upload.xml!", e);
+		}
 	}
 }
