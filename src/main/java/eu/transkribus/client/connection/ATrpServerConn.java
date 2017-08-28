@@ -27,6 +27,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 
+import org.apache.bcel.generic.NEW;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
@@ -51,9 +52,11 @@ import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.TrpWordgraph;
+import eu.transkribus.core.model.beans.adapters.MetsMessageBodyWriter;
 import eu.transkribus.core.model.beans.auth.TrpUserLogin;
 import eu.transkribus.core.model.beans.enums.OAuthProvider;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
+import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.rest.RESTConst;
 
 /**
@@ -147,6 +150,9 @@ public abstract class ATrpServerConn implements Closeable {
 				requestContext.getHeaders().put(RESTConst.CLIENT_ID_HEADER_KEY, clientIdList);
 			}
 		});
+		
+		//TrpDocUploadHttp might send METS
+		client.register(new MetsMessageBodyWriter());
 		
 		if(DEBUG) {
 			LoggingFilter lf = new LoggingFilter(new JulFacade(logger), true);

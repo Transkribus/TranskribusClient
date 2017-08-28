@@ -853,15 +853,19 @@ public class TrpServerConn extends ATrpServerConn {
 	/**
 	 * @param colId
 	 * @param doc
+	 * @param type specifies the type of object that is used to submit the document's structure (JSON|METS)
 	 * @param monitor
 	 * @param obs only for debugging
 	 * @throws Exception
 	 */
-	public void uploadTrpDoc(final int colId, TrpDoc doc, IProgressMonitor monitor, Observer obs) throws Exception {
+	public void uploadTrpDoc(final int colId, TrpDoc doc, UploadType type, IProgressMonitor monitor, Observer obs) throws Exception {
 		if (doc == null) {
 			throw new IllegalArgumentException("TrpDoc is null!");
 		}
-		ASingleDocUpload upload = new TrpDocUploadHttp(this, colId, doc, UploadType.JSON, true, monitor);
+		if(type == null) {
+			type = UploadType.JSON;
+		}
+		ASingleDocUpload upload = new TrpDocUploadHttp(this, colId, doc, type, true, monitor);
 		if(obs != null) {
 			upload.addObserver(obs);
 		}

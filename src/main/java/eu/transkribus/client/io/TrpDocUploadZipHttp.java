@@ -19,8 +19,10 @@ import eu.transkribus.core.model.beans.TrpDoc;
 
 /**
  * Zip files with more than MAX_INTEGER-1 bytes of content will run into Jersey internal file size limit.
+ * 
+ * Now deprecated due to this restriction. Use TrpDocUploadHttp instead.
  */
-//@Deprecated
+@Deprecated
 public class TrpDocUploadZipHttp extends ASingleDocUpload {
 	private static final Logger logger = LoggerFactory.getLogger(TrpDocUploadZipHttp.class);
 	protected final WebTarget target;

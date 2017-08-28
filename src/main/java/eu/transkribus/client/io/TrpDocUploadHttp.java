@@ -33,6 +33,7 @@ import eu.transkribus.core.model.builder.mets.TrpMetsBuilder;
  */
 public class TrpDocUploadHttp extends ASingleDocUpload {
 	private static final Logger logger = LoggerFactory.getLogger(TrpDocUploadHttp.class);
+	private static final int NR_OF_RETRIES_ON_FAIL = 3;
 	protected final TrpServerConn conn;
 	IProgressMonitor monitor = null;
 	final int colId;
@@ -94,8 +95,22 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 					xml = FileUtils.toFile(p.getCurrentTranscript().getUrl());
 				}
 				
-				//TODO retry loop if putPage fails
-				upload = conn.putPage(uploadId, img, xml);
+				//retry loop if putPage fails
+				int tries = 0;
+				Exception ex;
+				do {
+					try {
+						upload = conn.putPage(uploadId, img, xml);
+						ex = null;
+					} catch(Exception e) {
+						logger.error("Could not post image: " + img.getName(), e);
+						ex = e;
+					}
+				} while (tries++ <= NR_OF_RETRIES_ON_FAIL && ex != null);
+				if(ex != null) {
+					throw ex;
+				}
+				
 				updateStatus(Integer.valueOf(percentPerPage * p.getPageNr()));
 			}
 			
@@ -113,7 +128,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 //			}
 			
 		} catch (OperationCanceledException oce) {
-			logger.info("upload canceled: " + oce.getMessage());
+			logger.info("Upload canceled: " + oce.getMessage());
 		} catch (Exception e) {
 			logger.error("Upload failed!", e);
 		}

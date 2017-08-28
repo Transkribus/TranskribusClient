@@ -10,6 +10,7 @@ import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
 import eu.transkribus.client.connection.TrpServerConn;
 import eu.transkribus.core.io.LocalDocReader;
 import eu.transkribus.core.model.beans.TrpDoc;
+import eu.transkribus.core.model.beans.TrpUpload.UploadType;
 
 public class NewUploadTest {
 	private static final Logger logger = LoggerFactory.getLogger(NewUploadTest.class);
@@ -33,7 +34,7 @@ public class NewUploadTest {
 			    }
 			};
 			
-			conn.uploadTrpDoc(2, doc, null, o);
+			conn.uploadTrpDoc(2, doc, UploadType.METS, null, o);
 		
 		} catch (Exception e) {
 			e.printStackTrace();
