@@ -150,6 +150,15 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		doc = md5Comp.computeAndSetMd5Sums(doc);
 	}
 
+	/**
+	 * Uploads a single page, i.e. the image and optionally the PAGE XML, as specified in the structure.
+	 * If Upload fails the method will retry {@value #NR_OF_RETRIES_ON_FAIL} times.
+	 * @param upload
+	 * @param p
+	 * @param sourceDir
+	 * @param pageSourceDir
+	 * @throws Exception
+	 */
 	private void uploadPage(TrpUpload upload, PageUploadDescriptor p, final File sourceDir, final File pageSourceDir) throws Exception {
 		File img = new File(sourceDir.getAbsolutePath() + File.separator + p.getFileName());
 		File xml = null;
@@ -233,8 +242,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 				if(!struct.equals((DocumentUploadDescriptor)upload)) {
 					//remove old upload on server as it is not recoverable
 					logger.debug("Upload is not recoverable as source dir content has changed!");
-					//FIXME insert delete after debugging
-//					conn.deleteUpload(upload.getUploadId());
+					conn.deleteUpload(upload.getUploadId());
 					upload = null;
 				} else {
 					logger.debug("Upload is recoverable. Update DocMd on server.");
