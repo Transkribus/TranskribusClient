@@ -152,11 +152,7 @@ public abstract class ATrpServerConn implements Closeable {
 		//TrpDocUploadHttp might send METS
 		client.register(new MetsMessageBodyWriter());
 		
-		if(DEBUG) {
-			//when updating Jersey, LoggingFilter has to be replaced with LoggingFeature
-			LoggingFilter lf = new LoggingFilter(new JulFacade(logger), true);
-			client.register(lf);
-		}
+		enableDebugLogging(DEBUG);
 		
 		initTargets();
 //		initBaseTarget();	
@@ -165,6 +161,19 @@ public abstract class ATrpServerConn implements Closeable {
 //		client.register(new ClientRequestAuthFilter(login.getSessionId()));
 	}
 			
+	/**
+	 * When parameter is true, a LoggingFilter will be registered with the client.<br/>
+	 * Each request and response will then be logged in detail.<br/>
+	 * TODO If Jersey is updated, LoggingFilter has to be replaced with LoggingFeature
+	 * @param enableDebugLog
+	 */
+	public void enableDebugLogging(boolean enableDebugLog) {
+		if(enableDebugLog) {
+			LoggingFilter lf = new LoggingFilter(new JulFacade(logger), true);
+			client.register(lf);
+		}
+	}
+
 	protected boolean isSameServer(final String uriStr) {
 		URI serverUriStr = UriBuilder.fromUri(uriStr).build();
 		return serverUriStr.equals(serverUri);		

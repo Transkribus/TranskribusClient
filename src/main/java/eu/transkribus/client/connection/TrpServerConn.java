@@ -2026,4 +2026,24 @@ public class TrpServerConn extends ATrpServerConn {
 		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH).path(""+uploadId);
 		return super.getObject(t, TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
 	}
+
+	public void deleteUpload(int uploadId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(uploadId < 1) {
+			throw new IllegalArgumentException("No valid uploadId!");
+		}
+		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH).path(""+uploadId);
+		super.delete(t);
+	}
+
+	public TrpUpload updateUploadMd(int uploadId, TrpDocMetadata md, Integer colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(uploadId < 1 || md == null) {
+			throw new IllegalArgumentException("bad parameters.");
+		}
+		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH).path(""+uploadId);
+		if(colId != null) {
+			t = t.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		}
+		return postEntityReturnObject(t, md, MediaType.APPLICATION_JSON_TYPE, 
+				TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
+	}
 }
