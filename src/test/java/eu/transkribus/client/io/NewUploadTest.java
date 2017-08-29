@@ -17,9 +17,9 @@ public class NewUploadTest {
 	public static void main(String[] args) {
 
 		final String BASE = "/mnt/dea_scratch/TRP/";
-//		final String docPath = BASE + "Bentham_box_035/";
+		final String docPath = BASE + "Bentham_box_035/";
 		
-		final String docPath = BASE + "VeryLargeDocument/";
+//		final String docPath = BASE + "VeryLargeDocument/";
 		
 //		final String docPath2 = BASE + "TrpTestDoc_20140127/";
 //		final String docPath3 = BASE + "test/I._ZvS_1902_4.Q";
@@ -37,7 +37,12 @@ public class NewUploadTest {
 			    }
 			};
 			
-			conn.uploadTrpDoc(2, doc, UploadType.METS, null, o);
+			conn.uploadTrpDoc(2, doc, UploadType.JSON, false, null, o);
+			
+//			TrpUpload u = JaxbUtils.unmarshal(new File(docPath + "upload.xml"), 
+//					TrpUpload.class, PageUploadDescriptor.class, TrpDocMetadata.class);
+//			
+//			logger.info(""+u.isUploadComplete());
 		
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -868,14 +868,14 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @return
 	 * @throws Exception
 	 */
-	public TrpUpload uploadTrpDoc(final int colId, TrpDoc doc, UploadType type, IProgressMonitor monitor, Observer obs) throws Exception {
+	public TrpUpload uploadTrpDoc(final int colId, TrpDoc doc, UploadType type, boolean doMd5SumCheck, IProgressMonitor monitor, Observer obs) throws Exception {
 		if (doc == null) {
 			throw new IllegalArgumentException("TrpDoc is null!");
 		}
 		if(type == null) {
 			type = UploadType.JSON;
 		}
-		ASingleDocUpload upload = new TrpDocUploadHttp(this, colId, doc, type, true, monitor);
+		ASingleDocUpload upload = new TrpDocUploadHttp(this, colId, doc, type, doMd5SumCheck, monitor);
 		if(obs != null) {
 			upload.addObserver(obs);
 		}
@@ -890,11 +890,11 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @return
 	 * @throws Exception
 	 */
-	public TrpUpload uploadTrpDoc(final int colId, TrpDoc doc, UploadType type, IProgressMonitor monitor) throws Exception {
-		return uploadTrpDoc(colId, doc, type, monitor, null);
+	public TrpUpload uploadTrpDoc(final int colId, TrpDoc doc, UploadType type, boolean doMd5SumCheck, IProgressMonitor monitor) throws Exception {
+		return uploadTrpDoc(colId, doc, type, doMd5SumCheck, monitor, null);
 	}
 	/**
-	 * will use JSON for POSTing doc structure
+	 * will use JSON for POSTing doc structure and set MD5 sums to be checked on the server
 	 * 
 	 * @param colId the collection where the created document will be linked to
 	 * @param doc the local document entity
@@ -903,7 +903,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws Exception
 	 */
 	public TrpUpload uploadTrpDoc(final int colId, TrpDoc doc, IProgressMonitor monitor) throws Exception {
-		return uploadTrpDoc(colId, doc, UploadType.JSON, monitor, null);
+		return uploadTrpDoc(colId, doc, UploadType.JSON, true, monitor, null);
 	}
 	
 	public List<TrpDocDir> listDocsOnFtp() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {

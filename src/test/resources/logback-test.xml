@@ -43,7 +43,7 @@
 		</rollingPolicy>
 	</appender>    
     
-	<logger name="eu.transkribus" level="INFO">
+	<logger name="eu.transkribus" level="DEBUG">
 		<appender-ref ref="CONSOLE" />
 		<appender-ref ref="LOGFILE" />
 	</logger>    

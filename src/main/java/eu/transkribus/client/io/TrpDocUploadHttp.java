@@ -8,6 +8,7 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 import javax.xml.bind.JAXBException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -112,7 +113,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 			// put files	
 			for(PageUploadDescriptor p : upload.getPages()) {
 				if(!p.isPageUploaded()) {
-					uploadPage(upload, p, sourceDir, pageSourceDir);
+					upload = uploadPage(upload, p, sourceDir, pageSourceDir);
 				}
 				logger.debug("Page nr.: " + p.getPageNr() + " | percentPerPage = " + percentPerPage);
 				final int percent = new Double(percentPerPage * p.getPageNr()).intValue();
@@ -127,10 +128,10 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 				String msg = "Upload with ID = " + upload.getUploadId() + " failed for user: " 
 						+ upload.getUserId() + " -> " + upload.getUserName() +"\n\n";
 				msg += JaxbUtils.marshalToString(upload, TrpDocMetadata.class, PageUploadDescriptor.class);
-				conn.sendBugReport("bugs@transkribus.eu", "Upload failed!", msg, true, true, null);
-				throw new IllegalStateException("Upload could not be completed! A bug report has been sent and we are investigating the problem.");
+//				conn.sendBugReport("bugs@transkribus.eu", "Upload failed!", msg, true, true, null);
+				throw new IllegalStateException("Upload could not be completed!");
 			}
-			
+			deleteUploadXmlFromDisk(doc.getMd().getLocalFolder());
 		} catch (OperationCanceledException oce) {
 			logger.info("Upload canceled: " + oce.getMessage());
 			storeUploadXmlOnDisk(upload, doc.getMd().getLocalFolder());
@@ -159,7 +160,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 	 * @param pageSourceDir
 	 * @throws Exception
 	 */
-	private void uploadPage(TrpUpload upload, PageUploadDescriptor p, final File sourceDir, final File pageSourceDir) throws Exception {
+	private TrpUpload uploadPage(TrpUpload upload, PageUploadDescriptor p, final File sourceDir, final File pageSourceDir) throws Exception {
 		File img = new File(sourceDir.getAbsolutePath() + File.separator + p.getFileName());
 		File xml = null;
 		if(!StringUtils.isEmpty(p.getPageXmlName())) {
@@ -180,7 +181,8 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		if(ex != null) {
 			throw ex;
 		}
-		p.setPageUploaded(true);
+		storeUploadXmlOnDisk(upload, sourceDir);
+		return upload;
 	}
 
 	private TrpUpload createNewUpload() throws SessionExpiredException, ServerErrorException, ClientErrorException, IOException {		
@@ -199,6 +201,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		default:
 			throw new IllegalArgumentException("type is null.");	
 		}
+		storeUploadXmlOnDisk(upload, doc.getMd().getLocalFolder());
 		return upload;
 	}
 
@@ -216,24 +219,29 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 	 * @throws SessionExpiredException
 	 * @throws ServerErrorException
 	 * @throws ClientErrorException
-	 * @throws FileNotFoundException
 	 * @throws JAXBException
+	 * @throws IOException 
 	 */
-	private TrpUpload initUploadObject(TrpDoc doc) throws SessionExpiredException, ServerErrorException, ClientErrorException, FileNotFoundException, JAXBException {
+	private TrpUpload initUploadObject(TrpDoc doc) throws SessionExpiredException, ServerErrorException, ClientErrorException, JAXBException, IOException {
 		TrpUpload upload = null;
 		File uploadXml = new File(doc.getMd().getLocalFolder().getAbsolutePath() + File.separator + UPLOAD_XML_NAME);
 		if(uploadXml.isFile()) {
+			logger.debug("Found " + UPLOAD_XML_NAME);
 			upload = JaxbUtils.unmarshal(uploadXml, TrpUpload.class, TrpDocMetadata.class, PageUploadDescriptor.class);
 			//check if user ID matches before! (might be NAS storage).
 			if(conn.getUserLogin().getUserId() != upload.getUserId()) {
-				logger.debug("upload.xml was written by a different user.");
-				upload = null;
+				logger.debug(UPLOAD_XML_NAME + " was written by a different user.");
+				upload = null;			
 			} else {
 				//refresh state from server
 				try {
 					upload = conn.getUploadStatus(upload.getUploadId());
 				} catch (ServerErrorException | ClientErrorException e) {
 					logger.error("Could not get upload object from server. Upload has to be restarted.", e);
+					return null;
+				}
+				if (upload.getJobId() != null) {
+					deleteUploadXmlFromDisk(doc.getMd().getLocalFolder());
 					return null;
 				}
 				//check if files in sourceDir are now different
@@ -255,6 +263,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 					}
 					//update doc md and collection ID on server in case something has changed
 					upload = conn.updateUploadMd(upload.getUploadId(), upload.getMd(), colId);
+					storeUploadXmlOnDisk(upload, doc.getMd().getLocalFolder());
 				}
 			}
 		}
@@ -276,6 +285,23 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 			JaxbUtils.marshalToFile(upload, xml, TrpDocMetadata.class, PageUploadDescriptor.class);
 		} catch (FileNotFoundException | JAXBException e) {
 			logger.error("Could not store upload.xml!", e);
+		}
+	}
+	
+	/**
+	 * Deletes an {@value #UPLOAD_XML_NAME} in the localFolder specified
+	 * 
+	 * @param upload
+	 * @param localFolder
+	 * @throws IOException 
+	 */
+	private void deleteUploadXmlFromDisk(File localFolder) throws IOException {
+		if(localFolder == null) {
+			return;
+		}
+		File xml = new File(localFolder.getAbsolutePath() + File.separator + UPLOAD_XML_NAME);
+		if(xml.isFile()){
+			FileUtils.forceDelete(xml);
 		}
 	}
 }
