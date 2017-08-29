@@ -52,6 +52,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 	final int colId;
 	final UploadType type;
 	final boolean doMd5SumCheck;
+	final File uploadXml;
 
 	/**
 	 * @param conn a logged in connection object
@@ -77,7 +78,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		//default is JSON
 		this.type = type == null ? DEFAULT_TYPE : type;
 		this.doMd5SumCheck = doMd5SumCheck;
-		
+		this.uploadXml = new File(doc.getMd().getLocalFolder().getAbsolutePath() + File.separator + UPLOAD_XML_NAME);
 		this.conn.enableDebugLogging(DEBUG);
 	}
 
@@ -131,13 +132,13 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 //				conn.sendBugReport("bugs@transkribus.eu", "Upload failed!", msg, true, true, null);
 				throw new IllegalStateException("Upload could not be completed!");
 			}
-			deleteUploadXmlFromDisk(doc.getMd().getLocalFolder());
+			deleteUploadXmlFromDisk();
 		} catch (OperationCanceledException oce) {
 			logger.info("Upload canceled: " + oce.getMessage());
-			storeUploadXmlOnDisk(upload, doc.getMd().getLocalFolder());
+			storeUploadXmlOnDisk(upload);
 		} catch (Exception e) {
 			logger.error("Upload failed!", e);
-			storeUploadXmlOnDisk(upload, doc.getMd().getLocalFolder());
+			storeUploadXmlOnDisk(upload);
 			throw e;
 		}
 
@@ -181,7 +182,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		if(ex != null) {
 			throw ex;
 		}
-		storeUploadXmlOnDisk(upload, sourceDir);
+		storeUploadXmlOnDisk(upload);
 		return upload;
 	}
 
@@ -201,7 +202,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		default:
 			throw new IllegalArgumentException("type is null.");	
 		}
-		storeUploadXmlOnDisk(upload, doc.getMd().getLocalFolder());
+		storeUploadXmlOnDisk(upload);
 		return upload;
 	}
 
@@ -224,7 +225,6 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 	 */
 	private TrpUpload initUploadObject(TrpDoc doc) throws SessionExpiredException, ServerErrorException, ClientErrorException, JAXBException, IOException {
 		TrpUpload upload = null;
-		File uploadXml = new File(doc.getMd().getLocalFolder().getAbsolutePath() + File.separator + UPLOAD_XML_NAME);
 		if(uploadXml.isFile()) {
 			logger.debug("Found " + UPLOAD_XML_NAME);
 			upload = JaxbUtils.unmarshal(uploadXml, TrpUpload.class, TrpDocMetadata.class, PageUploadDescriptor.class);
@@ -241,7 +241,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 					return null;
 				}
 				if (upload.getJobId() != null) {
-					deleteUploadXmlFromDisk(doc.getMd().getLocalFolder());
+					deleteUploadXmlFromDisk();
 					return null;
 				}
 				//check if files in sourceDir are now different
@@ -263,7 +263,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 					}
 					//update doc md and collection ID on server in case something has changed
 					upload = conn.updateUploadMd(upload.getUploadId(), upload.getMd(), colId);
-					storeUploadXmlOnDisk(upload, doc.getMd().getLocalFolder());
+					storeUploadXmlOnDisk(upload);
 				}
 			}
 		}
@@ -276,13 +276,12 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 	 * @param upload
 	 * @param localFolder
 	 */
-	private void storeUploadXmlOnDisk(TrpUpload upload, File localFolder) {
+	private void storeUploadXmlOnDisk(TrpUpload upload) {
 		if(upload == null) {
 			return;
 		}
-		File xml = new File(localFolder.getAbsolutePath() + File.separator + UPLOAD_XML_NAME);
 		try {
-			JaxbUtils.marshalToFile(upload, xml, TrpDocMetadata.class, PageUploadDescriptor.class);
+			JaxbUtils.marshalToFile(upload, uploadXml, TrpDocMetadata.class, PageUploadDescriptor.class);
 		} catch (FileNotFoundException | JAXBException e) {
 			logger.error("Could not store upload.xml!", e);
 		}
@@ -295,13 +294,9 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 	 * @param localFolder
 	 * @throws IOException 
 	 */
-	private void deleteUploadXmlFromDisk(File localFolder) throws IOException {
-		if(localFolder == null) {
-			return;
-		}
-		File xml = new File(localFolder.getAbsolutePath() + File.separator + UPLOAD_XML_NAME);
-		if(xml.isFile()){
-			FileUtils.forceDelete(xml);
+	private void deleteUploadXmlFromDisk() throws IOException {
+		if(uploadXml.isFile()){
+			FileUtils.forceDelete(uploadXml);
 		}
 	}
 }

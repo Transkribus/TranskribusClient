@@ -37,7 +37,7 @@ public class NewUploadTest {
 			    }
 			};
 			
-			conn.uploadTrpDoc(2, doc, UploadType.JSON, false, null, o);
+			conn.uploadTrpDoc(2, doc, UploadType.JSON, true, null, o);
 			
 //			TrpUpload u = JaxbUtils.unmarshal(new File(docPath + "upload.xml"), 
 //					TrpUpload.class, PageUploadDescriptor.class, TrpDocMetadata.class);
