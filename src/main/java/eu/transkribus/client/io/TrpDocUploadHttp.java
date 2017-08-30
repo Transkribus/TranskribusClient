@@ -129,7 +129,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 				String msg = "Upload with ID = " + upload.getUploadId() + " failed for user: " 
 						+ upload.getUserId() + " -> " + upload.getUserName() +"\n\n";
 				msg += JaxbUtils.marshalToString(upload, TrpDocMetadata.class, PageUploadDescriptor.class);
-//				conn.sendBugReport("bugs@transkribus.eu", "Upload failed!", msg, true, true, null);
+				conn.sendBugReport("bugs@transkribus.eu", "Upload failed!", msg, true, true, null);
 				throw new IllegalStateException("Upload could not be completed!");
 			}
 			deleteUploadXmlFromDisk();
