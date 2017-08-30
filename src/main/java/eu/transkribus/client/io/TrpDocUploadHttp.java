@@ -241,6 +241,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 					return null;
 				}
 				if (upload.getJobId() != null) {
+					//this upload is already complete
 					deleteUploadXmlFromDisk();
 					return null;
 				}
