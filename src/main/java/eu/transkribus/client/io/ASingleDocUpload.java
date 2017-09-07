@@ -3,6 +3,7 @@ package eu.transkribus.client.io;
 import java.io.IOException;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.slf4j.Logger;
@@ -24,6 +25,11 @@ public abstract class ASingleDocUpload extends APassthroughObservable implements
 		if (this.doc == null || this.doc.getMd() == null
 				|| this.doc.getMd().getLocalFolder() == null) {
 			throw new IOException("Document either has no metadata or is no localdocument!");
+		}
+		final String errors = doc.getImageErrors();
+		if(!StringUtils.isEmpty(errors)) {
+			throw new IOException("The document includes faulty images! "
+					+ "Please resolve the issues and try again.\n" + errors);
 		}
 	}
 	
