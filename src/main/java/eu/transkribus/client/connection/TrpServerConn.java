@@ -1826,6 +1826,19 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getObject(target, FulltextSearchResult.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
+	public WebTarget getSearchTagsTarget(Set<Integer> collIds,
+			Set<Integer> docIds,
+			Set<Integer> pageIds,
+			String tagName,
+			String tagValue,
+			String regionType,
+			boolean exactMatch,
+			boolean caseSensitive,
+			Map<String, Object> attributes) {
+		return getSearchTagsTarget(collIds, docIds, pageIds, 
+				tagName, tagValue, regionType, exactMatch, caseSensitive, attributes, null, null);
+	}
+	
 	public WebTarget getSearchTagsTarget(
 			Set<Integer> collIds,
 			Set<Integer> docIds,
@@ -1835,7 +1848,9 @@ public class TrpServerConn extends ATrpServerConn {
 			String regionType,
 			boolean exactMatch,
 			boolean caseSensitive,
-			Map<String, Object> attributes
+			Map<String, Object> attributes,
+			String sortFieldName,
+			String sortDirection
 			) {
 		
 		Gson gson = new Gson();
@@ -1858,7 +1873,10 @@ public class TrpServerConn extends ATrpServerConn {
 		t = JerseyUtils.queryParam(t, RESTConst.EXACT_MATCH_PARAM, exactMatch);
 		t = JerseyUtils.queryParam(t, RESTConst.CASE_SENSITIVE_PARAM, caseSensitive);
 		t = JerseyUtils.queryParam(t, RESTConst.ATTRIBUTES_PARAM, attributesJson);
-		
+		if (sortFieldName != null)
+			t = JerseyUtils.queryParam(t, RESTConst.SORT_COLUMN_PARAM, sortFieldName);
+		if (sortDirection != null)
+			t = JerseyUtils.queryParam(t, RESTConst.SORT_DIRECTION_PARAM, sortDirection);
 		return t;
 	}
 	
@@ -1871,12 +1889,42 @@ public class TrpServerConn extends ATrpServerConn {
 			String regionType,
 			boolean exactMatch,
 			boolean caseSensitive,		
-			Map<String, Object> attributes, InvocationCallback<List<TrpDbTag>> callback) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
-		WebTarget t = getSearchTagsTarget(collIds, docIds, pageIds, tagName, tagValue, regionType, exactMatch, caseSensitive, attributes);
+			Map<String, Object> attributes, InvocationCallback<List<TrpDbTag>> callback) {
+		return searchTagsAsync(collIds, docIds, pageIds, tagName, tagValue, regionType, 
+				exactMatch, caseSensitive, attributes, callback, null, null);
+	}
+	
+	public Future<List<TrpDbTag>> searchTagsAsync(
+			Set<Integer> collIds,
+			Set<Integer> docIds,
+			Set<Integer> pageIds,
+			String tagName,
+			String tagValue,
+			String regionType,
+			boolean exactMatch,
+			boolean caseSensitive,		
+			Map<String, Object> attributes, InvocationCallback<List<TrpDbTag>> callback,
+			String sortFieldName,
+			String sortDirection) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
+		WebTarget t = getSearchTagsTarget(collIds, docIds, pageIds, tagName, tagValue, regionType, exactMatch, caseSensitive, attributes, sortFieldName, sortDirection);
 //		return docTarget.request(DOC_MD_LIST_TYPE).async().get(callback);
 		return t.request(DEFAULT_RESP_TYPE).async().get(callback);
 	}
 
+	public List<TrpDbTag> searchTags(
+			Set<Integer> collIds,
+			Set<Integer> docIds,
+			Set<Integer> pageIds,
+			String tagName,
+			String tagValue,
+			String regionType,
+			boolean exactMatch,
+			boolean caseSensitive,		
+			Map<String, Object> attributes
+		) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		return searchTags(collIds, docIds, pageIds, tagName, tagValue, regionType, exactMatch, caseSensitive, attributes, null, null);
+	}
+	
 	public List<TrpDbTag> searchTags(
 				Set<Integer> collIds,
 				Set<Integer> docIds,
@@ -1886,9 +1934,12 @@ public class TrpServerConn extends ATrpServerConn {
 				String regionType,
 				boolean exactMatch,
 				boolean caseSensitive,		
-				Map<String, Object> attributes
+				Map<String, Object> attributes,
+				String sortFieldName,
+				String sortDirection
 			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		WebTarget t = getSearchTagsTarget(collIds, docIds, pageIds, tagName, tagValue, regionType, exactMatch, caseSensitive, attributes);
+		WebTarget t = getSearchTagsTarget(collIds, docIds, pageIds, tagName, tagValue, regionType, 
+				exactMatch, caseSensitive, attributes, sortFieldName, sortDirection);
 				
 		return getList(t, DB_TAG_LIST_TYPE);
 	}
