@@ -50,6 +50,7 @@ import eu.transkribus.client.util.BufferedFileBodyWriter;
 import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
+import eu.transkribus.core.model.beans.CitLabSemiSupervisedHtrTrainConfig;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
 import eu.transkribus.core.model.beans.DocumentUploadDescriptor;
 import eu.transkribus.core.model.beans.EdFeature;
@@ -1206,6 +1207,17 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(JobConst.PROP_BASE_MODEL, baseModel);
 		
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
+				String.class, MediaType.APPLICATION_XML_TYPE);
+	}
+	
+	public String runCitLabText2Image(CitLabSemiSupervisedHtrTrainConfig config) 
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		if(config == null) {
+			throw new IllegalArgumentException("Config is null!");
+		}
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_T2I_CITLAB_PATH);
+				
+		return postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	

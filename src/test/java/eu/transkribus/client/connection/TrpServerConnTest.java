@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import eu.transkribus.core.io.LocalDocReader;
 import eu.transkribus.core.io.UnsupportedFormatException;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
+import eu.transkribus.core.model.beans.CitLabSemiSupervisedHtrTrainConfig;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor.PageDescriptor;
 import eu.transkribus.core.model.beans.PageLock;
@@ -602,6 +603,25 @@ public class TrpServerConnTest {
 		}
 	}
 	
+	public static void testStartText2Image(final String user, final String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			DocumentSelectionDescriptor dd1 = new DocumentSelectionDescriptor(459);
+			dd1.addPage(new PageDescriptor(3082));
+			CitLabSemiSupervisedHtrTrainConfig conf = new CitLabSemiSupervisedHtrTrainConfig();
+			conf.setColId(1);
+			conf.getTrain().add(dd1);
+			conf.setLanguage("English");
+			conf.setTrainEpochs("1;1;2;3;5;8;13;21;34;55");
+			conf.setNoise("both");
+			conf.setLearningRate("2e-3");
+			conf.setTrainSizePerEpoch(1000);
+			conf.setnThreads(4);
+
+			String jobID = conn.runCitLabText2Image(conf);
+			System.out.println("Started Text2Image with jobId = "+jobID);
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 		if(args.length != 2){
 			throw new IllegalArgumentException("No credentials");
@@ -655,7 +675,9 @@ public class TrpServerConnTest {
 		
 //		testServerExport(args[0], args[1]);
 		
-		testGetJobsByType(args[0], args[1]);
+//		testGetJobsByType(args[0], args[1]);
+		
+		testStartText2Image(args[0], args[1]);
 		
 //		testSearchTags(args[0], args[1]);
 	
