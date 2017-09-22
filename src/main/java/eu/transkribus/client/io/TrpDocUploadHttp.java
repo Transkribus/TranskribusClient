@@ -169,7 +169,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		}
 		//retry loop if putPage() fails
 		int tries = 0;
-		Exception ex;
+		Exception ex = null;
 		do {
 			try {
 				upload = conn.putPage(upload.getUploadId(), img, xml);
@@ -180,7 +180,7 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 			}
 		} while (tries++ <= NR_OF_RETRIES_ON_FAIL && ex != null);
 		if(ex != null) {
-			throw ex;
+			throw new IOException("Could not upload page nr. " + p.getPageNr() + ":" + ex.getMessage(), ex);
 		}
 		storeUploadXmlOnDisk(upload);
 		return upload;
