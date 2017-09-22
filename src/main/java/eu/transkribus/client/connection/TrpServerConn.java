@@ -299,6 +299,12 @@ public class TrpServerConn extends ATrpServerConn {
 		return Integer.parseInt(getObject(target, String.class));
 	}
 	
+	public int countUsersLoggedIn() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.COUNT_PATH);
+		
+		return Integer.parseInt(getObject(target, String.class));
+	}
+	
 	public int countMyDocs() throws NumberFormatException, SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.COUNT_MY_DOCS_PATH);
 		return Integer.parseInt(getObject(target, String.class));
