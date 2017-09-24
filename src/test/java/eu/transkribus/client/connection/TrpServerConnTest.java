@@ -604,18 +604,29 @@ public class TrpServerConnTest {
 	}
 	
 	public static void testStartText2Image(final String user, final String pw) throws Exception {
-		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
-			DocumentSelectionDescriptor dd1 = new DocumentSelectionDescriptor(459);
-			dd1.addPage(new PageDescriptor(3082));
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw)) {
+			
+//			DocumentSelectionDescriptor dd1 = new DocumentSelectionDescriptor(459); // bentham
+//			dd1.addPage(new PageDescriptor(3082));
+			
+//			DocumentSelectionDescriptor dd1 = new DocumentSelectionDescriptor(2092); // orient
+//			dd1.addPage(new PageDescriptor(9521));
+			
+			DocumentSelectionDescriptor dd1 = new DocumentSelectionDescriptor(26250); // orient on prod server
+//			dd1.addPage(new PageDescriptor(9521));
+			
 			CitLabSemiSupervisedHtrTrainConfig conf = new CitLabSemiSupervisedHtrTrainConfig();
 			conf.setColId(1);
 			conf.getTrain().add(dd1);
-			conf.setLanguage("English");
+//			conf.setLanguage("English");
+			conf.setLanguage("Arabic");
 			conf.setTrainEpochs("1;1;2;3;5;8;13;21;34;55");
 			conf.setNoise("both");
 			conf.setLearningRate("2e-3");
-			conf.setTrainSizePerEpoch(1000);
-			conf.setnThreads(4);
+			conf.setTrainSizePerEpoch(2000);
+			conf.setnThreads(12);
+//			conf.setBaseModelId(101); // bentham
+			conf.setBaseModelId(624); // arabic on prod server
 
 			String jobID = conn.runCitLabText2Image(conf);
 			System.out.println("Started Text2Image with jobId = "+jobID);
