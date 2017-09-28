@@ -1739,6 +1739,7 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 
+	@Deprecated
 	public List<KwsDocHit> doKwsSearch(int colId, Integer docId, String term, int confidence) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId);
@@ -2063,5 +2064,20 @@ public class TrpServerConn extends ATrpServerConn {
 		}
 		return postEntityReturnObject(t, md, MediaType.APPLICATION_JSON_TYPE, 
 				TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
+	}
+
+	public String doCITlabKwsSearch(int colId, int docId, List<String> queries) throws SessionExpiredException, ServerErrorException, ClientErrorException { 
+		if(queries == null || queries.isEmpty()) {
+			throw new IllegalArgumentException("No queries given.");
+		}
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+			.path(""+colId)
+			.path(""+docId)
+			.path(RESTConst.KWS_SEARCH_PATH);
+		for(String q : queries){
+			target = target.queryParam(RESTConst.QUERY_PARAM, q);
+		}	
+		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
+				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 }
