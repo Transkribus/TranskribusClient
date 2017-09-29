@@ -540,11 +540,19 @@ public abstract class ATrpServerConn implements Closeable {
 	}
 	
 	/**
-	 * TODO Unauthorized 403 => Session expired OR User is not authorized for this action
+	 * Checks the status code in the response and returns if OK, i.e. status code < 300.<br/>
+	 * Otherwise an exception is generated, either containing a generic message or the String entity from the response.
+	 * In this case, the Response's entity will be consumed and is no longer accessible!
+	 * 
+	 * @param resp
+	 * @param target
+	 * @throws SessionExpiredException
+	 * @throws TrpClientErrorException
+	 * @throws TrpServerErrorException
 	 */
 	protected void checkStatus(Response resp, WebTarget target) throws SessionExpiredException, TrpClientErrorException, TrpServerErrorException {
 		final int status = resp.getStatus();
-		if(status < 300 || status == 304 /*include NOT MODIFIED*/) {
+		if(status < 300) {
 			return;
 		}
 		//handle error
