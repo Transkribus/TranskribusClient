@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 import eu.transkribus.client.util.ClientRequestAuthFilter2;
 import eu.transkribus.client.util.JulFacade;
 import eu.transkribus.client.util.SessionExpiredException;
+import eu.transkribus.client.util.TrpClientErrorException;
+import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.exceptions.ClientVersionNotSupportedException;
 import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
 import eu.transkribus.core.model.beans.EdFeature;
@@ -544,40 +546,86 @@ public abstract class ATrpServerConn implements Closeable {
 	/**
 	 * TODO Unauthorized 403 => Session expired OR User is not authorized for this action
 	 */
-	protected void checkStatus(Response resp, WebTarget target) throws SessionExpiredException, ClientErrorException, ServerErrorException {
+	protected void checkStatus(Response resp, WebTarget target) throws SessionExpiredException, TrpClientErrorException, TrpServerErrorException {
 		final int status = resp.getStatus();
-				
+		final String ent = readStringEntity(resp);
 		final String loc = target.getUri().toString();
+		final String internalMsg;
+		final String userMsg;
+		ErrorType type = ErrorType.Client;
 		if(status < 300) {
 			//logger.debug(loc + " - " + status + " OK");
 			return;
+		} else if (status == 304) { //NOT_MODIFIED
+			return;
 		} else if(status == 400) {
-			throw new ClientErrorException(loc + " - Bad Request (400). "+readStringEntity(resp), resp);
+			type = ErrorType.Client;
+			internalMsg = loc + " - Bad Request (400). " + ent;
+			userMsg = generateUserMessage("Some input was missing to complete this action.", ent);
 		} else if(status == 401) {
-			if (login != null)
-				throw new SessionExpiredException(loc + " - Login expired (401).", login);
-			else
-				throw new SessionExpiredException(loc + " - Not logged in (401).");
+			type = ErrorType.Session;
+			if (login != null) {
+				internalMsg = loc + " - Login expired (401).";
+				userMsg = "Your session has expired. Please log in again.";
+			} else {
+				internalMsg = loc + " - Not logged in (401).";
+				userMsg = "You need to be logged in for this.";
+			}
 		} else if(status == 403) {
-			throw new ClientErrorException(loc + " - Forbidden request. (403) "+readStringEntity(resp), resp);
+			type = ErrorType.Client;
+			internalMsg = loc + " - Forbidden request. (403) " + ent;
+			userMsg = generateUserMessage("You are not allowed to access this resource.", ent);
 		} else if(status == 404) {
-			throw new ClientErrorException(loc + " - Bad parameters. No entity found. (404) "+readStringEntity(resp), resp);
+			type = ErrorType.Client;
+			internalMsg = loc + " - Bad parameters. No entity found. (404) " + ent;
+			userMsg = generateUserMessage("This resource does not exist.", ent);
 		} else if(status == 405) {
-			throw new ClientErrorException(loc + " - Method not allowed! (405) "+readStringEntity(resp), resp);
+			type = ErrorType.Client;
+			internalMsg = loc + " - Method not allowed! (405) " + ent;
+			userMsg = generateUserMessage("Something went wrong. Please report a bug.", ent);
 		} 
 //		else if(status == ClientVersionNotSupportedException.STATUS_CODE) {
 //			throw new RuntimeException(loc + " - Method not allowed! (405) "+readStringEntity(resp)/*, resp*/);
 //		}
 		else if (status < 500) {
-			throw new ClientErrorException("Client error: "+readStringEntity(resp), resp);
+			type = ErrorType.Client;
+			internalMsg = "Client error: " + ent;
+			userMsg = generateUserMessage("Something went wrong. Please report a bug.", ent);
 		}
 		else { // 500 etc.
-			String ent = readStringEntity(resp);
-			
-			throw new ServerErrorException(loc + " - Some server error occured! " + status + " - " + resp.getStatusInfo() + (StringUtils.isEmpty(ent)?"":" - "+ent), status);
+			type = ErrorType.Server;
+			internalMsg = loc + " - Some server error occured! " + status + " - " 
+					+ resp.getStatusInfo() 
+					+ (StringUtils.isEmpty(ent)?"":" - "+ent);
+			userMsg = generateUserMessage("The action could not be processed on the server. Please report a bug.", ent);
+		}
+		switch(type) {
+		case Server:
+			throw new TrpServerErrorException(internalMsg, userMsg, status);
+		case Session:
+			if(login == null) {
+				throw new SessionExpiredException(internalMsg, userMsg);
+			} else {
+				throw new SessionExpiredException(internalMsg, userMsg, login);
+			}
+		default:	
+			throw new TrpClientErrorException(internalMsg, userMsg, resp);
 		}
 	}
 	
+	/**
+	 * @param genericMessage
+	 * @param messageFromServer
+	 * @return genericMessage if messageFromServer is empty
+	 */
+	private String generateUserMessage(String genericMessage, String messageFromServer) {
+		if(StringUtils.isEmpty(messageFromServer)) {
+			return genericMessage;
+		} else {
+			return messageFromServer;
+		}
+	}
+
 	public class ClientStatus extends Observable implements Observer {
 		private static final String STATUS_IDLE = "IDLE";
 		private static final String STATUS_BUSY = "BUSY";
@@ -603,5 +651,11 @@ public abstract class ATrpServerConn implements Closeable {
 			status = STATUS_BUSY;
 			notifyObservers(status);
 		}
+	}
+	
+	private enum ErrorType {
+		Server,
+		Client,
+		Session;
 	}
 }
