@@ -9,9 +9,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import javax.security.auth.login.LoginException;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.ClientRequestContext;
@@ -36,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import eu.transkribus.client.util.ClientRequestAuthFilter2;
 import eu.transkribus.client.util.JulFacade;
 import eu.transkribus.client.util.SessionExpiredException;
+import eu.transkribus.client.util.TrpClientErrorException;
+import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.exceptions.ClientVersionNotSupportedException;
 import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
 import eu.transkribus.core.model.beans.EdFeature;
@@ -263,8 +263,7 @@ public abstract class ATrpServerConn implements Closeable {
 					);
 			
 			initTargets();
-		}
-		catch (ClientErrorException e) {
+		} catch (TrpClientErrorException e) {
 //			throw e;
 
 //			String entity = readStringEntity(e.getResponse());
@@ -276,8 +275,7 @@ public abstract class ATrpServerConn implements Closeable {
 			} else {
 				throw new LoginException(e.getMessage());
 			}
-		}
-		catch(Exception e) {
+		} catch(Exception e) {
 			login = null;
 			logger.error("Login request failed!", e);
 			throw new LoginException(e.getMessage());
@@ -309,7 +307,7 @@ public abstract class ATrpServerConn implements Closeable {
 					);
 			
 			initTargets();
-		} catch(ClientErrorException cee){
+		} catch(TrpClientErrorException cee){
 			if(cee.getResponse().getStatus() == 403) {
 				login = null;
 				throw new OAuthTokenRevokedException();				
@@ -342,7 +340,7 @@ public abstract class ATrpServerConn implements Closeable {
 		return t;
 	}
 
-	public void logout() throws ServerErrorException, ClientErrorException {
+	public void logout() throws TrpServerErrorException, TrpClientErrorException {
 		try {
 			final WebTarget target = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.LOGOUT_PATH);
 			//just post a null entity. SessionId is added in RequestAuthFilter
@@ -364,11 +362,11 @@ public abstract class ATrpServerConn implements Closeable {
 		return serverUri.toString();
 	}
 	
-	protected <T> List<T> getList(WebTarget target, GenericType<List<T>> returnType) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+	protected <T> List<T> getList(WebTarget target, GenericType<List<T>> returnType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException{
 		return getList(target, returnType, DEFAULT_RESP_TYPE);
 	}
 	
-	protected <T> List<T> getList(WebTarget target, GenericType<List<T>> returnType, MediaType responseType) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+	protected <T> List<T> getList(WebTarget target, GenericType<List<T>> returnType, MediaType responseType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException{
 		if (responseType == null)
 			responseType = DEFAULT_RESP_TYPE;
 		
@@ -387,7 +385,7 @@ public abstract class ATrpServerConn implements Closeable {
 		return genericList;
 	}
 		
-//	protected <T> List<T> getListAsync(WebTarget target, GenericType<List<T>> returnType, InvocationCallback<Response> callback) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+//	protected <T> List<T> getListAsync(WebTarget target, GenericType<List<T>> returnType, InvocationCallback<Response> callback) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException{
 //		Future<Response> fut = target.request(DEFAULT_RESP_TYPE).async().get(callback);
 //		
 //		checkStatus(resp, target);
@@ -395,11 +393,11 @@ public abstract class ATrpServerConn implements Closeable {
 //		return genericList;
 //	}	
 	
-	protected <T> T getObject(WebTarget target, Class<T> clazz) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	protected <T> T getObject(WebTarget target, Class<T> clazz) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		return getObject(target, clazz, null);
 	}
 	
-	protected <T> T getObject(WebTarget target, Class<T> clazz, MediaType type) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	protected <T> T getObject(WebTarget target, Class<T> clazz, MediaType type) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		if(type == null){
 			type = DEFAULT_RESP_TYPE;
 		}
@@ -409,38 +407,38 @@ public abstract class ATrpServerConn implements Closeable {
 		return object;
 	}
 	
-	protected void delete(WebTarget target) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	protected void delete(WebTarget target) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		Response resp = target.request().delete();
 		checkStatus(resp, target);
 	}
 	
-	protected <T> void postEntity(WebTarget target, T entity, MediaType postMediaType) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	protected <T> void postEntity(WebTarget target, T entity, MediaType postMediaType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		Response resp = target.request().post(Entity.entity(entity, postMediaType));
 		checkStatus(resp, target);
 	}
 	
-	protected <T> void postNull(WebTarget target) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	protected <T> void postNull(WebTarget target) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		Response resp = target.request().post(null);
 		checkStatus(resp, target);
 	}
 	
-	protected <T, R> R postNullReturnObject(WebTarget target, Class<R> returnType) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	protected <T, R> R postNullReturnObject(WebTarget target, Class<R> returnType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		Response resp = target.request().post(null);
 		checkStatus(resp, target);
 		return extractObject(resp, returnType);
 	}
 	
-	protected <T, R> R postNullReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	protected <T, R> R postNullReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		Response resp = target.request().post(Entity.entity(entity, postMediaType));
 		checkStatus(resp, target);
 		return extractObject(resp, returnType);
 	}
 	
-	protected <T, R> R postXmlEntityReturnObject(WebTarget target, T entity, Class<R> returnType) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+	protected <T, R> R postXmlEntityReturnObject(WebTarget target, T entity, Class<R> returnType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException{
 		return postEntityReturnObject(target, entity, MediaType.APPLICATION_XML_TYPE, returnType, DEFAULT_RESP_TYPE);
 	}
 	
-	protected <T, R> R postEntityReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType, MediaType returnMediaType) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	protected <T, R> R postEntityReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType, MediaType returnMediaType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		Entity<T> ent = buildEntity(entity, postMediaType);
 		Response resp = target.request(returnMediaType).post(ent);
 		checkStatus(resp, target);
@@ -448,7 +446,7 @@ public abstract class ATrpServerConn implements Closeable {
 		return object;
 	}
 	
-	public <T, R> R putEntityReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType, MediaType returnMediaType) throws SessionExpiredException, ClientErrorException, ServerErrorException {
+	public <T, R> R putEntityReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType, MediaType returnMediaType) throws SessionExpiredException, TrpClientErrorException, TrpServerErrorException {
 		Entity<T> ent = buildEntity(entity, postMediaType);
 		Response resp = target.request(returnMediaType).put(ent);
 		checkStatus(resp, target);
@@ -459,7 +457,7 @@ public abstract class ATrpServerConn implements Closeable {
 	/**
 	 * Does not work with Tomcat 7 (yet). See server.rest.Layout.java
 	 */
-	//	protected <T, R> R asyncPostEntityReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType, MediaType returnMediaType) throws InterruptedException, ExecutionException, SessionExpiredException, ServerErrorException, ClientErrorException{
+	//	protected <T, R> R asyncPostEntityReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType, MediaType returnMediaType) throws InterruptedException, ExecutionException, SessionExpiredException, TrpServerErrorException, TrpClientErrorException{
 	//		final Entity<T> ent = buildEntity(entity, postMediaType);
 	//		final AsyncInvoker asyncInvoker = target.request(returnMediaType).async();
 	//		final Future<Response> responseFuture = asyncInvoker.post(ent);
@@ -472,11 +470,11 @@ public abstract class ATrpServerConn implements Closeable {
 	//		return object;
 	//	}
 	
-	protected <T, R> List<R> postXmlEntityReturnList(WebTarget target, T entity, GenericType<List<R>> returnType) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+	protected <T, R> List<R> postXmlEntityReturnList(WebTarget target, T entity, GenericType<List<R>> returnType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException{
 		return postEntityReturnList(target, entity, MediaType.APPLICATION_XML_TYPE, returnType, DEFAULT_RESP_TYPE);
 	}
 	
-	protected <T, R> List<R> postEntityReturnList(WebTarget target, T entity, final MediaType postMediaType, GenericType<List<R>> returnType, MediaType returnMediaType) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+	protected <T, R> List<R> postEntityReturnList(WebTarget target, T entity, final MediaType postMediaType, GenericType<List<R>> returnType, MediaType returnMediaType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException{
 		Entity<T> ent = buildEntity(entity, postMediaType);
 		Response resp = target.request(returnMediaType).post(ent);
 		checkStatus(resp, target);
@@ -542,42 +540,96 @@ public abstract class ATrpServerConn implements Closeable {
 	}
 	
 	/**
-	 * TODO Unauthorized 403 => Session expired OR User is not authorized for this action
+	 * Checks the status code in the response and returns if OK, i.e. status code < 300.<br/>
+	 * Otherwise an exception is generated, either containing a generic message or the String entity from the response.
+	 * In this case, the Response's entity will be consumed and is no longer accessible!
+	 * 
+	 * @param resp
+	 * @param target
+	 * @throws SessionExpiredException
+	 * @throws TrpClientErrorException
+	 * @throws TrpServerErrorException
 	 */
-	protected void checkStatus(Response resp, WebTarget target) throws SessionExpiredException, ClientErrorException, ServerErrorException {
+	protected void checkStatus(Response resp, WebTarget target) throws SessionExpiredException, TrpClientErrorException, TrpServerErrorException {
 		final int status = resp.getStatus();
-				
-		final String loc = target.getUri().toString();
 		if(status < 300) {
-			//logger.debug(loc + " - " + status + " OK");
 			return;
-		} else if(status == 400) {
-			throw new ClientErrorException(loc + " - Bad Request (400). "+readStringEntity(resp), resp);
+		}
+		//handle error
+		final String loc = target.getUri().toString();
+		final String internalMsg;
+		final String userMsg;
+		ErrorType type = ErrorType.Client;
+		//if error code, then we can extract the entity safely as there is no object in it
+		final String ent = readStringEntity(resp);
+		if(status == 400) {
+			type = ErrorType.Client;
+			internalMsg = loc + " - Bad Request (400). " + ent;
+			userMsg = generateUserMessage("Some input was missing to complete this action.", ent);
 		} else if(status == 401) {
-			if (login != null)
-				throw new SessionExpiredException(loc + " - Login expired (401).", login);
-			else
-				throw new SessionExpiredException(loc + " - Not logged in (401).");
+			type = ErrorType.Session;
+			if (login != null) {
+				internalMsg = loc + " - Login expired (401).";
+				userMsg = "Your session has expired. Please log in again.";
+			} else {
+				internalMsg = loc + " - Not logged in (401).";
+				userMsg = "You need to be logged in for this.";
+			}
 		} else if(status == 403) {
-			throw new ClientErrorException(loc + " - Forbidden request. (403) "+readStringEntity(resp), resp);
+			type = ErrorType.Client;
+			internalMsg = loc + " - Forbidden request. (403) " + ent;
+			userMsg = generateUserMessage("You are not allowed to access this resource.", ent);
 		} else if(status == 404) {
-			throw new ClientErrorException(loc + " - Bad parameters. No entity found. (404) "+readStringEntity(resp), resp);
+			type = ErrorType.Client;
+			internalMsg = loc + " - Bad parameters. No entity found. (404) " + ent;
+			userMsg = generateUserMessage("This resource does not exist.", ent);
 		} else if(status == 405) {
-			throw new ClientErrorException(loc + " - Method not allowed! (405) "+readStringEntity(resp), resp);
+			type = ErrorType.Client;
+			internalMsg = loc + " - Method not allowed! (405) " + ent;
+			userMsg = generateUserMessage("Something went wrong. Please report a bug.", ent);
 		} 
 //		else if(status == ClientVersionNotSupportedException.STATUS_CODE) {
 //			throw new RuntimeException(loc + " - Method not allowed! (405) "+readStringEntity(resp)/*, resp*/);
 //		}
 		else if (status < 500) {
-			throw new ClientErrorException("Client error: "+readStringEntity(resp), resp);
+			type = ErrorType.Client;
+			internalMsg = "Client error: " + ent;
+			userMsg = generateUserMessage("Something went wrong. Please report a bug.", ent);
 		}
 		else { // 500 etc.
-			String ent = readStringEntity(resp);
-			
-			throw new ServerErrorException(loc + " - Some server error occured! " + status + " - " + resp.getStatusInfo() + (StringUtils.isEmpty(ent)?"":" - "+ent), status);
+			type = ErrorType.Server;
+			internalMsg = loc + " - Some server error occured! " + status + " - " 
+					+ resp.getStatusInfo() 
+					+ (StringUtils.isEmpty(ent)?"":" - "+ent);
+			userMsg = generateUserMessage("The action could not be processed on the server. Please report a bug.", ent);
+		}
+		switch(type) {
+		case Server:
+			throw new TrpServerErrorException(internalMsg, userMsg, status);
+		case Session:
+			if(login == null) {
+				throw new SessionExpiredException(internalMsg, userMsg);
+			} else {
+				throw new SessionExpiredException(internalMsg, userMsg, login);
+			}
+		default:	
+			throw new TrpClientErrorException(internalMsg, userMsg, resp);
 		}
 	}
 	
+	/**
+	 * @param genericMessage
+	 * @param messageFromServer
+	 * @return genericMessage if messageFromServer is empty
+	 */
+	private String generateUserMessage(String genericMessage, String messageFromServer) {
+		if(StringUtils.isEmpty(messageFromServer)) {
+			return genericMessage;
+		} else {
+			return messageFromServer;
+		}
+	}
+
 	public class ClientStatus extends Observable implements Observer {
 		private static final String STATUS_IDLE = "IDLE";
 		private static final String STATUS_BUSY = "BUSY";
@@ -603,5 +655,11 @@ public abstract class ATrpServerConn implements Closeable {
 			status = STATUS_BUSY;
 			notifyObservers(status);
 		}
+	}
+	
+	private enum ErrorType {
+		Server,
+		Client,
+		Session;
 	}
 }
