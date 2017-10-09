@@ -17,6 +17,8 @@ import java.util.function.Supplier;
 
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
+import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.InvocationCallback;
@@ -47,8 +49,6 @@ import eu.transkribus.client.io.TrpDocUploadZipHttp;
 import eu.transkribus.client.util.BufferedFileBodyWriter;
 import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.SessionExpiredException;
-import eu.transkribus.client.util.TrpClientErrorException;
-import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
 import eu.transkribus.core.model.beans.CitLabSemiSupervisedHtrTrainConfig;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
@@ -203,18 +203,18 @@ public class TrpServerConn extends ATrpServerConn {
 //		conn.login(user, pw);
 //	}
 	
-//	public void logout() throws TrpServerErrorException, IllegalArgumentException {
+//	public void logout() throws ServerErrorException, IllegalArgumentException {
 //		// on logout set singleton instance to null
 ////		conn = null;
 //		super.logout();
 //	}
 	
-	public void invalidate() throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void invalidate() throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.INVALIDATE_PATH);
 		postNull(docTarget);
 	}
 	
-	public void refreshSession() throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void refreshSession() throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.REFRESH_PATH);
 		super.postNull(docTarget);
 	}
@@ -231,7 +231,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @return
 	 * @throws SessionExpiredException 
 	 */
-	public TrpDoc getTrpDoc(final int colId, final int docId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, TrpClientErrorException {
+	public TrpDoc getTrpDoc(final int colId, final int docId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId)
 				.path(RESTConst.FULLDOC_PATH)
 				.queryParam(RESTConst.NR_OF_TRANSCRIPTS_PARAM, ""+nrOfTranscriptsPerPage);
@@ -242,7 +242,7 @@ public class TrpServerConn extends ATrpServerConn {
 //		return getTrpDoc(colId, docId, true);
 //	}
 	
-	public List<TrpCollection> getAllCollections(int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpCollection> getAllCollections(int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(RESTConst.LIST_PATH)
 				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
 				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
@@ -251,24 +251,24 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(target, COL_LIST_TYPE);
 	}
 	
-	public int countAllCollections() throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public int countAllCollections() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(RESTConst.COUNT_PATH);
 		return Integer.parseInt(getObject(target, String.class));
 	}
 	
-	public void deleteCollection(int colId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void deleteCollection(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId);
 		
 		delete(target);
 	}
 	
-	public void deleteEmptyCollection(int colId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void deleteEmptyCollection(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.DELETE_EMPTY_COLLECTION);
 		
 		postNull(target);
 	}
 	
-	public int createCollection(String name) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public int createCollection(String name) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(RESTConst.CREATE_COLLECTION_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_NAME_PARAM, name);
 		
@@ -278,14 +278,14 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	@Deprecated
-	public void modifyCollection(int colId, String name) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void modifyCollection(int colId, String name) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.MODIFY_COLLECTION_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_NAME_PARAM, name);
 		
 		postNull(target);
 	}
 	
-	public void updateCollectionMd(TrpCollection colMd) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void updateCollectionMd(TrpCollection colMd) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(colMd == null) {
 			throw new IllegalArgumentException("Collection object is null!");
 		}
@@ -294,18 +294,24 @@ public class TrpServerConn extends ATrpServerConn {
 		postEntity(docTarget, colMd, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
-	public int countDocs(int colId) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public int countDocs(int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.COUNT_PATH);
 		
 		return Integer.parseInt(getObject(target, String.class));
 	}
 	
-	public int countMyDocs() throws NumberFormatException, SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public int countUsersLoggedIn() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.COUNT_PATH);
+		
+		return Integer.parseInt(getObject(target, String.class));
+	}
+	
+	public int countMyDocs() throws NumberFormatException, SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.COUNT_MY_DOCS_PATH);
 		return Integer.parseInt(getObject(target, String.class));
 	}
 		
-	private WebTarget getAllDocsTarget(final int colId, int index, int nValues, String sortFieldName, String sortDirection) /*throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException*/ {
+	private WebTarget getAllDocsTarget(final int colId, int index, int nValues, String sortFieldName, String sortDirection) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.LIST_PATH)
 				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
 				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
@@ -314,22 +320,22 @@ public class TrpServerConn extends ATrpServerConn {
 		return docTarget;
 	}
 	
-	public List<TrpDocMetadata> getAllDocs(final int colId) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpDocMetadata> getAllDocs(final int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		return getAllDocs(colId, 0, 0, null, null);
 	}	
 	
-	public List<TrpDocMetadata> getAllDocs(final int colId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpDocMetadata> getAllDocs(final int colId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = getAllDocsTarget(colId, index, nValues, sortFieldName, sortDirection);
 		return getList(docTarget, DOC_MD_LIST_TYPE);
 	}
 	
-	public Future<List<TrpDocMetadata>> getAllDocsAsync(final int colId, int index, int nValues, String sortFieldName, String sortDirection, InvocationCallback<List<TrpDocMetadata>> callback) /*throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException*/ {
+	public Future<List<TrpDocMetadata>> getAllDocsAsync(final int colId, int index, int nValues, String sortFieldName, String sortDirection, InvocationCallback<List<TrpDocMetadata>> callback) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
 		WebTarget docTarget = getAllDocsTarget(colId, index, nValues, sortFieldName, sortDirection);
 //		return docTarget.request(DOC_MD_LIST_TYPE).async().get(callback);
 		return docTarget.request(DEFAULT_RESP_TYPE).async().get(callback);
 	}
 	
-	public List<TrpDocMetadata> getDocCount(final int colId) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpDocMetadata> getDocCount(final int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.LIST_PATH);
 		return getList(docTarget, DOC_MD_LIST_TYPE);
 	}	
@@ -342,7 +348,7 @@ public class TrpServerConn extends ATrpServerConn {
 						.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
 	}
 	
-	public List<TrpDocMetadata> getAllDocsByUser(int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpDocMetadata> getAllDocsByUser(int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = getAllDocsByUserTarget(index, nValues, sortFieldName, sortDirection);
 		return getList(docTarget, DOC_MD_LIST_TYPE);
 	}
@@ -352,12 +358,12 @@ public class TrpServerConn extends ATrpServerConn {
 		return docTarget.request(DEFAULT_RESP_TYPE).async().get(callback);
 	}
 	
-//	public List<TrpTranscriptMetadata> getTranscriptMdList(final int colId, final int docId, final int pageNr) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException {
+//	public List<TrpTranscriptMetadata> getTranscriptMdList(final int colId, final int docId, final int pageNr) throws SessionExpiredException, ServerErrorException, IllegalArgumentException {
 //		return getTranscriptMdList(colId, docId, pageNr, null, null);
 //	}
 	
 	public List<TrpTranscriptMetadata> getTranscriptMdList(final int colId, final int docId, final int pageNr, final Integer index, final Integer nValues,
-			String sortFieldName, String sortDirection) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		if (colId <= 0 || docId <= 0 || pageNr <= 0)
 			return new ArrayList<>();		
 		
@@ -379,7 +385,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(docTarget, TRANS_MD_LIST_TYPE);
 	}
 	
-	public int countTranscriptMdList(final int colId, final int docId, final int pageNr) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public int countTranscriptMdList(final int colId, final int docId, final int pageNr) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		if (colId <= 0 || docId <= 0 || pageNr <= 0)
 			return 0;
 		
@@ -393,7 +399,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return Integer.parseInt(getObject(t, String.class));
 	}
 	
-	public List<TrpWordgraph> getWordgraphs(final int colId, final int docId, final int pageNr) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpWordgraph> getWordgraphs(final int colId, final int docId, final int pageNr) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget
 			.path(RESTConst.COLLECTION_PATH)
 			.path(""+colId)
@@ -413,22 +419,22 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @param docMd
 	 * @throws SessionExpiredException
 	 * @throws IllegalArgumentException
-	 * @throws TrpClientErrorException
+	 * @throws ClientErrorException
 	 */
-	public void updateDocMd(final int colId, final int docId, TrpDocMetadata docMd) throws SessionExpiredException, IllegalArgumentException, TrpClientErrorException {
+	public void updateDocMd(final int colId, final int docId, TrpDocMetadata docMd) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId)
 				.path(RESTConst.MD_PATH);
 		postEntity(docTarget, docMd, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
-	public void deleteDoc(int colId, int docId) throws SessionExpiredException, IllegalArgumentException, TrpClientErrorException {
+	public void deleteDoc(int colId, int docId) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId);
 		delete(docTarget);
 	}
 	
 
 	
-//	public PcGtsType getTranscript(URL url) throws JAXBException, URISyntaxException, SessionExpiredException, TrpServerErrorException, IllegalArgumentException{
+//	public PcGtsType getTranscript(URL url) throws JAXBException, URISyntaxException, SessionExpiredException, ServerErrorException, IllegalArgumentException{
 //		PcGtsType pc;
 //		final String prot = url.getProtocol();
 //		logger.debug("PROTOCOL: " + prot);
@@ -445,11 +451,11 @@ public class TrpServerConn extends ATrpServerConn {
 //	}
 	
 	
-//	public PcGtsType getTranscript(final int docId, final int pageNr) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException {
+//	public PcGtsType getTranscript(final int docId, final int pageNr) throws SessionExpiredException, ServerErrorException, IllegalArgumentException {
 //		return getTranscript(docId, pageNr, null);
 //	}
 //	
-//	public PcGtsType getTranscript(final int docId, final int pageNr, final Long timestamp) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException {
+//	public PcGtsType getTranscript(final int docId, final int pageNr, final Long timestamp) throws SessionExpiredException, ServerErrorException, IllegalArgumentException {
 //		PcGtsType pc;
 //		WebTarget docTarget = baseTarget.path(RESTConst.DOC_PATH)
 //				.path("" + docId)
@@ -463,7 +469,7 @@ public class TrpServerConn extends ATrpServerConn {
 //		return pc;
 //	}
 	
-	public void lockPage(final int colId, final int docId, final int pageNr) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException{
+	public void lockPage(final int colId, final int docId, final int pageNr) throws SessionExpiredException, ServerErrorException, ClientErrorException{
 		WebTarget docTarget = baseTarget
 				.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
@@ -473,7 +479,7 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(docTarget);
 	}
 	
-	public void unlockPage() throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException{
+	public void unlockPage() throws SessionExpiredException, ServerErrorException, ClientErrorException{
 		WebTarget docTarget = baseTarget
 				.path(RESTConst.COLLECTION_PATH)
 				.path(""+-1)
@@ -484,7 +490,7 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(docTarget);
 	}
 	
-//	public void unlockPage(final int colId, final int docId, final int pageNr) throws SessionExpiredException, TrpServerErrorException{
+//	public void unlockPage(final int colId, final int docId, final int pageNr) throws SessionExpiredException, ServerErrorException{
 //		WebTarget docTarget = baseTarget
 //				.path(RESTConst.COLLECTION_PATH)
 //				.path(""+colId)
@@ -494,7 +500,7 @@ public class TrpServerConn extends ATrpServerConn {
 //		postNull(docTarget);
 //	}
 	
-	public boolean isPageLocked(final int colId, final int docId, final int pageNr) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public boolean isPageLocked(final int colId, final int docId, final int pageNr) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget
 				.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
@@ -505,7 +511,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return Boolean.parseBoolean(isLockedStr);
 	}
 	
-	public List<PageLock> listPageLocks(int colId, int docId, int pageNr) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public List<PageLock> listPageLocks(int colId, int docId, int pageNr) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget
 				.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
@@ -515,7 +521,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(docTarget, PAGELOCK_LIST_TYPE);
 	}
 	
-	public boolean canManageCollection(int colId) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public boolean canManageCollection(int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
@@ -525,14 +531,14 @@ public class TrpServerConn extends ATrpServerConn {
 		return Boolean.parseBoolean(canManage);
 	}
 	
-	public String getLatestGuiVersion(boolean isRelease) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public String getLatestGuiVersion(boolean isRelease) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.CLIENT_VERSION_INFO_PATH);
 		target = target.queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
 		return getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
 	}
 	
-	public List<HttpProgramPackageFile> getAvailableClientFiles(boolean isRelease) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<HttpProgramPackageFile> getAvailableClientFiles(boolean isRelease) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.CLIENT_AVAILABLE_FILES);
 		target = target.queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
@@ -540,7 +546,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(target, new  GenericType<List<HttpProgramPackageFile>>(){});
 	}
 	
-	public Future<List<HttpProgramPackageFile>> getAvailableClientFilesAsync(boolean isRelease, InvocationCallback<List<HttpProgramPackageFile>> callback) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public Future<List<HttpProgramPackageFile>> getAvailableClientFilesAsync(boolean isRelease, InvocationCallback<List<HttpProgramPackageFile>> callback) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		final WebTarget target = baseTarget
 				.path(RESTConst.CLIENT_AVAILABLE_FILES).queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
 		
@@ -551,7 +557,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return "";
 	}
 	
-	public <T> Future<T> invokeAsync(Supplier<T> supp) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public <T> Future<T> invokeAsync(Supplier<T> supp) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		// TODO
 //		Arrays.sort(a, c);
 		String s="";
@@ -568,7 +574,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @param l A progress listener for the download. Can be null
 	 * @deprecated A header field size greater 8kb leads to a server error which can happen if you specify a large libs map in this method!
 	 */
-	public String downloadClientFile(boolean isRelease, String filename, File f, Map<String, String> libs, ProgressInputStreamListener l) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, IOException, ParseException, TrpClientErrorException {
+	public String downloadClientFile(boolean isRelease, String filename, File f, Map<String, String> libs, ProgressInputStreamListener l) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, IOException, ParseException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.DOWNLOAD_CLIENT_FILE);
 		target = target.queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
@@ -600,7 +606,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @param libs A map with the currently used jar-libs in the libs dir, including their md5 checksum. Can be null
 	 * @param l A progress listener for the download. Can be null
 	 */
-	public String downloadClientFileNew(boolean isRelease, String filename, File f, Map<String, String> libs, ProgressInputStreamListener l) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, IOException, ParseException, TrpClientErrorException {
+	public String downloadClientFileNew(boolean isRelease, String filename, File f, Map<String, String> libs, ProgressInputStreamListener l) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, IOException, ParseException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.DOWNLOAD_CLIENT_FILE_NEW);
 		target = target.queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
@@ -628,12 +634,12 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @param f The file to store the latest client version to
 	 * @param l A progress listener for the download. Can be null
 	 * @throws SessionExpiredException
-	 * @throws TrpServerErrorException
+	 * @throws ServerErrorException
 	 * @throws IllegalArgumentException
 	 * @throws IOException
 	 * @throws ParseException 
 	 */
-//	public String downloadLatestGuiVersion(boolean isRelease, File f, ProgressInputStreamListener l) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, IOException, ParseException, TrpClientErrorException {
+//	public String downloadLatestGuiVersion(boolean isRelease, File f, ProgressInputStreamListener l) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, IOException, ParseException, ClientErrorException {
 //		WebTarget target = baseTarget
 //				.path(RESTConst.DOWNLOAD_LATEST_CLIENT);
 //		target = target.queryParam(RESTConst.IS_RELEASE_PARAM, isRelease);
@@ -655,10 +661,10 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @param status
 	 * @return Updated transcript list for this page
 	 * @throws IllegalArgumentException 
-	 * @throws TrpServerErrorException 
+	 * @throws ServerErrorException 
 	 * @throws SessionExpiredException 
 	 */
-	public TrpTranscriptMetadata updateTranscriptStatus(final int colId, final int docId, int pageNr, EditStatus status, final int parentId, final String note) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public TrpTranscriptMetadata updateTranscriptStatus(final int colId, final int docId, int pageNr, EditStatus status, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		return updateTranscript(colId, docId, pageNr, status, null, false, parentId, note);
 	}
 
@@ -672,16 +678,16 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @param transcript
 	 * @return Updated transcript list for this page
 	 * @throws IllegalArgumentException 
-	 * @throws TrpServerErrorException 
+	 * @throws ServerErrorException 
 	 * @throws SessionExpiredException 
 	 */
 	public TrpTranscriptMetadata updateTranscript(final int colId, final int docId, int pageNr, EditStatus status,
-			final PcGtsType transcript, final int parentId, final String note) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			final PcGtsType transcript, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		return updateTranscript(colId, docId, pageNr, status, transcript, false, parentId, note);
 	}
 	
 	public TrpTranscriptMetadata replaceCurrentTranscript(final int colId, final int docId, int pageNr,
-			final PcGtsType transcript, final int parentId, final String note) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			final PcGtsType transcript, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		return updateTranscript(colId, docId, pageNr, null, transcript, true, parentId, note);
 	}
 	
@@ -695,11 +701,11 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @param transcript
 	 * @return Updated transcript list for this page
 	 * @throws IllegalArgumentException 
-	 * @throws TrpServerErrorException 
+	 * @throws ServerErrorException 
 	 * @throws SessionExpiredException 
 	 */
 	public TrpTranscriptMetadata updateTranscript(final int colId, final int docId, int pageNr, EditStatus status,
-			final PcGtsType transcript, final boolean overwrite, final int parentId, final String note) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			final PcGtsType transcript, final boolean overwrite, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
 				.path(RESTConst.TRANSCRIPT_PATH);
 		if (status != null) {
@@ -711,14 +717,14 @@ public class TrpServerConn extends ATrpServerConn {
 		return postXmlEntityReturnObject(docTarget, transcript, TrpTranscriptMetadata.class);
 	}
 	
-	public void deleteTranscript(int colId, int docId, int pageNr, String key) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public void deleteTranscript(int colId, int docId, int pageNr, String key) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
 				.path(RESTConst.DELETE_PATH);
 		docTarget = docTarget.queryParam(RESTConst.KEY_PARAM, key);
 		postNull(docTarget);
 	}
 	
-	public void deleteUser(String username) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void deleteUser(String username) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.DELETE_PATH);
 		
 		t = t.queryParam(RESTConst.USER_PARAM, username);
@@ -726,7 +732,7 @@ public class TrpServerConn extends ATrpServerConn {
 		delete(t);
 	}
 	
-	public TrpPage replacePageImage(final int colId, final int docId, final int pageNr, File imgFile, final IProgressMonitor monitor) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public TrpPage replacePageImage(final int colId, final int docId, final int pageNr, File imgFile, final IProgressMonitor monitor) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
 				.path(RESTConst.REPLACE_PAGE_PATH);
 		MultiPart mp = new MultiPart();
@@ -907,12 +913,12 @@ public class TrpServerConn extends ATrpServerConn {
 		return uploadTrpDoc(colId, doc, UploadType.JSON, true, monitor, null);
 	}
 	
-	public List<TrpDocDir> listDocsOnFtp() throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpDocDir> listDocsOnFtp() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.FILES_PATH).path(RESTConst.LIST_PATH);
 		return getList(target, DOC_DIR_LIST_TYPE);
 	}
 	
-	public Boolean checkDirOnFtp(final String dirName) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public Boolean checkDirOnFtp(final String dirName) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.FILES_PATH).path(RESTConst.CHECK_PATH);
 		target = target.queryParam(RESTConst.FILE_NAME_PARAM, dirName);
 		return Boolean.valueOf(super.getObject(target, String.class));
@@ -924,7 +930,7 @@ public class TrpServerConn extends ATrpServerConn {
 		super.postNull(target);
 	}
 		
-	public void ingestDocFromUrl(final int colId, final String metsUrlStr) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException, UnsupportedEncodingException{
+	public void ingestDocFromUrl(final int colId, final String metsUrlStr) throws SessionExpiredException, ServerErrorException, ClientErrorException, UnsupportedEncodingException{
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("createDocFromMetsUrl");
 		String encodedUrlStr;
 		try {
@@ -956,7 +962,7 @@ public class TrpServerConn extends ATrpServerConn {
 		checkStatus(response, target);
 	}
 	
-	public List<TrpJobStatus> getJobs(boolean filterByUser, String status, String type, Integer docId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpJobStatus> getJobs(boolean filterByUser, String status, String type, Integer docId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.JOBS_PATH).path(RESTConst.LIST_PATH);
 		//only get jobs of the logged in user?
 		t = t.queryParam(RESTConst.FILTER_BY_USER_PARAM, filterByUser);
@@ -976,7 +982,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(t, JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);		
 	}
 	
-	public int countJobs(boolean filterByUser, String status, String type, Integer docId) throws NumberFormatException, SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public int countJobs(boolean filterByUser, String status, String type, Integer docId) throws NumberFormatException, SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.JOBS_PATH).path(RESTConst.COUNT_PATH);
 		t = t.queryParam(RESTConst.FILTER_BY_USER_PARAM, filterByUser);
 		t = t.queryParam(RESTConst.STATUS_PARAM, status);
@@ -986,16 +992,16 @@ public class TrpServerConn extends ATrpServerConn {
 		return Integer.parseInt(getObject(t, String.class));
 	}
 	
-//	public List<TrpJobStatus> getJobs(boolean filterByUser, String status, Integer docId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException{
+//	public List<TrpJobStatus> getJobs(boolean filterByUser, String status, Integer docId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException{
 //		return getJobs(filterByUser, status, null, index, nValues, sortFieldName, sortDirection);
 //	}
 	
-	public TrpJobStatus getJob(final String jobId) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public TrpJobStatus getJob(final String jobId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		final WebTarget docTarget = baseTarget.path(RESTConst.JOBS_PATH).path("" + jobId);
 		return getObject(docTarget, TrpJobStatus.class);
 	}
 	
-	public void killJob(final String jobId) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public void killJob(final String jobId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		final WebTarget docTarget = baseTarget.path(RESTConst.JOBS_PATH).path("" + jobId).path(RESTConst.KILL_JOB_PATH);
 		postNull(docTarget);
 	}
@@ -1005,7 +1011,7 @@ public class TrpServerConn extends ATrpServerConn {
 			boolean doBlockSeg, boolean doLineSeg, boolean doWordSeg, boolean doPolygonToBaseline, boolean doBaselineToPolygon,
 			
 			String jobImpl, String pars) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		
 		if (jobImpl==null || !jobImpl.endsWith("LaJob")) {
 			throw new IllegalArgumentException("Not a valid layout analysis job: "+jobImpl);
@@ -1041,7 +1047,7 @@ public class TrpServerConn extends ATrpServerConn {
 				JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public List<String> getStringListTest() throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public List<String> getStringListTest() throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path("getStringListTest");
 		
 		String json = getObject(target, String.class);
@@ -1049,7 +1055,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public String analyzeLayoutBatch(final int colId, final int docId, final String pages, final boolean doBlockSeg, final boolean doLineSeg) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_LAYOUT_BATCH_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
@@ -1071,7 +1077,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws IllegalArgumentException
 	 */
 	public String analyzeBlocks(final int colId, final int docId, final int pageNr, PcGtsType pc, final boolean usePrintspaceOnly) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_LAYOUT_PATH);
 		if(pc == null) {
 			throw new IllegalArgumentException("pcGtsType is null!");
@@ -1096,25 +1102,25 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws IllegalArgumentException
 	 */
 	public String analyzeLines(final int colId, final int docId, final int pageNr, PcGtsType pc, List<String> regIds) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_LINES_PATH);
 		return analyzeRegions(target, colId, docId, pageNr, pc, regIds);
 	}
 	
 	public String analyzeWords(final int colId, final int docId, final int pageNr, PcGtsType pc, List<String> regIds) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_WORDS_PATH);
 		return analyzeRegions(target, colId, docId, pageNr, pc, regIds);
 	}
 	
 	public String addBaselines(final int colId, final int docId, final int pageNr, PcGtsType pc, List<String> regIds) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_BASELINES_PATH);
 		return analyzeRegions(target, colId, docId, pageNr, pc, regIds);
 	}
 	
 	private String analyzeRegions(WebTarget target, final int colId, int docId, int pageNr, PcGtsType pc,
-			List<String> regIds) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			List<String> regIds) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		if(pc == null) {
 			throw new IllegalArgumentException("pcGtsType is null!");
 		}
@@ -1133,7 +1139,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public String runOcr(final int colId, final int docId, final String pageStr,
 			final ScriptType typeFace, final String languages) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.OCR_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
@@ -1146,7 +1152,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	@Deprecated
 	public String runHtr(final int colId, final int docId, final int pageNr, final String modelName) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
@@ -1159,7 +1165,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	@Deprecated
 	public String runHtr(final int colId, final int docId, final String modelName) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
@@ -1169,7 +1175,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public String runHtr(final int colId, final int docId, final String pageStr, final String modelName) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_PATH);
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
@@ -1180,7 +1186,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public String runUpvlcHtrTraining(final String modelName, final Integer... docIds) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_UPVLC_TRAIN_PATH);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, (Object[])docIds);
 		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
@@ -1190,13 +1196,13 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public String runCitLabHtrTraining(final String modelName, final String numEpochs, final String learningRate,
 			final String noise, final Integer trainSizePerEpoch, final Integer... docIds) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		return runCitLabHtrTraining(modelName, numEpochs, learningRate, noise, trainSizePerEpoch, null, docIds);
 	}
 	
 	public String runCitLabHtrTraining(final String modelName, final String numEpochs, final String learningRate,
 			final String noise, final Integer trainSizePerEpoch, final String baseModel, final Integer... docIds) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_URO_TRAIN_PATH);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, (Object[])docIds);
 		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
@@ -1211,7 +1217,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public String runCitLabText2Image(CitLabSemiSupervisedHtrTrainConfig config) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		if(config == null) {
 			throw new IllegalArgumentException("Config is null!");
 		}
@@ -1222,7 +1228,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public String runCitLabHtrTraining(CitLabHtrTrainConfig config) 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		if(config == null) {
 			throw new IllegalArgumentException("Config is null!");
 		}
@@ -1232,7 +1238,7 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 
-	public void addHtrToCollection(final int htrId, final int colId, final int toColId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void addHtrToCollection(final int htrId, final int colId, final int toColId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.RECOGNITION_PATH)
 				.path(""+colId)
@@ -1242,7 +1248,7 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
-	public void removeHtrFromCollection(final int htrId, final int colId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void removeHtrFromCollection(final int htrId, final int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.RECOGNITION_PATH)
 				.path(""+colId)
@@ -1253,7 +1259,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	@Deprecated
 	public List<String> getHtrModelListText() 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_MODEL_PATH);
 		final String modelsStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
 		return Arrays.asList(modelsStr.split("\n"));
@@ -1263,24 +1269,24 @@ public class TrpServerConn extends ATrpServerConn {
 	 * LEGACY. Only used for HMM UPVLC HTR
 	 * @return
 	 * @throws SessionExpiredException
-	 * @throws TrpServerErrorException
+	 * @throws ServerErrorException
 	 * @throws IllegalArgumentException
-	 * @throws TrpClientErrorException
+	 * @throws ClientErrorException
 	 */
 	@Deprecated
 	public List<HtrModel> getHtrModelList() 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_MODEL_PATH);
 		return super.getList(target, new GenericType<List<HtrModel>>(){});
 	}
 	
-	public List<TrpHtr> getHtrs(final int colId, final String provider) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public List<TrpHtr> getHtrs(final int colId, final String provider) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path(RESTConst.LIST_PATH);
 		target = target.queryParam(RESTConst.PROVIDER_PARAM, provider);
 		return super.getList(target, new GenericType<List<TrpHtr>>(){});
 	}
 	
-	public void addOrModifyUserInCollection(int colId, int userId, TrpRole role) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException  {
+	public void addOrModifyUserInCollection(int colId, int userId, TrpRole role) throws SessionExpiredException, ServerErrorException, ClientErrorException  {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 							.path(""+colId)
 							.path(RESTConst.ADD_OR_MODIFY_USER_IN_COLLECTION)
@@ -1290,7 +1296,7 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
-	public void removeUserFromCollection(int colId, int userId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException  {		
+	public void removeUserFromCollection(int colId, int userId) throws SessionExpiredException, ServerErrorException, ClientErrorException  {		
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 							.path(""+colId)
 							.path(RESTConst.REMOVE_USER_FROM_COLLECTION)
@@ -1299,7 +1305,7 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
-	public void addDocToCollection(int colId, int docId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void addDocToCollection(int colId, int docId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
 				.path(RESTConst.ADD_DOC_TO_COLLECTION)
@@ -1308,7 +1314,7 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(target);
 	}
 	
-	public void removeDocFromCollection(int colId, int docId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void removeDocFromCollection(int colId, int docId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
 				.path(RESTConst.REMOVE_DOC_FROM_COLLECTION)
@@ -1323,7 +1329,7 @@ public class TrpServerConn extends ATrpServerConn {
 			PdfExportPars pdfPars,
 			TeiExportPars teiPars,
 			DocxExportPars docxPars
-			) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.EXPORT_PATH);
 		
@@ -1361,7 +1367,7 @@ public class TrpServerConn extends ATrpServerConn {
 			PdfExportPars pdfPars,
 			TeiExportPars teiPars,
 			DocxExportPars docxPars
-			) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.EXPORT_PATH);
 		
@@ -1399,7 +1405,7 @@ public class TrpServerConn extends ATrpServerConn {
 			boolean doTeiWithNoZones, boolean doTeiWithZonePerRegion, boolean doTeiWithZonePerLine, boolean doTeiWithZonePerWord, boolean doTeiWithLineTags, boolean doTeiWithLineBreaks, 
 			boolean doDocxWithTags, boolean doDocxPreserveLineBreaks, boolean doDocxMarkUnclear, boolean doDocxKeepAbbrevs, boolean doDocxExpandAbbrevs, boolean doDocxSubstituteAbbrevs, 
 			boolean doWordBased, boolean doBlackening,
-			boolean doCreateTitle, String useVersionStatus) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+			boolean doCreateTitle, String useVersionStatus) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
 				.path(""+docId)
@@ -1440,7 +1446,7 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 
-	public List<TrpUser> findUsers(String username, String firstName, String lastName, boolean exactMatch, boolean caseSensitive) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public List<TrpUser> findUsers(String username, String firstName, String lastName, boolean exactMatch, boolean caseSensitive) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget target = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.FIND_USER_PATH);
 
 		target = target.queryParam(RESTConst.USER_PARAM, username)
@@ -1456,7 +1462,7 @@ public class TrpServerConn extends ATrpServerConn {
 //	@QueryParam(RESTConst.AUTHOR_PARAM) String author,
 //	@QueryParam(RESTConst.WRITER_PARAM) String writer,
 	
-	public List<TrpDocMetadata> findDocuments(int collId, Integer docId, String title, String description, String author, String writer, boolean exactMatch, boolean caseSensitive, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public List<TrpDocMetadata> findDocuments(int collId, Integer docId, String title, String description, String author, String writer, boolean exactMatch, boolean caseSensitive, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(RESTConst.FIND_DOCUMENTS_PATH);
 	
 		target = target	.queryParam(RESTConst.COLLECTION_ID_PARAM, collId)	
@@ -1477,7 +1483,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(target, new GenericType<List<TrpDocMetadata>>(){});
 	}
 	
-	public int countFindDocuments(int collId, Integer docId, String title, String description, String author, String writer, boolean exactMatch, boolean caseSensitive) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public int countFindDocuments(int collId, Integer docId, String title, String description, String author, String writer, boolean exactMatch, boolean caseSensitive) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(RESTConst.COUNT_FIND_DOCUMENTS_PATH);
 	
 		target = target	.queryParam(RESTConst.COLLECTION_ID_PARAM, collId)	
@@ -1494,7 +1500,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return Integer.parseInt(getObject(target, String.class));
 	}	
 
-//	public List<TrpUser> getUserList() throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException{
+//	public List<TrpUser> getUserList() throws SessionExpiredException, ServerErrorException, IllegalArgumentException{
 //		WebTarget target = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.LIST_USERS_PATH);
 //		return getList(target, new  GenericType<List<TrpUser>>(){});		
 //	}
@@ -1502,7 +1508,7 @@ public class TrpServerConn extends ATrpServerConn {
 	/**
 	 * Return users for a given collection. Set role to null if you want users with all roles.
 	 */
-	public List<TrpUser> getUsersForCollection(int colId, TrpRole role, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpUser> getUsersForCollection(int colId, TrpRole role, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.LIST_USERS_PATH).queryParam(RESTConst.ROLE_PARAM, role)
 						.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
 						.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
@@ -1511,7 +1517,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(t, new GenericType<List<TrpUser>>(){});
 	}
 	
-	public int countUsersForCollection(final int colId, TrpRole role) throws NumberFormatException, SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public int countUsersForCollection(final int colId, TrpRole role) throws NumberFormatException, SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		
 		WebTarget t = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.LIST_USERS_PATH).path(RESTConst.COUNT_PATH)
 				.queryParam(RESTConst.ROLE_PARAM, role);
@@ -1519,7 +1525,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return Integer.parseInt(getObject(t, String.class));
 	}
 	
-//	public void allow(String userName, int docId, TrpRole role) throws SessionExpiredException, TrpServerErrorException{
+//	public void allow(String userName, int docId, TrpRole role) throws SessionExpiredException, ServerErrorException{
 //		WebTarget target = baseTarget.path(RESTConst.DOC_PATH).path(""+docId).path(RESTConst.ALLOW_PATH);
 //		if(userName == null || role == null){
 //			throw new IllegalArgumentException("A parameter is null!");
@@ -1529,7 +1535,7 @@ public class TrpServerConn extends ATrpServerConn {
 //		super.postNull(target);
 //	}
 //	
-//	public void disallow(String userName, int docId) throws SessionExpiredException, TrpServerErrorException {
+//	public void disallow(String userName, int docId) throws SessionExpiredException, ServerErrorException {
 //		WebTarget target = baseTarget.path(RESTConst.DOC_PATH).path(""+docId).path(RESTConst.DISALLOW_PATH);
 //		if(userName == null){
 //			throw new IllegalArgumentException("userName is null!");
@@ -1539,7 +1545,7 @@ public class TrpServerConn extends ATrpServerConn {
 //	}
 	
 	// TODO / FIXME ? 
-	public void sendBugReport(String email, String subject, String message, boolean isBug, boolean sendCopyToEmail, File tailOfLogFile) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public void sendBugReport(String email, String subject, String message, boolean isBug, boolean sendCopyToEmail, File tailOfLogFile) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		if (email == null || subject == null || message == null)
 			throw new IllegalArgumentException("email, subject or message not defined!");
 		
@@ -1562,7 +1568,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public PcGtsType analyzePageStructure(int colId, int docId, int pageNr, 
-			boolean detectPageNumbers, boolean detectRunningTitles, boolean detectFootnotes) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, JAXBException, TrpClientErrorException {
+			boolean detectPageNumbers, boolean detectRunningTitles, boolean detectFootnotes) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, JAXBException, ClientErrorException {
 		
 		WebTarget t = baseTarget.path(RESTConst.STRUCTURE_PATH).path(RESTConst.ANALYZE_STRUCTURE_PATH);
 		t = t.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
@@ -1586,10 +1592,10 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @param colId
 	 * @return
 	 * @throws SessionExpiredException
-	 * @throws TrpServerErrorException
+	 * @throws ServerErrorException
 	 * @throws IllegalArgumentException
 	 */
-	public List<EdFeature> getEditDeclFeatures(int colId) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public List<EdFeature> getEditDeclFeatures(int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.LIST_EDIT_DECL_FEATURES);
 		return super.getList(docTarget, ED_FEATURE_LIST_TYPE);
@@ -1599,29 +1605,29 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @param colId
 	 * @param feature
 	 * @throws SessionExpiredException
-	 * @throws TrpServerErrorException
+	 * @throws ServerErrorException
 	 * @throws IllegalArgumentException
 	 */
-	public void postEditDeclFeature(Integer colId, EdFeature feature) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public void postEditDeclFeature(Integer colId, EdFeature feature) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.STORE_EDIT_DECL_FEATURE);
 		super.postEntity(docTarget, feature, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public void deleteEditDeclFeature(Integer colId, EdFeature feature) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public void deleteEditDeclFeature(Integer colId, EdFeature feature) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.DELETE_EDIT_DECL_FEATURE)
 				.queryParam(RESTConst.ID_PARAM, feature.getFeatureId());
 		super.postNull(docTarget);
 	}
 	
-	public void postCrowdProject(Integer colId, TrpCrowdProject project) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public void postCrowdProject(Integer colId, TrpCrowdProject project) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.STORE_CROWD_PROJECT);
 		super.postEntity(docTarget, project, MediaType.APPLICATION_XML_TYPE);
 	}
 		
-	public int postCrowdProjectMilestone(Integer colId, TrpCrowdProjectMilestone currMst) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public int postCrowdProjectMilestone(Integer colId, TrpCrowdProjectMilestone currMst) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.STORE_CROWD_PROJECT_MILESTONE);
 		//target = target.queryParam(RESTConst.CROWD_PROJECT_MILESTONE, currMst);
@@ -1631,7 +1637,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return cid==null ? 0 : cid;
 	}
 	
-	public int postCrowdProjectMessage(Integer colId, TrpCrowdProjectMessage currMsg) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public int postCrowdProjectMessage(Integer colId, TrpCrowdProjectMessage currMsg) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.STORE_CROWD_PROJECT_MESSAGE);
 		//target = target.queryParam(RESTConst.CROWD_PROJECT_MESSAGE, currMsg);
@@ -1642,7 +1648,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return cid==null ? 0 : cid;
 	}
 	
-	public void deleteCrowdProjectMilestones(int colId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void deleteCrowdProjectMilestones(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.DELETE_CROWD_PROJECT_MILESTONES)
 				.queryParam(RESTConst.ID_PARAM, -1);
@@ -1650,7 +1656,7 @@ public class TrpServerConn extends ATrpServerConn {
 		//super.postNull(docTarget);
 	}
 	
-	public void deleteCrowdProjectMilestone(int colId, int id) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void deleteCrowdProjectMilestone(int colId, int id) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.DELETE_CROWD_PROJECT_MILESTONES)
 				.queryParam(RESTConst.ID_PARAM, id);
@@ -1658,7 +1664,7 @@ public class TrpServerConn extends ATrpServerConn {
 		
 	}
 	
-	public void deleteCrowdProjectMessages(int colId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void deleteCrowdProjectMessages(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.DELETE_CROWD_PROJECT_MESSAGES)
 				.queryParam(RESTConst.ID_PARAM, -1);
@@ -1666,7 +1672,7 @@ public class TrpServerConn extends ATrpServerConn {
 		//super.postNull(docTarget);
 	}
 	
-	public void deleteCrowdProjectMessage(int colId, int id) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void deleteCrowdProjectMessage(int colId, int id) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.DELETE_CROWD_PROJECT_MESSAGES)
 				.queryParam(RESTConst.ID_PARAM, id);
@@ -1674,13 +1680,13 @@ public class TrpServerConn extends ATrpServerConn {
 		
 	}
 
-	public void postEditDeclOption(Integer colId, EdOption option) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public void postEditDeclOption(Integer colId, EdOption option) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.STORE_EDIT_DECL_OPTION);
 		super.postEntity(docTarget, option, MediaType.APPLICATION_XML_TYPE);
 	}
 
-	public void deleteEditDeclOption(int colId, EdOption opt) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public void deleteEditDeclOption(int colId, EdOption opt) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.DELETE_EDIT_DECL_OPTION)
 				.queryParam(RESTConst.ID_PARAM, opt.getOptionId());
@@ -1693,19 +1699,19 @@ public class TrpServerConn extends ATrpServerConn {
 //	public void updateEditDeclOptionText(EdOption option){
 //		return;
 //	}
-	public List<EdFeature> getEditDeclByDoc(int colId, int docId) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public List<EdFeature> getEditDeclByDoc(int colId, int docId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(""+docId).path(RESTConst.EDIT_DECL_PATH);
 		return super.getList(docTarget, ED_FEATURE_LIST_TYPE);
 	}
-	public void postEditDecl(int colId, int docId, List<EdFeature> features) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public void postEditDecl(int colId, int docId, List<EdFeature> features) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(""+docId).path(RESTConst.EDIT_DECL_PATH);
 		final EdFeature[] featArr = features.toArray(new EdFeature[features.size()]);
 		super.postEntity(docTarget, featArr, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public String computeWer(String refKey, String hypKey) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public String computeWer(String refKey, String hypKey) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		if(refKey == null || hypKey == null){
 			throw new IllegalArgumentException("A key is null!");
 		}
@@ -1715,14 +1721,14 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
 	}
 	
-	public List<TrpEvent> getNextEvents(int days) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+	public List<TrpEvent> getNextEvents(int days) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.EVENTS_PATH);
 		target = target.queryParam(RESTConst.TIMESTAMP, days);
 		return getList(target, EVENT_LIST_TYPE);
 	}
 	
-	public String duplicateDocument(final int colId, final int docId, final String targetDocName, final Integer toColId) throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException{
+	public String duplicateDocument(final int colId, final int docId, final String targetDocName, final Integer toColId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
 				.path(""+docId)
@@ -1734,7 +1740,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 
 	@Deprecated
-	public List<KwsDocHit> doKwsSearch(int colId, Integer docId, String term, int confidence) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public List<KwsDocHit> doKwsSearch(int colId, Integer docId, String term, int confidence) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId);
 		if(docId != null && docId != 0){
@@ -1748,7 +1754,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	@Deprecated
 	public String runRnnHtr(final int colId, final int docId, final String pageStr, final String modelName, final String dictName) 
-				throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+				throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 			WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_RNN_PATH);
 			target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 			target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
@@ -1760,7 +1766,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 
-	public String runCitLabHtr(int colId, int docId, String pages, final int modelId, final String dictName) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public String runCitLabHtr(int colId, int docId, String pages, final int modelId, final String dictName) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH)
 				.path(""+colId)
 				.path(""+modelId)
@@ -1774,7 +1780,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	@Deprecated
 	public List<String> getHtrRnnListText() 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_NETS_PATH);
 		final String modelsStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
 		return Arrays.asList(modelsStr.split("\n"));
@@ -1782,7 +1788,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	@Deprecated
 	public List<String> getHtrDictListText() 
-			throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException {
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_DICTS_PATH);
 		final String modelsStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
 		return new ArrayList<String>(Arrays.asList(modelsStr.split("\n")));
@@ -1794,7 +1800,7 @@ public class TrpServerConn extends ATrpServerConn {
 			Integer rows,
 			final List<String> filters,
 			InvocationCallback<FulltextSearchResult> callback
-			) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException, UnsupportedEncodingException { 
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException, UnsupportedEncodingException { 
 		WebTarget target = baseTarget.path(RESTConst.SEARCH_PATH).path(RESTConst.FULLTEXT_PATH);
 		
 		target = target	.queryParam(RESTConst.QUERY_PARAM, query)	
@@ -1819,7 +1825,7 @@ public class TrpServerConn extends ATrpServerConn {
 			Integer start,
 			Integer rows,
 			final List<String> filters
-			) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException { 
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException { 
 		WebTarget target = baseTarget.path(RESTConst.SEARCH_PATH).path(RESTConst.FULLTEXT_PATH);
 
 		target = target	.queryParam(RESTConst.QUERY_PARAM, query)	
@@ -1884,7 +1890,7 @@ public class TrpServerConn extends ATrpServerConn {
 			String regionType,
 			boolean exactMatch,
 			boolean caseSensitive,		
-			Map<String, Object> attributes, InvocationCallback<List<TrpDbTag>> callback) /*throws SessionExpiredException, TrpServerErrorException, IllegalArgumentException, TrpClientErrorException*/ {
+			Map<String, Object> attributes, InvocationCallback<List<TrpDbTag>> callback) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
 		WebTarget t = getSearchTagsTarget(collIds, docIds, pageIds, tagName, tagValue, regionType, exactMatch, caseSensitive, attributes);
 //		return docTarget.request(DOC_MD_LIST_TYPE).async().get(callback);
 		return t.request(DEFAULT_RESP_TYPE).async().get(callback);
@@ -1900,14 +1906,14 @@ public class TrpServerConn extends ATrpServerConn {
 				boolean exactMatch,
 				boolean caseSensitive,		
 				Map<String, Object> attributes
-			) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget t = getSearchTagsTarget(collIds, docIds, pageIds, tagName, tagValue, regionType, exactMatch, caseSensitive, attributes);
 				
 		return getList(t, DB_TAG_LIST_TYPE);
 	}
 	
 	public void updatePageStatus(final int colId, final int docId, final int pageNr, final int transcriptId,
-			final EditStatus status, final String note) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+			final EditStatus status, final String note) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
 				.path(""+docId)
@@ -1918,14 +1924,14 @@ public class TrpServerConn extends ATrpServerConn {
 		super.postNull(target);
 	}
 	
-	public TrpDoc getHtrTrainDoc(final int colId, final int htrId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, TrpClientErrorException {
+	public TrpDoc getHtrTrainDoc(final int colId, final int htrId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htrId)
 				.path(RESTConst.TRAIN_DOC_PATH)
 				.queryParam(RESTConst.NR_OF_TRANSCRIPTS_PARAM, ""+nrOfTranscriptsPerPage);
 		return getObject(docTarget, TrpDoc.class);
 	}
 	
-	public TrpDoc getHtrTestDoc(final int colId, final int htrId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, TrpClientErrorException {
+	public TrpDoc getHtrTestDoc(final int colId, final int htrId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htrId)
 				.path(RESTConst.TEST_DOC_PATH)
 				.queryParam(RESTConst.NR_OF_TRANSCRIPTS_PARAM, ""+nrOfTranscriptsPerPage);
@@ -1957,24 +1963,24 @@ public class TrpServerConn extends ATrpServerConn {
 		target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA));
 	}
 	
-	public void movePage(final int colId, final int docId, final int pageNr, final int toPageNr) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void movePage(final int colId, final int docId, final int pageNr, final int toPageNr) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		final WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(""+docId).path(""+pageNr).queryParam(RESTConst.MOVE_TO_PARAM, ""+toPageNr);
 		super.postNull(target);		
 	}
 	
-	public void deletePage(int colId, int docId, int pageNr) throws SessionExpiredException, IllegalArgumentException, TrpClientErrorException {
+	public void deletePage(int colId, int docId, int pageNr) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr);
 		delete(docTarget);
 	}
 
-	public void checkSession() throws SessionExpiredException, TrpClientErrorException, TrpServerErrorException {
+	public void checkSession() throws SessionExpiredException, ClientErrorException, ServerErrorException {
 		final WebTarget target = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.CHECK_SESSION);
 		Response resp = target.request().get();
 		checkStatus(resp, target);
 	}
 		
-	public boolean isUserAllowedForJob(String jobImpl) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public boolean isUserAllowedForJob(String jobImpl) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.USER_PATH)
 										.path(RESTConst.IS_USER_ALLOWED_FOR_JOB_PATH)
 										.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl);
@@ -1983,7 +1989,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return StringUtils.equals("true", isAllowed);
 	}
 
-	public TrpCrowdProject getCrowdProject(int colId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public TrpCrowdProject getCrowdProject(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.CROWD_PROJECT);
 		return getObject(target, TrpCrowdProject.class);
 	}
@@ -1992,7 +1998,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * Upload
 	 */
 	
-	public TrpUpload createNewUpload(final int colId, Mets mets) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public TrpUpload createNewUpload(final int colId, Mets mets) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(colId < 1 || mets == null) {
 			throw new IllegalArgumentException("bad parameters.");
 		}
@@ -2003,7 +2009,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return u;
 	}
 	
-	public TrpUpload createNewUpload(final int colId, DocumentUploadDescriptor struct) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public TrpUpload createNewUpload(final int colId, DocumentUploadDescriptor struct) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(colId < 1 || struct == null) {
 			throw new IllegalArgumentException("bad parameters.");
 		}
@@ -2014,7 +2020,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return u;
 	}
 	
-	public TrpUpload putPage(final int uploadId, File img, File xml) throws SessionExpiredException, TrpClientErrorException, TrpServerErrorException {
+	public TrpUpload putPage(final int uploadId, File img, File xml) throws SessionExpiredException, ClientErrorException, ServerErrorException {
 		if(uploadId < 1) {
 			throw new IllegalArgumentException("No valid uploadId!");
 		}
@@ -2032,7 +2038,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.putEntityReturnObject(t, mp, MediaType.MULTIPART_FORM_DATA_TYPE, TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 
-	public TrpUpload getUploadStatus(int uploadId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public TrpUpload getUploadStatus(int uploadId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(uploadId < 1) {
 			throw new IllegalArgumentException("No valid uploadId!");
 		}
@@ -2040,7 +2046,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getObject(t, TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 
-	public void deleteUpload(int uploadId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public void deleteUpload(int uploadId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(uploadId < 1) {
 			throw new IllegalArgumentException("No valid uploadId!");
 		}
@@ -2048,7 +2054,7 @@ public class TrpServerConn extends ATrpServerConn {
 		super.delete(t);
 	}
 
-	public TrpUpload updateUploadMd(int uploadId, TrpDocMetadata md, Integer colId) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public TrpUpload updateUploadMd(int uploadId, TrpDocMetadata md, Integer colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(uploadId < 1 || md == null) {
 			throw new IllegalArgumentException("bad parameters.");
 		}
@@ -2060,7 +2066,7 @@ public class TrpServerConn extends ATrpServerConn {
 				TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 
-	public String doCITlabKwsSearch(int colId, int docId, List<String> queries) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException { 
+	public String doCITlabKwsSearch(int colId, int docId, List<String> queries) throws SessionExpiredException, ServerErrorException, ClientErrorException { 
 		if(queries == null || queries.isEmpty()) {
 			throw new IllegalArgumentException("No queries given.");
 		}
