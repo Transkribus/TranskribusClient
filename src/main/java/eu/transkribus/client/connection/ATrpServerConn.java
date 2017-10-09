@@ -586,7 +586,7 @@ public abstract class ATrpServerConn implements Closeable {
 		} else if(status == 405) {
 			type = ErrorType.Client;
 			internalMsg = loc + " - Method not allowed! (405) " + ent;
-			userMsg = generateUserMessage("Something went wrong. Please report a bug.", ent);
+			userMsg = generateUserMessage("Something went wrong. Please update TranskribusX and report a bug if the issue persists.", ent);
 		} 
 //		else if(status == ClientVersionNotSupportedException.STATUS_CODE) {
 //			throw new RuntimeException(loc + " - Method not allowed! (405) "+readStringEntity(resp)/*, resp*/);
@@ -594,7 +594,7 @@ public abstract class ATrpServerConn implements Closeable {
 		else if (status < 500) {
 			type = ErrorType.Client;
 			internalMsg = "Client error: " + ent;
-			userMsg = generateUserMessage("Something went wrong. Please report a bug.", ent);
+			userMsg = generateUserMessage("Something went wrong. Please update TranskribusX and report a bug if the issue persists.", ent);
 		}
 		else { // 500 etc.
 			type = ErrorType.Server;
