@@ -16,6 +16,7 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
 import eu.transkribus.core.io.LocalDocReader;
 import eu.transkribus.core.io.UnsupportedFormatException;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
@@ -62,6 +63,27 @@ public class TrpServerConnTest {
 			TrpDocMetadata md = doc.getMd();
 			md.setDesc(testString);
 			conn.updateDocMd(colId, docId, md);
+		}
+	}
+	
+	public static void testGetMyDocsAsync(String user, String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServer.Test, user, pw)) {
+//			Future<List<TrpDocMetadata>> f = conn.getAllDocsByUserAsync(0, 0, null, null, new InvocationCallback<List<TrpDocMetadata>>() {
+//				@Override public void failed(Throwable throwable) {
+//					logger.error("Error loading documents by user "+user+" - "+throwable.getMessage(), throwable);
+//				}
+//				
+//				@Override public void completed(List<TrpDocMetadata> response) {
+//					logger.debug("loaded docs by user "+user+" - "+response.size()+" thread: "+Thread.currentThread().getName());
+//					
+//				}
+//			});
+			
+			conn.getAllDocsByUser(0, 0, null, null);
+			
+//			f.wait();
+//			List<TrpDocMetadata> list = (List<TrpDocMetadata>)f;
+//			logger.debug(list.size() + " documents");
 		}
 	}
 	
@@ -637,7 +659,7 @@ public class TrpServerConnTest {
 		if(args.length != 2){
 			throw new IllegalArgumentException("No credentials");
 		}
-				
+		
 //		testDocMdDescriptionSizeLimit(args[0], args[1]);
 		
 //		testIsUserAllowedForJob(args[0], args[1]);
@@ -688,10 +710,11 @@ public class TrpServerConnTest {
 		
 //		testGetJobsByType(args[0], args[1]);
 		
-		testStartText2Image(args[0], args[1]);
+//		testStartText2Image(args[0], args[1]);
 		
 //		testSearchTags(args[0], args[1]);
 	
+		testGetMyDocsAsync(args[0], args[1]);
 		
 		if (true)
 			return;
