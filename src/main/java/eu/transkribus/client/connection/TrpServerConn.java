@@ -49,6 +49,8 @@ import eu.transkribus.client.io.TrpDocUploadZipHttp;
 import eu.transkribus.client.util.BufferedFileBodyWriter;
 import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.SessionExpiredException;
+import eu.transkribus.client.util.TrpClientErrorException;
+import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
 import eu.transkribus.core.model.beans.CitLabSemiSupervisedHtrTrainConfig;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
@@ -93,6 +95,7 @@ import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
+import eu.transkribus.core.model.beans.TrpTotalTranscriptStatistics;
 
 /**
  * Singleton implementation of ATrpServerConn.
@@ -2080,4 +2083,12 @@ public class TrpServerConn extends ATrpServerConn {
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
+
+	public TrpTotalTranscriptStatistics getCollectionStats(int colId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId)
+				.path(RESTConst.STATS_PATH);
+		return getObject(docTarget, TrpTotalTranscriptStatistics.class);
+	}
+	
+
 }
