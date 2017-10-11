@@ -1775,7 +1775,21 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.PAGES_PARAM, pages);
 		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
-				String.class, MediaType.APPLICATION_XML_TYPE);
+				String.class, MediaType.TEXT_PLAIN_TYPE);
+	}
+	
+	public String runCitLabHtr(int colId, DocumentSelectionDescriptor descriptor, final int modelId, final String dictName) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(descriptor == null || descriptor.getPages().isEmpty()) {
+			throw new IllegalArgumentException("descriptor must not be null or empty!");
+		}
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH)
+				.path(""+colId)
+				.path(""+modelId)
+				.path(RESTConst.HTR_CITLAB_TEST_PATH);
+		target = target.queryParam(RESTConst.DOC_ID_PARAM, descriptor.getDocId());
+		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
+		return postEntityReturnObject(target, descriptor, MediaType.APPLICATION_JSON_TYPE, 
+				String.class, MediaType.TEXT_PLAIN_TYPE);
 	}
 	
 	@Deprecated

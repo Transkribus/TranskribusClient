@@ -49,6 +49,28 @@ public class TrpServerConnTest {
 	
 	static SebisStopWatch sw = new SebisStopWatch();
 	
+	public static void testHtrWithDescriptor(String user, String pw) throws Exception {
+		final int colId = 2;
+		final int docId = 2278;
+		final int pageId = 10070; //pageNr 1
+		final int tsId = 25143;
+		final String regionId1 = "r1";
+		final String regionId2 = "r2";
+		final int modelId = 241;
+		
+		//generate a page descriptor for a single page/single region HTR job
+		DocumentSelectionDescriptor descriptor = new DocumentSelectionDescriptor(docId);
+		PageDescriptor pd = new PageDescriptor(pageId, tsId);
+		pd.getRegionIds().add(regionId1);
+		pd.getRegionIds().add(regionId2);
+		descriptor.addPage(pd);
+		
+		try (TrpServerConn conn = new TrpServerConn(TrpServer.Test, user, pw)) {
+			String jobId = conn.runCitLabHtr(colId, descriptor, modelId, null);
+			logger.info(jobId);
+		}
+	}
+	
 	public static void testDocMdDescriptionSizeLimit(String user, String pw) throws Exception {
 		final int colId = 2;
 		final int docId = 87;
@@ -714,7 +736,9 @@ public class TrpServerConnTest {
 		
 //		testSearchTags(args[0], args[1]);
 	
-		testGetMyDocsAsync(args[0], args[1]);
+//		testGetMyDocsAsync(args[0], args[1]);
+		
+		testHtrWithDescriptor(args[0], args[1]);
 		
 		if (true)
 			return;
