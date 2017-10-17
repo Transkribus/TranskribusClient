@@ -12,7 +12,7 @@ import org.apache.commons.lang3.StringUtils;
  * @author philip
  *
  */
-public class TrpServerErrorException extends ServerErrorException {
+public class TrpServerErrorException extends ServerErrorException implements IUserMessageException {
 	private static final long serialVersionUID = -5027543549856917584L;
 	
 	private String messageToUser;
