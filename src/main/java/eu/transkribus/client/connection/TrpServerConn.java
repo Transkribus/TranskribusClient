@@ -1769,7 +1769,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 
-	public String runCitLabHtr(int colId, int docId, String pages, final int modelId, final String dictName) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public String runCitLabHtr(int colId, int docId, String pages, final int modelId, final String dictName) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH)
 				.path(""+colId)
 				.path(""+modelId)
