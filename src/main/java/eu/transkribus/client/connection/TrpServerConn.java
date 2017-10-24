@@ -2083,7 +2083,7 @@ public class TrpServerConn extends ATrpServerConn {
 				TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 
-	public String doCITlabKwsSearch(int colId, int docId, List<String> queries) throws SessionExpiredException, ServerErrorException, ClientErrorException { 
+	public String doCITlabKwsSearch(int colId, int docId, List<String> queries) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException { 
 		if(queries == null || queries.isEmpty()) {
 			throw new IllegalArgumentException("No queries given.");
 		}
