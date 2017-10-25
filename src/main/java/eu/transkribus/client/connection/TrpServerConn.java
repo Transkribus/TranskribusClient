@@ -71,6 +71,7 @@ import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpPage;
+import eu.transkribus.core.model.beans.TrpTotalTranscriptStatistics;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.TrpUpload;
 import eu.transkribus.core.model.beans.TrpUpload.UploadType;
@@ -80,6 +81,7 @@ import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
+import eu.transkribus.core.model.beans.job.KwsParameters;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
@@ -95,7 +97,6 @@ import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
-import eu.transkribus.core.model.beans.TrpTotalTranscriptStatistics;
 
 /**
  * Singleton implementation of ATrpServerConn.
@@ -2083,7 +2084,7 @@ public class TrpServerConn extends ATrpServerConn {
 				TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 
-	public String doCITlabKwsSearch(int colId, int docId, List<String> queries) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException { 
+	public String doCITlabKwsSearch(int colId, int docId, List<String> queries, KwsParameters params) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException { 
 		if(queries == null || queries.isEmpty()) {
 			throw new IllegalArgumentException("No queries given.");
 		}
@@ -2094,7 +2095,7 @@ public class TrpServerConn extends ATrpServerConn {
 		for(String q : queries){
 			target = target.queryParam(RESTConst.QUERY_PARAM, q);
 		}	
-		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
+		return postEntityReturnObject(target, params, MediaType.APPLICATION_JSON_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 
