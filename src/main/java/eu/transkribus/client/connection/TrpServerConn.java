@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
+import org.glassfish.jersey.uri.UriComponent;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -2093,7 +2094,10 @@ public class TrpServerConn extends ATrpServerConn {
 			.path(""+docId)
 			.path(RESTConst.KWS_SEARCH_PATH);
 		for(String q : queries){
-			target = target.queryParam(RESTConst.QUERY_PARAM, q);
+			//encode the query, otherwise curly braces will be interpreted as parameter by Jersey
+			final String encQ = UriComponent.encode(q,
+                    UriComponent.Type.QUERY_PARAM_SPACE_ENCODED);
+			target = target.queryParam(RESTConst.QUERY_PARAM, encQ);
 		}	
 		return postEntityReturnObject(target, params, MediaType.APPLICATION_JSON_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
