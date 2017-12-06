@@ -3,6 +3,9 @@ package eu.transkribus.client.connection;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,8 +33,10 @@ import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.xml.utils.URI;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
@@ -936,7 +941,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 		
 	public void ingestDocFromUrl(final int colId, final String metsUrlStr) throws SessionExpiredException, ServerErrorException, ClientErrorException, UnsupportedEncodingException{
-		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("createDocFromMetsUrl");
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH_METS_URL);
 		String encodedUrlStr;
 		try {
 			encodedUrlStr = URLEncoder.encode(metsUrlStr, DEFAULT_URI_ENCODING);
@@ -947,6 +952,42 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.FILE_NAME_PARAM, encodedUrlStr);
 		super.postNull(target);
 
+	}
+	
+	public void ingestDocFromLocalMetsUrl(final int colId, final String metsUrlStr) throws SessionExpiredException, ServerErrorException, ClientErrorException, MalformedURLException, IOException{
+		final WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.UPLOAD_PATH_METS);
+		MultiPart mp = new MultiPart();
+		mp.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+		
+		URL url = new URL(metsUrlStr);
+		File mets;
+		try{
+			mets = new File(url.toURI());
+		}catch (URISyntaxException e){
+			mets = new File(url.getPath());
+		}
+				
+		//File.createTempFile("TRP", "mets");
+		//mets.deleteOnExit();
+		//FileUtils.copyURLToFile(new URL(metsUrlStr), mets);
+		
+		FileDataBodyPart imgPart = new FileDataBodyPart("mets", mets, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+		mp.bodyPart(imgPart);
+		
+		target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA));
+		
+		
+		/*
+		 * may needed here as well
+		 */
+//		String encodedUrlStr;
+//		try {
+//			encodedUrlStr = URLEncoder.encode(metsUrlStr, DEFAULT_URI_ENCODING);
+//		} catch (UnsupportedEncodingException e) {
+//			logger.error("Encoding not supported on this platform: " + DEFAULT_URI_ENCODING, e);
+//			throw e;
+//		}
 	}
 	
 	/**
