@@ -1087,6 +1087,7 @@ public class TrpServerConn extends ATrpServerConn {
 		
 		target = target.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl);
 		target = target.queryParam(RESTConst.PARS_PARAM, pars);
+		target = target.queryParam(RESTConst.DO_CREATE_JOB_BATCH_PARAM, false);
 		
 		GenericEntity<List<DocumentSelectionDescriptor>> entity = new GenericEntity<List<DocumentSelectionDescriptor>>(dsds) {};
 		return postEntityReturnList(target, entity, MediaType.APPLICATION_XML_TYPE, 
