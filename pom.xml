@@ -69,11 +69,12 @@
 		</dependency>
 		
 		<!-- For IProgressMonitor  -->
-		<dependency>
-			<groupId>org.eclipse.equinox</groupId>
-			<artifactId>org.eclipse.equinox.common</artifactId>
-			<version>3.6.0.v20110523</version>
-		</dependency>		
+		<!-- Should already get included via TranskribusCore -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>org.eclipse.equinox</groupId> -->
+<!-- 			<artifactId>org.eclipse.equinox.common</artifactId> -->
+<!-- 			<version>3.6.0.v20110523</version> -->
+<!-- 		</dependency>		 -->
 		
 		<dependency>
 			<groupId>org.json</groupId>
