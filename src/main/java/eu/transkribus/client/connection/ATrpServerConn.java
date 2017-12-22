@@ -491,7 +491,8 @@ public abstract class ATrpServerConn implements Closeable {
 			postMediaType = MediaType.APPLICATION_JSON_TYPE;
 		}
 		Entity<T> ent = null;
-		if(MediaType.APPLICATION_FORM_URLENCODED_TYPE.equals(postMediaType)) {
+		if(MediaType.APPLICATION_FORM_URLENCODED_TYPE.equals(postMediaType)
+				|| MediaType.MULTIPART_FORM_DATA_TYPE.equals(postMediaType)) {
 			/* FIXME
 			 * there is a bug that prevents form params to be properly decoded from UTF-8 on the server 
 			 * if the charset is not set explicitly!
