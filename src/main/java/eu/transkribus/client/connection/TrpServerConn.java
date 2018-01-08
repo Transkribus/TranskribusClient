@@ -2081,6 +2081,18 @@ public class TrpServerConn extends ATrpServerConn {
 		return u;
 	}
 	
+	/**
+	 * FIXME: filenames like "Action française_T00001.tiff" seem to get set correctly here but the server fails to interpret it and messes up the encoding.
+	 * <br/>Maybe this might work? http://shchekoldin.com/2010/08/21/fix-for-jerseys-russian-files-names-bug/
+	 * 
+	 * @param uploadId
+	 * @param img
+	 * @param xml
+	 * @return
+	 * @throws SessionExpiredException
+	 * @throws ClientErrorException
+	 * @throws ServerErrorException
+	 */
 	public TrpUpload putPage(final int uploadId, File img, File xml) throws SessionExpiredException, ClientErrorException, ServerErrorException {
 		if(uploadId < 1) {
 			throw new IllegalArgumentException("No valid uploadId!");
@@ -2088,12 +2100,13 @@ public class TrpServerConn extends ATrpServerConn {
 		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH).path(""+uploadId);
 		MultiPart mp = new MultiPart();
 		mp.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
-		
 		FileDataBodyPart imgPart = new FileDataBodyPart("img", img, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+//		imgPart.setMediaType(MediaType.valueOf(MediaType.APPLICATION_OCTET_STREAM_TYPE.toString() + ";charset=utf-8"));
 		mp.bodyPart(imgPart);
 		
 		if(xml != null) {
 			FileDataBodyPart xmlPart = new FileDataBodyPart("xml", xml, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+//			xmlPart.setMediaType(MediaType.valueOf(MediaType.APPLICATION_OCTET_STREAM_TYPE.toString() + ";charset=utf-8"));
 			mp.bodyPart(xmlPart);
 		}
 		return super.putEntityReturnObject(t, mp, MediaType.MULTIPART_FORM_DATA_TYPE, TrpUpload.class, MediaType.APPLICATION_JSON_TYPE);
@@ -2119,7 +2132,7 @@ public class TrpServerConn extends ATrpServerConn {
 		if(uploadId < 1 || md == null) {
 			throw new IllegalArgumentException("bad parameters.");
 		}
-		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH).path(""+uploadId);
+		WebTarget t = baseTarget.path(RESTConst.UPLOADS_PATH).path(""+uploadId).path(RESTConst.MD_PATH);
 		if(colId != null) {
 			t = t.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		}
