@@ -469,6 +469,7 @@ public class TrpServerConnTest {
 			commonPars.setDoWriteTei(true);
 			commonPars.setDoWritePdf(true);
 			commonPars.setDoWriteDocx(true);
+			commonPars.setDoWriteTxt(true);
 			commonPars.setDoWriteTagsXlsx(true);
 			commonPars.setDoWriteTablesXlsx(true);
 			
