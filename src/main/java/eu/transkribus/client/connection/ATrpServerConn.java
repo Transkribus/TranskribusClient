@@ -66,7 +66,7 @@ public abstract class ATrpServerConn implements Closeable {
 	/**
 	 * Set DEBUG=true if you want this Connection to log all requests/responses in detail
 	 */
-	public final static boolean DEBUG = true;
+	public final static boolean DEBUG = false;
 	
 	public static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
 	public static final GenericType<List<TrpCollection>> COL_LIST_TYPE = new GenericType<List<TrpCollection>>() {};
