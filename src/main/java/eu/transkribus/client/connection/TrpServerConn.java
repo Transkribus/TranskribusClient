@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -12,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -36,8 +36,8 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.xml.utils.URI;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.FileDataBodyPart;
@@ -940,11 +940,12 @@ public class TrpServerConn extends ATrpServerConn {
 		super.postNull(target);
 	}
 		
-	public void ingestDocFromUrl(final int colId, final String metsUrlStr) throws SessionExpiredException, ServerErrorException, ClientErrorException, UnsupportedEncodingException{
+	public void ingestDocFromUrl(final int colId, final URL metsUrl) throws SessionExpiredException, ServerErrorException, ClientErrorException, UnsupportedEncodingException{
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH_METS_URL);
 		String encodedUrlStr;
 		try {
-			encodedUrlStr = URLEncoder.encode(metsUrlStr, DEFAULT_URI_ENCODING);
+			//TODO will URL.toUri do the escaping? see java doc of URL
+			encodedUrlStr = URLEncoder.encode(metsUrl.toString(), DEFAULT_URI_ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			logger.error("Encoding not supported on this platform: " + DEFAULT_URI_ENCODING, e);
 			throw e;
@@ -954,18 +955,16 @@ public class TrpServerConn extends ATrpServerConn {
 
 	}
 	
-	public void ingestDocFromLocalMetsUrl(final int colId, final String metsUrlStr) throws SessionExpiredException, ServerErrorException, ClientErrorException, MalformedURLException, IOException{
+	public void ingestDocFromLocalMetsUrl(final int colId, final URL metsUrl) throws SessionExpiredException, ServerErrorException, ClientErrorException, MalformedURLException, IOException{
 		final WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.UPLOAD_PATH_METS);
 		MultiPart mp = new MultiPart();
 		mp.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
 		
-		URL url = new URL(metsUrlStr);
-		File mets;
-		try{
-			mets = new File(url.toURI());
-		}catch (URISyntaxException e){
-			mets = new File(url.getPath());
+		final File mets = FileUtils.toFile(metsUrl);
+		if(mets == null) {
+			mp.close();
+			throw new IllegalArgumentException("Not pointing to a file: " + metsUrl.toString()); 
 		}
 				
 		//File.createTempFile("TRP", "mets");
@@ -2101,6 +2100,16 @@ public class TrpServerConn extends ATrpServerConn {
 		MultiPart mp = new MultiPart();
 		mp.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
 		FileDataBodyPart imgPart = new FileDataBodyPart("img", img, MediaType.APPLICATION_OCTET_STREAM_TYPE);
+		if(DEBUG) {
+			FormDataContentDisposition cd = imgPart.getFormDataContentDisposition();
+			logger.debug("\n\nPUT page");
+			logger.debug("Name = " + cd.getName());	
+			logger.debug("FileName = " + cd.getFileName());
+			for(Entry<String, String> e : cd.getParameters().entrySet()) {
+				logger.debug(e.getKey() + " = " + e.getValue());
+			}
+			logger.debug("\n\n");
+		}
 //		imgPart.setMediaType(MediaType.valueOf(MediaType.APPLICATION_OCTET_STREAM_TYPE.toString() + ";charset=utf-8"));
 		mp.bodyPart(imgPart);
 		
