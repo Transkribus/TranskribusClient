@@ -1,5 +1,6 @@
 package eu.transkribus.client.io;
 
+import java.net.URL;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -44,7 +45,7 @@ public class TrpDocUploadTest {
 			
 			
 			//test coll on test server is 235 and on prod server is 211
-			conn.ingestDocFromUrl(235, "http://rosdok.uni-rostock.de/file/rosdok_document_0000007322/rosdok_derivate_0000026952/ppn778418405.dv.mets.xml");
+			conn.ingestDocFromUrl(235, new URL("http://rosdok.uni-rostock.de/file/rosdok_document_0000007322/rosdok_derivate_0000026952/ppn778418405.dv.mets.xml"));
 			
 			//conn.postTrpDoc(2, doc, null);
 			
