@@ -92,6 +92,7 @@ import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
+import eu.transkribus.core.model.beans.searchresult.KeywordSearchResult;
 import eu.transkribus.core.model.builder.CommonExportPars;
 import eu.transkribus.core.model.builder.alto.AltoExportPars;
 import eu.transkribus.core.model.builder.docx.DocxExportPars;
@@ -1880,6 +1881,49 @@ public class TrpServerConn extends ATrpServerConn {
 		return target.request(MediaType.APPLICATION_JSON_TYPE).async().get(callback);
 	}
 	
+	public Future<KeywordSearchResult> searchKWAsync(
+			String keyword,
+			Integer start,
+			Integer rows,
+			Float probL,
+			Float probH,
+			final List<String> filters,
+			String sorting,
+			Integer fuzzy,
+			InvocationCallback<KeywordSearchResult> callback
+			){
+		
+		WebTarget target = baseTarget.path(RESTConst.SEARCH_PATH).path(RESTConst.KEYWORD_PATH);
+		
+		target = target	.queryParam(RESTConst.QUERY_PARAM, keyword);
+		if(start != null) {
+			target = target.queryParam(RESTConst.START_PARAM, start);
+		}
+		if(rows != null) {
+			target = target.queryParam(RESTConst.ROWS_PARAM, rows);
+		}		
+		if(probL != null) {
+			target = target.queryParam(RESTConst.PROBL_PARAM, probL);
+		}
+		if(probH != null) {
+			target = target.queryParam(RESTConst.PROBH_PARAM, probH);
+		}		
+		if(filters != null && !filters.isEmpty()) {
+			for(String f : filters){
+				target = target.queryParam(RESTConst.FILTER_PARAM, f);
+			}	
+		}
+		if(fuzzy != null) {
+			target = target.queryParam(RESTConst.FUZZY_PARAM, fuzzy);
+		}
+		if(sorting != null) {
+			target = target.queryParam(RESTConst.SORTING_PARAM, sorting);
+		}
+		
+		return target.request(MediaType.APPLICATION_JSON_TYPE).async().get(callback);
+	}
+	
+	@Deprecated
 	public FulltextSearchResult searchFulltext(String query,
 			SearchType type,
 			Integer start,
