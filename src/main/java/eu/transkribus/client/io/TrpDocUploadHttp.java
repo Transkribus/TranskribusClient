@@ -79,6 +79,9 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		this.type = type == null ? DEFAULT_TYPE : type;
 		this.doMd5SumCheck = doMd5SumCheck;
 		this.uploadXml = new File(doc.getMd().getLocalFolder().getAbsolutePath() + File.separator + UPLOAD_XML_NAME);
+		logger.debug("docMd localFolder: " + doc.getMd().getLocalFolder().getAbsolutePath());
+		logger.debug("File.separator: " + File.separator);
+		logger.debug("Setting upload.xml path: " + this.uploadXml.getAbsolutePath());
 		this.conn.enableDebugLogging(DEBUG);
 	}
 

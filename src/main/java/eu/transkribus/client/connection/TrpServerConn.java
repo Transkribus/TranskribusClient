@@ -91,6 +91,8 @@ import eu.transkribus.core.model.beans.job.KwsParameters;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
+import eu.transkribus.core.model.beans.rest.JobParameters;
+import eu.transkribus.core.model.beans.rest.ParameterMap;
 import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
 import eu.transkribus.core.model.beans.searchresult.KeywordSearchResult;
 import eu.transkribus.core.model.builder.CommonExportPars;
@@ -1055,15 +1057,24 @@ public class TrpServerConn extends ATrpServerConn {
 	// NEW layout analysis client method
 	public List<TrpJobStatus> analyzeLayout(int colId, List<DocumentSelectionDescriptor> dsds, 
 			boolean doBlockSeg, boolean doLineSeg, boolean doWordSeg, boolean doPolygonToBaseline, boolean doBaselineToPolygon,
-			
-			String jobImpl, String pars) 
+			String jobImpl, ParameterMap pars) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		
 		if (jobImpl==null || !jobImpl.endsWith("LaJob")) {
 			throw new IllegalArgumentException("Not a valid layout analysis job: "+jobImpl);
 		}
 		
-		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_PATH);
+		//use current prod. server version = true (does not accept ParameterMap yet)
+		final boolean useOldEndpoint = true;
+		//use new job workflow which is already deployed
+		final boolean doCreateJobBatch = false;
+		
+		WebTarget target;
+		if(useOldEndpoint) {
+			target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_PATH);
+		} else {
+			target = baseTarget.path(RESTConst.LAYOUT_PATH);
+		}
 		
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		
@@ -1086,12 +1097,20 @@ public class TrpServerConn extends ATrpServerConn {
 		}
 		
 		target = target.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl);
-		target = target.queryParam(RESTConst.PARS_PARAM, pars);
-		target = target.queryParam(RESTConst.DO_CREATE_JOB_BATCH_PARAM, false);
+		target = target.queryParam(RESTConst.DO_CREATE_JOB_BATCH_PARAM, doCreateJobBatch);
 		
-		GenericEntity<List<DocumentSelectionDescriptor>> entity = new GenericEntity<List<DocumentSelectionDescriptor>>(dsds) {};
-		return postEntityReturnList(target, entity, MediaType.APPLICATION_XML_TYPE, 
-				JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);
+		if(useOldEndpoint) {
+			//send this to endpoint that accepts the descriptor list
+			GenericEntity<List<DocumentSelectionDescriptor>> entity = new GenericEntity<List<DocumentSelectionDescriptor>>(dsds) {};
+			return postEntityReturnList(target, entity, MediaType.APPLICATION_XML_TYPE, 
+					JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);
+		} else {
+			JobParameters jobParams = new JobParameters();
+			jobParams.setDocs(dsds);
+			jobParams.setParams(pars);
+			return postEntityReturnList(target, jobParams, MediaType.APPLICATION_XML_TYPE, 
+					JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);
+		}
 	}
 	
 	public List<String> getStringListTest() throws SessionExpiredException, ServerErrorException, ClientErrorException {
@@ -1101,6 +1120,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return GsonUtil.toStrList2(json);
 	}
 	
+	@Deprecated
 	public String analyzeLayoutBatch(final int colId, final int docId, final String pages, final boolean doBlockSeg, final boolean doLineSeg) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_LAYOUT_BATCH_PATH);
@@ -1123,6 +1143,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws SessionExpiredException
 	 * @throws IllegalArgumentException
 	 */
+	@Deprecated
 	public String analyzeBlocks(final int colId, final int docId, final int pageNr, PcGtsType pc, final boolean usePrintspaceOnly) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_LAYOUT_PATH);
@@ -1148,24 +1169,25 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws SessionExpiredException
 	 * @throws IllegalArgumentException
 	 */
+	@Deprecated
 	public String analyzeLines(final int colId, final int docId, final int pageNr, PcGtsType pc, List<String> regIds) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_LINES_PATH);
 		return analyzeRegions(target, colId, docId, pageNr, pc, regIds);
 	}
-	
+	@Deprecated
 	public String analyzeWords(final int colId, final int docId, final int pageNr, PcGtsType pc, List<String> regIds) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_WORDS_PATH);
 		return analyzeRegions(target, colId, docId, pageNr, pc, regIds);
 	}
-	
+	@Deprecated
 	public String addBaselines(final int colId, final int docId, final int pageNr, PcGtsType pc, List<String> regIds) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_BASELINES_PATH);
 		return analyzeRegions(target, colId, docId, pageNr, pc, regIds);
 	}
-	
+	@Deprecated
 	private String analyzeRegions(WebTarget target, final int colId, int docId, int pageNr, PcGtsType pc,
 			List<String> regIds) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		if(pc == null) {
