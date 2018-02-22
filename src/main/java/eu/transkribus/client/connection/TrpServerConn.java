@@ -1065,7 +1065,7 @@ public class TrpServerConn extends ATrpServerConn {
 		}
 		
 		//use current prod. server version = true (does not accept ParameterMap yet)
-		final boolean useOldEndpoint = true;
+		final boolean useOldEndpoint = false;
 		//use new job workflow which is already deployed
 		final boolean doCreateJobBatch = false;
 		
