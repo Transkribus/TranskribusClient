@@ -87,6 +87,7 @@ import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
+import eu.transkribus.core.model.beans.job.JobError;
 import eu.transkribus.core.model.beans.job.KwsParameters;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.mets.Mets;
@@ -1052,6 +1053,16 @@ public class TrpServerConn extends ATrpServerConn {
 	public void killJob(final String jobId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		final WebTarget docTarget = baseTarget.path(RESTConst.JOBS_PATH).path("" + jobId).path(RESTConst.KILL_JOB_PATH);
 		postNull(docTarget);
+	}
+	
+	public List<JobError> getJobErrors(final String jobId, final int index, final int nValues, final String sortColumnField, final String sortDirection) 
+			throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.JOBS_PATH).path("" + jobId).path(RESTConst.ERROR_PATH);
+		target = target.queryParam(RESTConst.PAGING_INDEX_PARAM, index);
+		target = target.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues);
+		target = target.queryParam(RESTConst.SORT_COLUMN_PARAM, sortColumnField);
+		target = target.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);		
+		return super.getList(target, new GenericType<List<JobError>>(){});
 	}
 	
 	// NEW layout analysis client method
