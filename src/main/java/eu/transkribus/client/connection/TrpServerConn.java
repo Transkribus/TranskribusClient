@@ -993,24 +993,6 @@ public class TrpServerConn extends ATrpServerConn {
 //		}
 	}
 	
-	/**
-	 * ingest a document that has been upload via FTP
-	 * 
-	 * this is no longer supported in TRP server
-	 *  
-	 * @param colId
-	 * @param zipFn
-	 * @throws Exception
-	 */
-	@Deprecated
-	public void processTrpDocFromFtp(final int colId, String zipFn) throws Exception {
-		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH_FTP);
-
-		Entity<String> ent = Entity.entity(zipFn, MediaType.TEXT_PLAIN);
-		Response response = target.request().post(ent);
-		checkStatus(response, target);
-	}
-	
 	public List<TrpJobStatus> getJobs(boolean filterByUser, String status, String type, Integer docId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.JOBS_PATH).path(RESTConst.LIST_PATH);
 		//only get jobs of the logged in user?
