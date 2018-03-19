@@ -92,6 +92,7 @@ import eu.transkribus.core.model.beans.job.KwsParameters;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
+import eu.transkribus.core.model.beans.rest.JobErrorList;
 import eu.transkribus.core.model.beans.rest.JobParameters;
 import eu.transkribus.core.model.beans.rest.ParameterMap;
 import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
@@ -1037,14 +1038,14 @@ public class TrpServerConn extends ATrpServerConn {
 		postNull(docTarget);
 	}
 	
-	public List<JobError> getJobErrors(final String jobId, final int index, final int nValues, final String sortColumnField, final String sortDirection) 
-			throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public JobErrorList getJobErrors(final String jobId, final int index, final int nValues, final String sortColumnField, final String sortDirection) 
+			throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.JOBS_PATH).path("" + jobId).path(RESTConst.ERROR_PATH);
 		target = target.queryParam(RESTConst.PAGING_INDEX_PARAM, index);
 		target = target.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues);
 		target = target.queryParam(RESTConst.SORT_COLUMN_PARAM, sortColumnField);
 		target = target.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);		
-		return super.getList(target, new GenericType<List<JobError>>(){});
+		return super.getObject(target, JobErrorList.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
 	// NEW layout analysis client method
