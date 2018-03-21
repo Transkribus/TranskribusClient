@@ -1,31 +1,13 @@
 package eu.transkribus.client.io;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.security.auth.login.LoginException;
-import javax.ws.rs.ClientErrorException;
-import javax.xml.bind.JAXBException;
-
-import org.docx4j.openpackaging.exceptions.Docx4JException;
-
-import com.itextpdf.text.DocumentException;
 
 import eu.transkribus.client.connection.TrpServerConn;
-import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.model.beans.TrpDoc;
-import eu.transkribus.core.model.beans.customtags.CustomTagFactory;
-import eu.transkribus.core.model.builder.ExportUtils;
+import eu.transkribus.core.model.builder.ExportCache;
 import eu.transkribus.core.model.builder.docx.DocxBuilder;
-import eu.transkribus.core.model.builder.pdf.PdfExporter;
-import eu.transkribus.core.model.builder.rtf.TrpRtfBuilder;
 
 public class DocxTest {
 	public static void main(String[] args){
@@ -57,10 +39,10 @@ public class DocxTest {
 			
 			boolean wordbased = false;
 			
-
-			ExportUtils.storeCustomTagMapForDoc(doc7, wordbased, idxs2, null, false);
+			ExportCache cache = new ExportCache();
+			cache.storeCustomTagMapForDoc(doc7, wordbased, idxs2, null, false);
 			//export index
-			DocxBuilder.writeDocxForDoc(doc7, false, true, false, new File("C:/Users/Schorsch/ArabicTest.docx"), idxs2, null, false, false, false, false, true, false, false);
+			DocxBuilder.writeDocxForDoc(doc7, false, true, false, new File("C:/Users/Schorsch/ArabicTest.docx"), idxs2, null, false, false, false, false, true, false, false, cache);
 			//export with substitute abbreviations and preserve line breaks
 //			DocxBuilder.writeDocxForDoc(doc5, true, true, true, new File("C:/Users/Administrator/DocxTest1.docx"), idxs2, null, CustomTagFactory.getRegisteredTagNames(), false, false, false, true, true);
 //			//export with substitute abbreviations and not preserve line breaks

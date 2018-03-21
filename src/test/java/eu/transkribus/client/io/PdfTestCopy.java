@@ -1,6 +1,5 @@
 package eu.transkribus.client.io;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -14,10 +13,8 @@ import com.itextpdf.text.DocumentException;
 
 import eu.transkribus.client.connection.TrpServerConn;
 import eu.transkribus.core.model.beans.TrpDoc;
-import eu.transkribus.core.model.beans.customtags.CustomTagFactory;
-import eu.transkribus.core.model.builder.ExportUtils;
+import eu.transkribus.core.model.builder.ExportCache;
 import eu.transkribus.core.model.builder.pdf.PdfExporter;
-import eu.transkribus.core.model.builder.rtf.TrpRtfBuilder;
 
 public class PdfTestCopy {
 	public static void main(String[] args) throws LoginException, MalformedURLException, DocumentException, IOException, JAXBException, URISyntaxException, InterruptedException{
@@ -48,9 +45,10 @@ public class PdfTestCopy {
 			}};
 			
 		boolean wordbased = false;
-			
-		ExportUtils.storeCustomTagMapForDoc(doc33, wordbased, idxs2, null, false);
-		(new PdfExporter()).export(doc33, "C:/Users/Schorsch/arabic_test.pdf", idxs2);
+		
+		ExportCache cache = new ExportCache();
+		cache.storeCustomTagMapForDoc(doc33, wordbased, idxs2, null, false);
+		(new PdfExporter()).export(doc33, "C:/Users/Schorsch/arabic_test.pdf", idxs2, cache);
 		
 		//TrpRtfBuilder.writeRtfForDoc(doc4, false, new File("C:/Users/Administrator/KonzilsProtokolle_test2.rtf"), idxs2, null);
 		//(new PdfExporter()).export(doc2, "C:/Users/Administrator/Reichsgericht_test.pdf", idxs2);

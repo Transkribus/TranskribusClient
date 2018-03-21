@@ -96,6 +96,7 @@
 <!-- 			<version>3.6.0.v20110523</version> -->
 <!-- 		</dependency>		 -->
 		
+		<!-- only used for client update. Use jersey-moxy instead? -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
