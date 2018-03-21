@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
+import javax.json.Json;
+import javax.json.JsonArray;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
@@ -47,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import eu.transkribus.client.io.ASingleDocUpload;
 import eu.transkribus.client.io.TrpDocUploadHttp;
@@ -149,7 +152,7 @@ public class TrpServerConn extends ATrpServerConn {
 //	private static TrpServerConn conn = null;
 //	public ClientStatus status = new ClientStatus();
 	
-	static Gson gson = new Gson();
+	//static Gson gson = new Gson();
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
@@ -446,7 +449,31 @@ public class TrpServerConn extends ATrpServerConn {
 		delete(docTarget);
 	}
 	
-
+	public void updateTagDefsCollection(final int colId, final String tagDefs) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
+		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId)
+				.path(RESTConst.TAG_DEF_PARAM);
+		postEntity(docTarget, tagDefs, MediaType.APPLICATION_JSON_TYPE);
+	}
+	
+	public String getTagDefsCollection(final int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId)
+				.path(RESTConst.LIST_TAG_DEFS_PARAM);
+		
+		String json = getObject(target, String.class);
+		return json;
+	}
+	
+	public void updateTagDefsUser(final JsonArray tagDefs) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
+		final WebTarget docTarget = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.TAG_DEF_PARAM);
+		postEntity(docTarget, tagDefs, MediaType.APPLICATION_JSON_TYPE);
+	}
+	
+	public String getTagDefsUser() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.LIST_TAG_DEFS_PARAM);
+		
+		String json = getObject(target, String.class);
+		return json;
+	}
 	
 //	public PcGtsType getTranscript(URL url) throws JAXBException, URISyntaxException, SessionExpiredException, ServerErrorException, IllegalArgumentException{
 //		PcGtsType pc;
