@@ -18,8 +18,6 @@ import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
 
-import javax.json.Json;
-import javax.json.JsonArray;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
@@ -464,7 +462,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return json;
 	}
 	
-	public void updateTagDefsUser(final JsonArray tagDefs) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
+	public void updateTagDefsUser(final String tagDefs) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.USER_PATH).path(RESTConst.TAG_DEF_PARAM);
 		postEntity(docTarget, tagDefs, MediaType.APPLICATION_JSON_TYPE);
 	}
