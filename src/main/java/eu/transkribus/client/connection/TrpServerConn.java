@@ -47,7 +47,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 
 import eu.transkribus.client.io.ASingleDocUpload;
 import eu.transkribus.client.io.TrpDocUploadHttp;
@@ -88,7 +87,6 @@ import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
-import eu.transkribus.core.model.beans.job.JobError;
 import eu.transkribus.core.model.beans.job.KwsParameters;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.mets.Mets;
