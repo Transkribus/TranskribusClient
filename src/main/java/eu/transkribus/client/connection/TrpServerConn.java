@@ -26,7 +26,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -1080,21 +1079,13 @@ public class TrpServerConn extends ATrpServerConn {
 		if (jobImpl==null || !jobImpl.endsWith("LaJob")) {
 			throw new IllegalArgumentException("Not a valid layout analysis job: "+jobImpl);
 		}
-		
-		//use current prod. server version = true (does not accept ParameterMap yet)
-		final boolean useOldEndpoint = false;
+
 		//use new job workflow which is already deployed
 		final boolean doCreateJobBatch = false;
 		
-		WebTarget target;
-		if(useOldEndpoint) {
-			target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.ANALYZE_PATH);
-		} else {
-			target = baseTarget.path(RESTConst.LAYOUT_PATH);
-		}
+		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH);		
 		
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
-		
 		if (doPolygonToBaseline) {
 			target = target.queryParam(RESTConst.DO_BLOCK_SEG_PARAM, false);
 			target = target.queryParam(RESTConst.DO_LINE_SEG_PARAM, false);
@@ -1116,18 +1107,13 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl);
 		target = target.queryParam(RESTConst.DO_CREATE_JOB_BATCH_PARAM, doCreateJobBatch);
 		
-		if(useOldEndpoint) {
-			//send this to endpoint that accepts the descriptor list
-			GenericEntity<List<DocumentSelectionDescriptor>> entity = new GenericEntity<List<DocumentSelectionDescriptor>>(dsds) {};
-			return postEntityReturnList(target, entity, MediaType.APPLICATION_XML_TYPE, 
-					JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);
-		} else {
-			JobParameters jobParams = new JobParameters();
-			jobParams.setDocs(dsds);
-			jobParams.setParams(pars);
-			return postEntityReturnList(target, jobParams, MediaType.APPLICATION_XML_TYPE, 
-					JOB_LIST_TYPE, MediaType.APPLICATION_XML_TYPE);
-		}
+		//the media type to use for data transmission here (default is XML)
+		MediaType mediaType = MediaType.APPLICATION_XML_TYPE;
+		
+		JobParameters jobParams = new JobParameters();
+		jobParams.setDocs(dsds);
+		jobParams.setParams(pars);
+		return postEntityReturnList(target, jobParams, mediaType, JOB_LIST_TYPE, mediaType);
 	}
 	
 	public List<String> getStringListTest() throws SessionExpiredException, ServerErrorException, ClientErrorException {
