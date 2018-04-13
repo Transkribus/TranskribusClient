@@ -265,6 +265,15 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(target, COL_LIST_TYPE);
 	}
 	
+	public List<TrpCollection> getAllCollectionsForSingleUser(int index, int nValues, String sortFieldName, String sortDirection, int userId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+userId).path(RESTConst.LIST_COL_PATH)
+				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
+				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
+				.queryParam(RESTConst.SORT_COLUMN_PARAM, sortFieldName)
+				.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
+		return getList(target, COL_LIST_TYPE);
+	}
+	
 	public int countAllCollections() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(RESTConst.COUNT_PATH);
 		return Integer.parseInt(getObject(target, String.class));
