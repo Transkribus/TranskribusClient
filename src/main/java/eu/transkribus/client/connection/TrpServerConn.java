@@ -167,6 +167,14 @@ public class TrpServerConn extends ATrpServerConn {
 		this(server.getUriStr(), username, password);
 	}
 	
+	public static TrpServerConn connectToProdServer(String username, String password) throws LoginException {
+		return new TrpServerConn(ATrpServerConn.PROD_SERVER_URI, username, password);
+	}
+	
+	public static TrpServerConn connectToTestServer(String username, String password) throws LoginException {
+		return new TrpServerConn(ATrpServerConn.TEST_SERVER_URI, username, password);
+	}
+	
 //	private TrpServerConn(String uriStr, final String user, final String pw) throws LoginException {
 //		super(uriStr, user, pw);
 //	}
