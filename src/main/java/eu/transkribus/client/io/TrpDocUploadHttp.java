@@ -193,7 +193,8 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		TrpUpload upload;
 		switch (type) {
 		case METS:
-			Mets mets = TrpMetsBuilder.buildMets(doc, true, false, true, null);
+			TrpMetsBuilder metsBuilder = new TrpMetsBuilder();
+			Mets mets = metsBuilder.buildMets(doc, true, false, true, null);
 			upload = conn.createNewUpload(colId, mets);
 			break;
 		case JSON:

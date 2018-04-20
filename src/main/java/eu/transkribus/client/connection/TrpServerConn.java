@@ -1473,6 +1473,7 @@ public class TrpServerConn extends ATrpServerConn {
 			parAsJsonMap.put(DocxExportPars.PARAMETER_KEY, GsonUtil.toJson(docxPars));
 		}
 				
+		logger.debug("json export string example: " + GsonUtil.toJson(parAsJsonMap));
 		return postEntityReturnObject(target, GsonUtil.toJson(parAsJsonMap), MediaType.APPLICATION_JSON_TYPE, 
 		String.class, MediaType.APPLICATION_XML_TYPE);		
 	}
