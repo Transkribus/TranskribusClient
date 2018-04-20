@@ -30,6 +30,7 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.annotation.XmlAccessType;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -73,6 +74,7 @@ import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
+import eu.transkribus.core.model.beans.TrpErrorRate;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpPage;
@@ -165,6 +167,14 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public TrpServerConn(TrpServer server, final String username, final String password) throws LoginException {
 		this(server.getUriStr(), username, password);
+	}
+	
+	public static TrpServerConn connectToProdServer(String username, String password) throws LoginException {
+		return new TrpServerConn(ATrpServerConn.PROD_SERVER_URI, username, password);
+	}
+	
+	public static TrpServerConn connectToTestServer(String username, String password) throws LoginException {
+		return new TrpServerConn(ATrpServerConn.TEST_SERVER_URI, username, password);
 	}
 	
 //	private TrpServerConn(String uriStr, final String user, final String pw) throws LoginException {
@@ -1801,6 +1811,18 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.REF_KEY_PARAM, refKey);
 		target = target.queryParam(RESTConst.KEY_PARAM, hypKey);
 		return super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
+	}
+	
+	public TrpErrorRate computeErrorRate(String refKey, String hypKey) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		if(refKey == null || hypKey == null){
+			throw new IllegalArgumentException("A key is null!");
+		}
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.ERROR_RATE);
+		target = target.queryParam(RESTConst.REF_KEY_PARAM, refKey);
+		target = target.queryParam(RESTConst.KEY_PARAM, hypKey);
+		
+		return super.getObject(target, TrpErrorRate.class, MediaType.APPLICATION_XML_TYPE);
+		
 	}
 	
 	public List<TrpEvent> getNextEvents(int days) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
