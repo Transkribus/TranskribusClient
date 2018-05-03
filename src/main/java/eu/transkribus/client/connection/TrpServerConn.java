@@ -30,7 +30,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.xml.bind.JAXBException;
-import javax.xml.bind.annotation.XmlAccessType;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -1823,6 +1822,19 @@ public class TrpServerConn extends ATrpServerConn {
 		
 		return super.getObject(target, TrpErrorRate.class, MediaType.APPLICATION_XML_TYPE);
 		
+	}
+	
+	public TrpJobStatus computeErrorRateWithJob(int docId, final String pageStr, ParameterMap params) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		if(params == null) {
+			params = new ParameterMap();
+		}
+		params.addParameter(JobConst.PROP_DOC_ID, docId);
+		params.addParameter(JobConst.PROP_PAGES, pageStr);
+		
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.ERROR_RATE);
+		
+		return postEntityReturnObject(target, params, MediaType.APPLICATION_JSON_TYPE, 
+				TrpJobStatus.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
 	public List<TrpEvent> getNextEvents(int days) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
