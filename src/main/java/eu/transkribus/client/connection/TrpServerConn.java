@@ -720,30 +720,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws SessionExpiredException 
 	 */
 	public TrpTranscriptMetadata updateTranscriptStatus(final int colId, final int docId, int pageNr, EditStatus status, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return updateTranscript(colId, docId, pageNr, status, null, false, parentId, note);
-	}
-
-	/**
-	 * Update the Page XML for a page in the server
-	 * @param docId
-	 * @param pageNr
-	 * @param status
-	 *            new EditStatus. If null, the status from old version will be
-	 *            used
-	 * @param transcript
-	 * @return Updated transcript list for this page
-	 * @throws IllegalArgumentException 
-	 * @throws ServerErrorException 
-	 * @throws SessionExpiredException 
-	 */
-	public TrpTranscriptMetadata updateTranscript(final int colId, final int docId, int pageNr, EditStatus status,
-			final PcGtsType transcript, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return updateTranscript(colId, docId, pageNr, status, transcript, false, parentId, note);
-	}
-	
-	public TrpTranscriptMetadata replaceCurrentTranscript(final int colId, final int docId, int pageNr,
-			final PcGtsType transcript, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return updateTranscript(colId, docId, pageNr, null, transcript, true, parentId, note);
+		return updateTranscript(colId, docId, pageNr, status, null, parentId, note);
 	}
 	
 	/**
@@ -760,13 +737,13 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws SessionExpiredException 
 	 */
 	public TrpTranscriptMetadata updateTranscript(final int colId, final int docId, int pageNr, EditStatus status,
-			final PcGtsType transcript, final boolean overwrite, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+			final PcGtsType transcript, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
 				.path(RESTConst.TRANSCRIPT_PATH);
 		if (status != null) {
 			docTarget = docTarget.queryParam(RESTConst.STATUS_PARAM, status.toString());
 		}
-		docTarget = docTarget.queryParam(RESTConst.OVERWRITE_PARAM, overwrite)
+		docTarget = docTarget.queryParam(RESTConst.OVERWRITE_PARAM, false)
 				.queryParam(RESTConst.PARENT_ID_PARAM, parentId)
 				.queryParam(RESTConst.NOTE_PARAM, note);
 		return postXmlEntityReturnObject(docTarget, transcript, TrpTranscriptMetadata.class);
