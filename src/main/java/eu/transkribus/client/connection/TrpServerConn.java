@@ -1830,8 +1830,9 @@ public class TrpServerConn extends ATrpServerConn {
 		}
 		params.addParameter(JobConst.PROP_DOC_ID, docId);
 		params.addParameter(JobConst.PROP_PAGES, pageStr);
+		params.addParameter(JobConst.PROP_QUERY, params.containsKey("option"));
 		
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.ERROR_RATE);
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.ERROR_VIA_JOB);
 		
 		return postEntityReturnObject(target, params, MediaType.APPLICATION_JSON_TYPE, 
 				TrpJobStatus.class, MediaType.APPLICATION_XML_TYPE);
