@@ -124,7 +124,7 @@ public class TrpJobsConnection extends ATrpServerConn {
 	}
 
 	public TrpTranscriptMetadata updateTranscript(int pageId, EditStatus newStatus, int userId, String userName,
-			PcGtsType page, String toolName, boolean overwrite, int parentId, String note) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+			PcGtsType page, String toolName, int parentId, String note) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.JOB_MGMT_PATH).path(RESTConst.UPDATE_TRANSCRIPT_PATH);
 		
 		t = t.queryParam(RESTConst.PAGE_ID_PARAM, pageId);
@@ -134,7 +134,6 @@ public class TrpJobsConnection extends ATrpServerConn {
 		t = t.queryParam(RESTConst.USER_ID_PARAM, userId);
 		t = queryParam(t, RESTConst.USER_PARAM, userName);
 		t = queryParam(t, RESTConst.TOOL_NAME_PARAM, toolName);
-		t = t.queryParam(RESTConst.OVERWRITE_PARAM, overwrite);
 		t = t.queryParam(RESTConst.PARENT_ID_PARAM, parentId);
 		t = queryParam(t, RESTConst.NOTE_PARAM, note);
 		
