@@ -1217,30 +1217,6 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	@Deprecated
-	public String runHtr(final int colId, final int docId, final int pageNr, final String modelName) 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_PATH);
-		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
-		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
-		target = target.queryParam(RESTConst.PAGE_NR_PARAM, pageNr);
-		target = target.queryParam(RESTConst.PAGES_PARAM, pageNr);
-		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
-		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
-				String.class, MediaType.APPLICATION_XML_TYPE);
-	}
-	
-	@Deprecated
-	public String runHtr(final int colId, final int docId, final String modelName) 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_PATH);
-		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
-		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
-		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
-		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
-				String.class, MediaType.APPLICATION_XML_TYPE);
-	}
-	
 	public String runHtr(final int colId, final int docId, final String pageStr, final String modelName) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_PATH);
@@ -1248,37 +1224,6 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGES_PARAM, pageStr);
 		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
-		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
-				String.class, MediaType.APPLICATION_XML_TYPE);
-	}
-	
-	public String runUpvlcHtrTraining(final String modelName, final Integer... docIds) 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_UPVLC_TRAIN_PATH);
-		target = target.queryParam(RESTConst.DOC_ID_PARAM, (Object[])docIds);
-		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
-		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
-				String.class, MediaType.APPLICATION_XML_TYPE);
-	}
-	
-	public String runCitLabHtrTraining(final String modelName, final String numEpochs, final String learningRate,
-			final String noise, final Integer trainSizePerEpoch, final Integer... docIds) 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return runCitLabHtrTraining(modelName, numEpochs, learningRate, noise, trainSizePerEpoch, null, docIds);
-	}
-	
-	public String runCitLabHtrTraining(final String modelName, final String numEpochs, final String learningRate,
-			final String noise, final Integer trainSizePerEpoch, final String baseModel, final Integer... docIds) 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_URO_TRAIN_PATH);
-		target = target.queryParam(RESTConst.DOC_ID_PARAM, (Object[])docIds);
-		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
-		target = target.queryParam(JobConst.PROP_NUM_EPOCHS, numEpochs);
-		target = target.queryParam(JobConst.PROP_LEARNING_RATE, learningRate);
-		target = target.queryParam(JobConst.PROP_NOISE, noise);
-		target = target.queryParam(JobConst.PROP_TRAIN_SIZE_PER_EPOCH, trainSizePerEpoch);
-		target = target.queryParam(JobConst.PROP_BASE_MODEL, baseModel);
-		
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
