@@ -1752,7 +1752,7 @@ public class TrpServerConn extends ATrpServerConn {
 		}
 		params.addParameter(JobConst.PROP_DOC_ID, docId);
 		params.addParameter(JobConst.PROP_PAGES, pageStr);
-		params.addParameter(JobConst.PROP_QUERY, params.containsKey("option"));
+		params.addParameter(JobConst.PROP_QUERY, params.getIntParam("option"));
 		
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.ERROR_RATE);
 		
