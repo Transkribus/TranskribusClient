@@ -65,6 +65,7 @@ import eu.transkribus.core.model.beans.EdOption;
 import eu.transkribus.core.model.beans.HtrModel;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
+import eu.transkribus.core.model.beans.TrpAction;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpCrowdProject;
 import eu.transkribus.core.model.beans.TrpCrowdProjectMessage;
@@ -574,6 +575,17 @@ public class TrpServerConn extends ATrpServerConn {
 				.path(""+ pageNr)
 				.path(RESTConst.LIST_LOCKS_PATH);
 		return getList(docTarget, PAGELOCK_LIST_TYPE);
+	}
+	
+	public List<TrpAction> listActions(Integer typeId, int colId, int docId, int nValues) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
+		WebTarget target = baseTarget
+				.path(RESTConst.ACTIONS_PATH)
+				.path(RESTConst.LIST_PATH);
+		target = target.queryParam(RESTConst.TYPE_ID_PARAM, typeId);
+		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
+		target = target.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues);
+		return getList(target, ACTION_LIST_TYPE);
 	}
 	
 	public boolean canManageCollection(int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
