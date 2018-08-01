@@ -3,10 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>eu.transkribus</groupId>
 	<artifactId>TranskribusClient</artifactId>
-	<version>0.0.2</version>
+	<version>0.0.3</version>
 	<packaging>jar</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<!-- Transkribus components' version numbers -->
+		<core.version>0.0.6-SNAPSHOT</core.version>
 	</properties>
 	<repositories>
 		<!-- dea artifactory: -->		
@@ -42,7 +44,7 @@
 		<dependency>
 			<groupId>eu.transkribus</groupId>
 			<artifactId>TranskribusCore</artifactId>
-			<version>0.0.4</version>
+			<version>${core.version}</version>
 		</dependency>
 
 		<dependency>
