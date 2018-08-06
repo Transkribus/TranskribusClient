@@ -48,7 +48,7 @@ public class PdfTestCopy {
 		
 		ExportCache cache = new ExportCache();
 		cache.storeCustomTagMapForDoc(doc33, wordbased, idxs2, null, false);
-		(new PdfExporter()).export(doc33, "C:/Users/Schorsch/arabic_test.pdf", idxs2, cache);
+		(new PdfExporter()).export(doc33, "C:/Users/Schorsch/arabic_test.pdf", idxs2, cache, false);
 		
 		//TrpRtfBuilder.writeRtfForDoc(doc4, false, new File("C:/Users/Administrator/KonzilsProtokolle_test2.rtf"), idxs2, null);
 		//(new PdfExporter()).export(doc2, "C:/Users/Administrator/Reichsgericht_test.pdf", idxs2);

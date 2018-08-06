@@ -41,6 +41,7 @@ import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TestBean;
+import eu.transkribus.core.model.beans.TrpAction;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDocDir;
@@ -74,6 +75,7 @@ public abstract class ATrpServerConn implements Closeable {
 	public static final GenericType<List<TrpJobStatus>> JOB_LIST_TYPE = new GenericType<List<TrpJobStatus>>() {};
 	public static final GenericType<List<TrpWordgraph>> WORDGRAPH_LIST_TYPE = new GenericType<List<TrpWordgraph>>() {};
 	public static final GenericType<List<PageLock>> PAGELOCK_LIST_TYPE = new GenericType<List<PageLock>>() {};
+	public static final GenericType<List<TrpAction>> ACTION_LIST_TYPE = new GenericType<List<TrpAction>>() {};
 	public static final GenericType<List<EdFeature>> ED_FEATURE_LIST_TYPE = new GenericType<List<EdFeature>>() {};
 	public static final GenericType<List<TrpDocDir>> DOC_DIR_LIST_TYPE = new GenericType<List<TrpDocDir>>() {};
 	public static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
