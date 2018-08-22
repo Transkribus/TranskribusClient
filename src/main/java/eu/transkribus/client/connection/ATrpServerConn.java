@@ -594,17 +594,24 @@ public abstract class ATrpServerConn implements Closeable {
 //		else if(status == ClientVersionNotSupportedException.STATUS_CODE) {
 //			throw new RuntimeException(loc + " - Method not allowed! (405) "+readStringEntity(resp)/*, resp*/);
 //		}
-		else if (status < 500) {
+		else if (status >= 400 && status < 500) {
 			type = ErrorType.Client;
 			internalMsg = "Client error: " + ent;
 			userMsg = generateUserMessage("Something went wrong. Please update TranskribusX and report a bug if the issue persists.", ent);
 		}
-		else { // 500 etc.
+		else if (status >= 500) { // 500 etc.
 			type = ErrorType.Server;
 			internalMsg = loc + " - Some server error occured! " + status + " - " 
 					+ resp.getStatusInfo() 
 					+ (StringUtils.isEmpty(ent)?"":" - "+ent);
 			userMsg = generateUserMessage("The action could not be processed on the server. Please report a bug.", ent);
+		} else {
+			//3xx codes are not accepted by Client- or ServerException and should not happen!
+			type = ErrorType.IllegalState;
+			internalMsg = loc + " - Illegal State! " + status + " - " 
+					+ resp.getStatusInfo()
+					+ (StringUtils.isEmpty(ent) ? "" : " - " + ent);
+			userMsg = "";
 		}
 		switch(type) {
 		case Server:
@@ -615,8 +622,10 @@ public abstract class ATrpServerConn implements Closeable {
 			} else {
 				throw new SessionExpiredException(internalMsg, userMsg, login);
 			}
-		default:	
+		case Client:	
 			throw new TrpClientErrorException(internalMsg, userMsg, resp);
+		default:
+			throw new IllegalStateException(internalMsg);
 		}
 	}
 	
@@ -663,6 +672,7 @@ public abstract class ATrpServerConn implements Closeable {
 	private enum ErrorType {
 		Server,
 		Client,
-		Session;
+		Session,
+		IllegalState;
 	}
 }
