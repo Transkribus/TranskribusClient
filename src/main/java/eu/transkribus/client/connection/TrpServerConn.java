@@ -90,6 +90,8 @@ import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
 import eu.transkribus.core.model.beans.job.KwsParameters;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
+import eu.transkribus.core.model.beans.job.enums.JobImpl;
+import eu.transkribus.core.model.beans.job.enums.JobType;
 import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.rest.JobErrorList;
@@ -1083,7 +1085,9 @@ public class TrpServerConn extends ATrpServerConn {
 			String jobImpl, ParameterMap pars) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		
-		if (jobImpl==null || !jobImpl.endsWith("LaJob")) {
+		if (jobImpl==null 
+				|| JobImpl.fromStr(jobImpl) == null
+				|| !JobImpl.fromStr(jobImpl).getTask().getJobType().equals(JobType.layoutAnalysis)) {
 			throw new IllegalArgumentException("Not a valid layout analysis job: "+jobImpl);
 		}
 
@@ -1121,6 +1125,16 @@ public class TrpServerConn extends ATrpServerConn {
 		jobParams.setDocs(dsds);
 		jobParams.setParams(pars);
 		return postEntityReturnList(target, jobParams, mediaType, JOB_LIST_TYPE, mediaType);
+	}
+	
+	public TrpJobStatus analyzeTables(int colId, List<DocumentSelectionDescriptor> dsds, 
+			final int templateTsId) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
+		if(templateTsId < 1) {
+			throw new IllegalArgumentException("Template ID has an illegal value (" + templateTsId + ")");
+		}
+		ParameterMap pars = new ParameterMap();
+		pars.addParameter(JobConst.PROP_TABLE_TEMPLATE_ID, templateTsId);
+		return analyzeLayout(colId, dsds, true, false, false, false, false, JobImpl.CvlTableJob.toString(), pars).get(0);
 	}
 	
 	public List<String> getStringListTest() throws SessionExpiredException, ServerErrorException, ClientErrorException {
