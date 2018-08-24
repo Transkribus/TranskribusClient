@@ -19,10 +19,8 @@ import org.slf4j.LoggerFactory;
 import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
 import eu.transkribus.core.io.LocalDocReader;
 import eu.transkribus.core.io.UnsupportedFormatException;
-import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
 import eu.transkribus.core.model.beans.CitLabSemiSupervisedHtrTrainConfig;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
-import eu.transkribus.core.model.beans.DocumentSelectionDescriptor.PageDescriptor;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpDbTag;
@@ -48,28 +46,6 @@ public class TrpServerConnTest {
 	private static final Logger logger = LoggerFactory.getLogger(TrpServerConnTest.class);
 	
 	static SebisStopWatch sw = new SebisStopWatch();
-	
-	public static void testHtrWithDescriptor(String user, String pw) throws Exception {
-		final int colId = 2;
-		final int docId = 2278;
-		final int pageId = 10070; //pageNr 1
-		final int tsId = 25143;
-		final String regionId1 = "r1";
-		final String regionId2 = "r2";
-		final int modelId = 241;
-		
-		//generate a page descriptor for a single page/single region HTR job
-		DocumentSelectionDescriptor descriptor = new DocumentSelectionDescriptor(docId);
-		PageDescriptor pd = new PageDescriptor(pageId, tsId);
-		pd.getRegionIds().add(regionId1);
-		pd.getRegionIds().add(regionId2);
-		descriptor.addPage(pd);
-		
-		try (TrpServerConn conn = new TrpServerConn(TrpServer.Test, user, pw)) {
-			String jobId = conn.runCitLabHtr(colId, descriptor, modelId, null);
-			logger.info(jobId);
-		}
-	}
 	
 	public static void testDocMdDescriptionSizeLimit(String user, String pw) throws Exception {
 		final int colId = 2;
@@ -490,71 +466,6 @@ public class TrpServerConnTest {
 		}
 	}
 	
-	static List<DocumentSelectionDescriptor> getDds(TrpServerConn conn, int collId) throws Exception {
-		List<TrpDocMetadata> docMds = conn.getAllDocs(collId, 0, 0, null, null);
-		System.out.println("n-docs = "+docMds.size());
-		List<DocumentSelectionDescriptor> dds = new ArrayList<>();
-		
-		for (TrpDocMetadata dm : docMds) {
-			TrpDoc d = conn.getTrpDoc(collId, dm.getDocId(), 1);
-			
-			DocumentSelectionDescriptor dd = new DocumentSelectionDescriptor();
-			dd.setDocId(d.getId());
-			
-			for (TrpPage p : d.getPages()) {
-				PageDescriptor pd = new PageDescriptor();
-				TrpTranscriptMetadata tmd = p.getCurrentTranscript();
-				
-//				System.out.println(""+tmd);
-				
-				pd.setPageId(p.getPageId());
-				pd.setTsId(tmd.getTsId());
-				
-				dd.getPages().add(pd);
-			}
-			
-			dds.add(dd);
-		}
-		
-		return dds;
-	}
-	
-	static void startHtrTraining(final String user, final String pw) throws Exception {
-		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw)) {
-			
-			CitLabHtrTrainConfig conf = new CitLabHtrTrainConfig();
-			
-			conf.setDescription("");
-			conf.setModelName("Goettingen");
-			conf.setLanguage("German");
-			
-			conf.setNumEpochs(150);
-			conf.setNoise("both");
-			conf.setLearningRate("2e-3");
-			conf.setTrainSizePerEpoch(1000);
-			
-			conf.setColId(4486);
-			
-			List<DocumentSelectionDescriptor> dds = getDds(conn, 4486);
-			conf.getTrain().addAll(dds);
-			
-			System.out.println("conf = "+conf.toString());
-			System.out.println("nr of docs = "+conf.getTrain().size());
-			
-			int c = 0;
-			for (DocumentSelectionDescriptor dd : dds) {
-				c += dd.getPages().size();
-			}
-			
-			System.out.println("nf of pages = "+c);
-
-			String jobID = conn.runCitLabHtrTraining(conf);
-			System.out.println("Started training with jobId = "+jobID);
-			
-//			conn.exportDocument(2, 1312, "1-31", true, true, true, true, false, true, true, true, false, false, false, true, false, false, false, true, false, false, false, true, false, false, false, false, false, true, false, false, false, "Latest");
-		}
-	}
-	
 	public static void testGetStringListTest(String user, String pw) throws Exception {
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {	
 			List<String> list = conn.getStringListTest();			
@@ -738,8 +649,6 @@ public class TrpServerConnTest {
 //		testSearchTags(args[0], args[1]);
 	
 //		testGetMyDocsAsync(args[0], args[1]);
-		
-		testHtrWithDescriptor(args[0], args[1]);
 		
 		if (true)
 			return;

@@ -1,4 +1,4 @@
-package eu.transkribus.client.connection;
+package eu.transkribus.client.connection.jobs;
 
 import java.util.Arrays;
 
@@ -19,17 +19,13 @@ public class TableMatchingTest extends ATrpClientTest {
 	private static final Logger logger = LoggerFactory.getLogger(TableMatchingTest.class);
 	
 	@Test
-	public void tableMatchingTest() throws SessionExpiredException, ClientErrorException, ServerErrorException, InterruptedException {
+	public void tableMatchingTest() throws SessionExpiredException, ClientErrorException, ServerErrorException {
 		final int docId = 4263;
 		final int templateTsId = 35165;
 		DocumentSelectionDescriptor dsd = new DocumentSelectionDescriptor(docId);
 		TrpJobStatus job = client.analyzeTables(TEST_COLLECTION_ID, Arrays.asList(dsd), templateTsId);
 		logger.info("Started table matching job: " + job);
-		while(!(job.isFailed() || job.isFinished())) {
-			Thread.sleep(2000);
-			job = client.getJob(job.getJobId());
-			logger.info("Job state = " + job.getState());
-		}
+		job = super.waitForJobToEnd(job);
 		Assert.assertEquals("Job did not succeed!", TrpJobStatus.FINISHED, job.getState());
 	}
 }
