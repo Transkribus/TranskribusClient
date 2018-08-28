@@ -299,7 +299,7 @@ public class TrpServerConnTest {
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw)) {
 			
 			sw.start();
-			List<TrpDocMetadata> docs = conn.getAllDocs(colId, 0, 0, null, null);
+			List<TrpDocMetadata> docs = conn.getAllDocs(colId, 0, 0, null, null, 0);
 			sw.stop(true);
 			System.out.println("got all docs: "+docs.size());
 			
@@ -314,7 +314,7 @@ public class TrpServerConnTest {
 				System.out.println("i = "+i);
 				
 				sw.start();
-				docs = conn.getAllDocs(colId, i, ps, null, null);
+				docs = conn.getAllDocs(colId, i, ps, null, null, 0);
 				sw.stop(true);
 				System.out.println("got docs: "+docs.size());
 			}
@@ -491,7 +491,7 @@ public class TrpServerConnTest {
 	}
 	
 	static List<DocumentSelectionDescriptor> getDds(TrpServerConn conn, int collId) throws Exception {
-		List<TrpDocMetadata> docMds = conn.getAllDocs(collId, 0, 0, null, null);
+		List<TrpDocMetadata> docMds = conn.getAllDocs(collId, 0, 0, null, null, 0);
 		System.out.println("n-docs = "+docMds.size());
 		List<DocumentSelectionDescriptor> dds = new ArrayList<>();
 		

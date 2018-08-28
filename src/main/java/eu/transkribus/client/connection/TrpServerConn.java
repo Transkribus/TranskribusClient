@@ -345,26 +345,27 @@ public class TrpServerConn extends ATrpServerConn {
 		return Integer.parseInt(getObject(target, String.class));
 	}
 		
-	private WebTarget getAllDocsTarget(final int colId, int index, int nValues, String sortFieldName, String sortDirection) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
+	private WebTarget getAllDocsTarget(final int colId, int index, int nValues, String sortFieldName, String sortDirection, int deleted) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.LIST_PATH)
 				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
 				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
 				.queryParam(RESTConst.SORT_COLUMN_PARAM, sortFieldName)
-				.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
+				.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection)
+				.queryParam(RESTConst.IS_DELETED_FLAG, deleted);
 		return docTarget;
 	}
 	
 	public List<TrpDocMetadata> getAllDocs(final int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return getAllDocs(colId, 0, 0, null, null);
+		return getAllDocs(colId, 0, 0, null, null, 0);
 	}	
 	
-	public List<TrpDocMetadata> getAllDocs(final int colId, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget docTarget = getAllDocsTarget(colId, index, nValues, sortFieldName, sortDirection);
+	public List<TrpDocMetadata> getAllDocs(final int colId, int index, int nValues, String sortFieldName, String sortDirection, int deleted) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget docTarget = getAllDocsTarget(colId, index, nValues, sortFieldName, sortDirection, deleted);
 		return getList(docTarget, DOC_MD_LIST_TYPE);
 	}
 	
-	public Future<List<TrpDocMetadata>> getAllDocsAsync(final int colId, int index, int nValues, String sortFieldName, String sortDirection, InvocationCallback<List<TrpDocMetadata>> callback) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
-		WebTarget docTarget = getAllDocsTarget(colId, index, nValues, sortFieldName, sortDirection);
+	public Future<List<TrpDocMetadata>> getAllDocsAsync(final int colId, int index, int nValues, String sortFieldName, String sortDirection, int deleted, InvocationCallback<List<TrpDocMetadata>> callback) /*throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException*/ {
+		WebTarget docTarget = getAllDocsTarget(colId, index, nValues, sortFieldName, sortDirection, deleted);
 //		return docTarget.request(DOC_MD_LIST_TYPE).async().get(callback);
 		return docTarget.request(DEFAULT_RESP_TYPE).async().get(callback);
 	}
@@ -461,11 +462,11 @@ public class TrpServerConn extends ATrpServerConn {
 		postEntity(docTarget, docMd, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
-	public void deleteDoc(int colId, int docId) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
-		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId);
+	public void deleteDoc(int colId, int docId, boolean reallyDelete) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
+		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).queryParam(RESTConst.DELETE_PATH, reallyDelete);
 		delete(docTarget);
 	}
-	
+		
 	public void updateTagDefsCollection(final int colId, final String tagDefs) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId)
 				.path(RESTConst.TAG_DEF_PARAM);
