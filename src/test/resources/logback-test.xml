@@ -19,29 +19,10 @@
 			<pattern>%-5p [%t] %c - %m%n</pattern>
 		</encoder>
 	</appender>
-	<!-- <appender name="CONSOLE_ERR" class="ch.qos.logback.core.ConsoleAppender"> -->
-	<!-- <target>System.err</target> -->
-	<!-- <filter.ID>org.apache.log4j.varia.LevelRangeFilter</filter.ID> -->
-	<!-- <filter.ID.LevelMin>WARN</filter.ID.LevelMin> -->
-	<!-- <filter.ID.LevelMax>FATAL</filter.ID.LevelMax> -->
-	<!-- <encoder> -->
-	<!-- <pattern>%-5p [%t] %c %x - %m%n</pattern> -->
-	<!-- </encoder> -->
-	<!-- </appender> -->
-	<appender name="LOGFILE"
-		class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<!--See http://logback.qos.ch/manual/appenders.html#RollingFileAppender -->
-		<!--and http://logback.qos.ch/manual/appenders.html#TimeBasedRollingPolicy -->
-		<!--for further documentation -->
-		<File>logs/TrpGui.log</File>
-		<Append>true</Append>
-		<encoder>
-			<pattern>%d [%t] %-5p %c - %m%n</pattern>
-		</encoder>
-		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>logs/TrpGui.log.%d{.yyyy-MM}</fileNamePattern>
-		</rollingPolicy>
-	</appender>    
+
+	<root level="DEBUG">
+		<appender-ref ref="CONSOLE"/>
+	</root>
     
 	<logger name="eu.transkribus" level="DEBUG">
 		<appender-ref ref="CONSOLE" />
