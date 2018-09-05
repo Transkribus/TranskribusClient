@@ -8,7 +8,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Transkribus components' version numbers -->
-		<core.version>0.0.9-SNAPSHOT</core.version>
+		<core.version>0.1.0-SNAPSHOT</core.version>
 	</properties>
 	<repositories>
 		<!-- dea artifactory: -->		
