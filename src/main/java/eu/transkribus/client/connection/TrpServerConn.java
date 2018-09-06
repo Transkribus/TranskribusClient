@@ -383,6 +383,16 @@ public class TrpServerConn extends ATrpServerConn {
 						.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
 	}
 	
+	private WebTarget getAllStrayDocsByUserTarget(int index, int nValues, String sortFieldName, String sortDirection) {
+		return baseTarget.path(RESTConst.USER_PATH).path(RESTConst.LIST_MY_DOCS_PATH)
+						.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
+						.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
+						.queryParam(RESTConst.SORT_COLUMN_PARAM, sortFieldName)
+						.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection)
+						.queryParam(RESTConst.IS_DELETED_FLAG, 0)
+						.queryParam(RESTConst.IS_STRAY_FLAG, true);
+	}
+	
 	public List<TrpDocMetadata> getAllDocsByUser(int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = getAllDocsByUserTarget(index, nValues, sortFieldName, sortDirection);
 		return getList(docTarget, DOC_MD_LIST_TYPE);
@@ -390,6 +400,12 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public Future<List<TrpDocMetadata>> getAllDocsByUserAsync(int index, int nValues, String sortFieldName, String sortDirection, InvocationCallback<List<TrpDocMetadata>> callback) {
 		WebTarget docTarget = getAllDocsByUserTarget(index, nValues, sortFieldName, sortDirection);
+		return docTarget.request(DEFAULT_RESP_TYPE).async().get(callback);
+	}
+	
+	//get all docs of a user that are not assigned in a collection
+	public Future<List<TrpDocMetadata>> getAllStrayDocsByUserAsync(int index, int nValues, String sortFieldName, String sortDirection, InvocationCallback<List<TrpDocMetadata>> callback) {
+		WebTarget docTarget = getAllStrayDocsByUserTarget(index, nValues, sortFieldName, sortDirection);
 		return docTarget.request(DEFAULT_RESP_TYPE).async().get(callback);
 	}
 	
