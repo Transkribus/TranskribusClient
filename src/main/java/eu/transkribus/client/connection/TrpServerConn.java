@@ -34,7 +34,6 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -49,13 +48,12 @@ import com.google.gson.Gson;
 
 import eu.transkribus.client.io.ASingleDocUpload;
 import eu.transkribus.client.io.TrpDocUploadHttp;
-import eu.transkribus.client.io.TrpDocUploadMultipart;
-import eu.transkribus.client.io.TrpDocUploadZipHttp;
 import eu.transkribus.client.util.BufferedFileBodyWriter;
 import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.client.util.TrpClientErrorException;
 import eu.transkribus.client.util.TrpServerErrorException;
+import eu.transkribus.core.io.FimgStoreReadConnection;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
 import eu.transkribus.core.model.beans.CitLabSemiSupervisedHtrTrainConfig;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
@@ -156,11 +154,18 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
+		
+		//FIXME retrieve the fimagestore details from the server's DB after login
+		String fimagestoreConfigName = "trpTest";
+		if(PROD_SERVER_URI.equals(uriStr)) {
+			fimagestoreConfigName = "trpProd";	
+		}
+		FimgStoreReadConnection.loadConfig(fimagestoreConfigName);
 	}
 	
 	public TrpServerConn(String uriStr, final String username, final String password) throws LoginException {
 		super(uriStr);
-		login(username, password);
+		this.login(username, password);
 	}
 	
 	public TrpServerConn(TrpServer server) throws LoginException {
@@ -818,115 +823,6 @@ public class TrpServerConn extends ATrpServerConn {
 		mp.bodyPart(imgPart);
 		
 		return docTarget.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA), TrpPage.class);
-	}
-	
-	
-//	public Pair<TrpDocUploadSinglePages, Thread> postTrpDocSinglePages(final int colId, TrpDoc doc){
-//		//create Empty doc with nr. of pages
-//		
-//		//start page upload thread
-//	}
-	
-//	public Pair<TrpDocUploadZip, Thread> postTrpDoc(final int colId, TrpDoc doc) throws IOException{
-//		return postTrpDoc(colId, doc, null);
-//	}
-	
-	
-//	/** This method fails when the zipped document is bigger than MAX_INTEGER-1 bytes as Jersey has that internal limit
-//	 * @param doc"}/{"
-//	 * @param o
-//	 * @return
-//	 * @throws IOException
-//	 */
-//	public Pair<TrpDocUploadZip, Thread> postTrpDoc(final int colId, TrpDoc doc, IProgressMonitor monitor) throws IOException{
-//		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH);
-//		if(doc == null) {
-//			throw new IllegalArgumentException("TrpDoc is null!");
-//		}
-//				
-//		//TODO connection extends observable!??
-//		
-//		TrpDocUploadZip upload = new TrpDocUploadZip(target, doc, monitor);
-//		upload.call();
-//		
-////		upload.addObserver(status);
-////		if (o!=null)
-////			upload.addObserver(o);
-//		
-////		Thread t = new Thread(upload);
-////		t.run();
-//
-//		return Pair.of(upload, t);
-////		return upload;
-//	}
-	
-//	public void testPostTrpDoc(File testFile) throws IOException{
-//		WebTarget target = baseTarget.path(RESTConst.DOC_PATH).path(RESTConst.UPLOAD_PATH);
-//		if(testFile == null) {
-//			throw new IllegalArgumentException("file is null!");
-//		}
-//		
-//		Entity<File> ent = Entity.entity(testFile, MediaType.APPLICATION_OCTET_STREAM);
-//
-//		final String sContentDisposition = "attachment; " + "filename=\"" + testFile.getName()
-//				+ "\"; " + "size=" + testFile.length();
-////		final String sContentLength = ""+testFile.length();
-//		Integer.parseInt(""+testFile.length());
-//		logger.info("File size = " + testFile.length() + ";");
-//		
-//		BufferedFileBodyWriter bfbw = new BufferedFileBodyWriter();
-////		bfbw.addObserver(o);
-//
-//		target.register(bfbw);
-//		Response response = target.request()
-//				.header("Content-Disposition", sContentDisposition)
-////				.header("Content-Length", sContentLength)
-//				.post(ent);
-//		logger.info("Request sent. " + response.getStatusInfo().toString());
-//	}
-	
-	@Deprecated
-	public Pair<TrpDocUploadMultipart, Thread> postTrpDocMultipart(final int colId, TrpDoc doc, Observer o) throws IOException{
-		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH_MULTIPART);
-		if(doc == null) {
-			throw new IllegalArgumentException("TrpDoc is null!");
-		}
-				
-		//TODO connection extends observable!??
-		
-		TrpDocUploadMultipart upload = new TrpDocUploadMultipart(target, doc);
-		BufferedFileBodyWriter bfbw = new BufferedFileBodyWriter();
-		bfbw.addObserver(o);
-		target.register(bfbw);
-//		upload.addObserver(status);
-		if (o!=null)
-			upload.addObserver(o);
-		
-		Thread t = new Thread(upload);
-		t.run();
-
-		return Pair.of(upload, t);
-//		return upload;
-	}
-	
-	/**
-	 * Use uploadTrpDoc() instead
-	 * 
-	 * @param colId
-	 * @param doc
-	 * @param monitor
-	 * @throws Exception
-	 */
-	@Deprecated
-	public void postTrpDoc(final int colId, TrpDoc doc, IProgressMonitor monitor) throws Exception {
-		if (doc == null) {
-			throw new IllegalArgumentException("TrpDoc is null!");
-		}
-		
-		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.UPLOAD_PATH);
-		ASingleDocUpload upload = new TrpDocUploadZipHttp(target, doc, monitor);
-		
-		upload.call();
 	}
 	
 	/**
