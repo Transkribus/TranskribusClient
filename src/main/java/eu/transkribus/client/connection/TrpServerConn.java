@@ -17,6 +17,7 @@ import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.Future;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
@@ -75,6 +76,7 @@ import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpErrorRate;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpHtr;
+import eu.transkribus.core.model.beans.TrpJobImplRegistry;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTotalTranscriptStatistics;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
@@ -108,6 +110,7 @@ import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
+import eu.transkribus.core.util.SebisStopWatch.SSW;
 
 /**
  * Singleton implementation of ATrpServerConn.
@@ -145,12 +148,12 @@ public class TrpServerConn extends ATrpServerConn {
 //	private static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
 //	private static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
 //	private static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
-
-	// Singleton instance of this
-//	private static TrpServerConn conn = null;
-//	public ClientStatus status = new ClientStatus();
 	
-	//static Gson gson = new Gson();
+	/**
+	 * a list of JobImpls identified by Strings where the server side execution is restricted and the logged in user is allowed to execute them.<br>
+	 * The list is accessed with {@link #isUserAllowedForJob(String)}. If it is not yet initialized, this will be done with a call of {@link #getJobAcl()}
+	 */
+	private List<String> jobAcl = null;
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
@@ -182,6 +185,12 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public static TrpServerConn connectToTestServer(String username, String password) throws LoginException {
 		return new TrpServerConn(ATrpServerConn.TEST_SERVER_URI, username, password);
+	}
+	
+	@Override
+	public void close() {
+		super.close();
+		jobAcl = null;
 	}
 	
 //	private TrpServerConn(String uriStr, final String user, final String pw) throws LoginException {
@@ -2015,13 +2024,46 @@ public class TrpServerConn extends ATrpServerConn {
 		checkStatus(resp, target);
 	}
 		
-	public boolean isUserAllowedForJob(String jobImpl) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	@Deprecated
+	public boolean isUserAllowedForJobOld(String jobImpl) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget t = baseTarget.path(RESTConst.USER_PATH)
 										.path(RESTConst.IS_USER_ALLOWED_FOR_JOB_PATH)
 										.queryParam(RESTConst.JOB_IMPL_PARAM, jobImpl);
 		
 		String isAllowed = getObject(t, String.class);
 		return StringUtils.equals("true", isAllowed);
+	}
+	
+	public boolean isUserAllowedForJob(String jobImpl) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		try {
+			List<String> acl = getJobAcl();
+			if(acl == null) {
+				return false;
+			}
+			return acl.stream().anyMatch(j -> j.equals(jobImpl));
+		} catch (TrpClientErrorException e) {
+			if(e.getResponse().getStatus() == 404) {
+				//TODO remove this after server update 2.6.0
+				logger.warn("Server does not provide job ACL yet! Falling back to old endpoint.");
+				return isUserAllowedForJobOld(jobImpl);
+			} else {
+				throw e;
+			}
+		}
+	}
+	
+	public List<String> getJobAcl() throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(jobAcl == null) {
+			logger.debug("Job ACL is not initialized. Doint that now...");
+			SSW sw = new SSW();
+			sw.start();
+			WebTarget target = baseTarget.path(RESTConst.USER_PATH)
+									.path(RESTConst.JOB_ACL_PATH);
+			List<TrpJobImplRegistry> regList = getList(target, JOB_IMPL_REG_LIST_TYPE, MediaType.APPLICATION_JSON_TYPE);
+			jobAcl = regList.stream().map(r -> r.getJobImpl()).collect(Collectors.toList());
+			sw.stop("Loaded ACL from server: ", logger);
+		}
+		return jobAcl;
 	}
 
 	public TrpCrowdProject getCrowdProject(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {

@@ -47,6 +47,7 @@ import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpEvent;
+import eu.transkribus.core.model.beans.TrpJobImplRegistry;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.adapters.MetsMessageBodyWriter;
@@ -82,6 +83,7 @@ public abstract class ATrpServerConn implements Closeable {
 	public static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
 	public static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
 	public static final GenericType<List<String>> STRING_LIST_TYPE = new GenericType<List<String>>() {};
+	public static final GenericType<List<TrpJobImplRegistry>> JOB_IMPL_REG_LIST_TYPE = new GenericType<List<TrpJobImplRegistry>>() {};
 	
 	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
 	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";
