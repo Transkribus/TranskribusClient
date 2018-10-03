@@ -24,20 +24,20 @@
 		<appender-ref ref="CONSOLE"/>
 	</root>
     
-	<logger name="eu.transkribus" level="DEBUG">
+	<logger name="eu.transkribus" additivity="false" level="DEBUG">
 		<appender-ref ref="CONSOLE" />
-		<appender-ref ref="LOGFILE" />
+<!-- 		<appender-ref ref="LOGFILE" /> -->
 	</logger>    
-	<logger name="org.dea" level="INFO">
+	<logger name="org.dea" additivity="false" level="INFO">
 		<appender-ref ref="CONSOLE" />
-		<appender-ref ref="LOGFILE" />
+<!-- 		<appender-ref ref="LOGFILE" /> -->
 	</logger>    
-	<logger name="org.eclipse" level="INFO">
+	<logger name="org.eclipse" additivity="false" level="INFO">
 		<appender-ref ref="CONSOLE" />
-		<appender-ref ref="LOGFILE" />
+<!-- 		<appender-ref ref="LOGFILE" /> -->
 	</logger>
-	<logger name="org.apache" level="ERROR">
+	<logger name="org.apache" additivity="false" level="ERROR">
 		<appender-ref ref="CONSOLE" />
-		<appender-ref ref="LOGFILE" />
+<!-- 		<appender-ref ref="LOGFILE" /> -->
 	</logger>
 </configuration>
