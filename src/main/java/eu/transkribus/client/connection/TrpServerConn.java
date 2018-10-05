@@ -74,6 +74,7 @@ import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpErrorRate;
+import eu.transkribus.core.model.beans.TrpErrorRateResult;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpJobImplRegistry;
@@ -1682,7 +1683,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
 	}
 	
-	public TrpErrorRate computeErrorRate(String refKey, String hypKey) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+	public TrpErrorRateResult computeErrorRate(String refKey, String hypKey) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
 		if(refKey == null || hypKey == null){
 			throw new IllegalArgumentException("A key is null!");
 		}
@@ -1690,7 +1691,7 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.REF_KEY_PARAM, refKey);
 		target = target.queryParam(RESTConst.KEY_PARAM, hypKey);
 		
-		return super.getObject(target, TrpErrorRate.class, MediaType.APPLICATION_XML_TYPE);
+		return super.getObject(target, TrpErrorRateResult.class, MediaType.APPLICATION_XML_TYPE);
 		
 	}
 	
