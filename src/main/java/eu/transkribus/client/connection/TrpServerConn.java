@@ -73,7 +73,6 @@ import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
-import eu.transkribus.core.model.beans.TrpErrorRate;
 import eu.transkribus.core.model.beans.TrpErrorRateResult;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpHtr;
@@ -620,6 +619,65 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues);
 		return getList(target, ACTION_LIST_TYPE);
+	}
+	
+	public List<TrpAction> listActionsNew(Integer typeId, int colId, int docId, int nValues) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+		return listActions(typeId, null, colId, docId, null, null, null, null, null, 0, nValues, null, null);
+	}
+	
+	public TrpAction getMostRecentDocLoadAction() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
+		final int typeId = 4; // = Access Document
+		List<TrpAction> list = listActions(typeId, null, null, null, null, null, null, null, null, 0, 1, null, null);
+		if(list == null ||  list.size() != 1) {
+			logger.warn("Could not retrieve most recent doc load action from server!");
+			return null;
+		}
+		return list.get(0);
+	}
+	
+	/**
+	 * Method for retrieving user actions, enabling the whole functionality of the server side
+	 * 
+	 * @param typeId
+	 * @param userId
+	 * @param colId
+	 * @param docId
+	 * @param pageId
+	 * @param pageNr
+	 * @param clientId
+	 * @param start
+	 * @param end
+	 * @param index
+	 * @param nValues
+	 * @param sortColumnField
+	 * @param sortDirection
+	 * @return
+	 * @throws TrpServerErrorException
+	 * @throws TrpClientErrorException
+	 * @throws SessionExpiredException
+	 */
+	private List<TrpAction> listActions(Integer typeId, Integer userId, Integer colId, Integer docId, Integer pageId, 
+			Integer pageNr, Integer clientId, Long start, Long end, int index, int nValues, String sortColumnField, String sortDirection
+			) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget target = baseTarget.path(RESTConst.ACTIONS_PATH).path(RESTConst.LIST_PATH);
+		target = target.queryParam(RESTConst.TYPE_ID_PARAM, typeId)
+			.queryParam(RESTConst.USER_ID_PARAM, userId)
+			.queryParam(RESTConst.COLLECTION_ID_PARAM, colId)
+			.queryParam(RESTConst.DOC_ID_PARAM, docId)
+			.queryParam(RESTConst.PAGE_ID_PARAM, pageId)
+			.queryParam(RESTConst.PAGE_NR_PARAM, pageNr)
+			.queryParam(RESTConst.CLIENT_ID_PARAM, clientId)
+			.queryParam(RESTConst.START_PARAM, start)
+			.queryParam(RESTConst.END_PARAM, end)
+			.queryParam(RESTConst.SORT_COLUMN_PARAM, sortColumnField)
+			.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
+		if(index > 0) {
+			target = target.queryParam(RESTConst.PAGING_INDEX_PARAM, index);
+		}
+		if(nValues > 0) {
+			target = target.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues);
+		}
+		return super.getList(target, ACTION_LIST_TYPE, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
 	public boolean canManageCollection(int colId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
@@ -2055,7 +2113,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public List<String> getJobAcl() throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(jobAcl == null) {
-			logger.debug("Job ACL is not initialized. Doint that now...");
+			logger.debug("Job ACL is not initialized. Doing that now...");
 			SSW sw = new SSW();
 			sw.start();
 			WebTarget target = baseTarget.path(RESTConst.USER_PATH)
@@ -2190,6 +2248,4 @@ public class TrpServerConn extends ATrpServerConn {
 				.path(RESTConst.STATS_PATH);
 		return getObject(docTarget, TrpTotalTranscriptStatistics.class);
 	}
-	
-
 }
