@@ -1749,7 +1749,7 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.REF_KEY_PARAM, refKey);
 		target = target.queryParam(RESTConst.KEY_PARAM, hypKey);
 		
-		return super.getObject(target, TrpErrorRateResult.class, MediaType.APPLICATION_XML_TYPE);
+		return super.getObject(target, TrpErrorRateResult.class, MediaType.APPLICATION_JSON_TYPE);
 		
 	}
 	
