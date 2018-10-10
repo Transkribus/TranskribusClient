@@ -610,24 +610,25 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(docTarget, PAGELOCK_LIST_TYPE);
 	}
 	
-	public List<TrpAction> listActions(Integer typeId, int colId, int docId, int nValues) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
-		WebTarget target = baseTarget
-				.path(RESTConst.ACTIONS_PATH)
-				.path(RESTConst.LIST_PATH);
-		target = target.queryParam(RESTConst.TYPE_ID_PARAM, typeId);
-		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
-		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
-		target = target.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues);
-		return getList(target, ACTION_LIST_TYPE);
+	/**
+	 * Check equivalence of result and replace method above with this
+	 * 
+	 * @param typeId
+	 * @param colId
+	 * @param docId
+	 * @param nValues
+	 * @return
+	 * @throws SessionExpiredException
+	 * @throws ServerErrorException
+	 * @throws ClientErrorException
+	 */
+	public List<TrpAction> listActions(Integer typeId, Integer colId, Integer docId, int nValues) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+		return listActions(typeId != null ? new Integer[] { typeId } : null, null, colId, docId, null, null, null, null, null, 0, nValues, null, null);
 	}
 	
-	public List<TrpAction> listActionsNew(Integer typeId, int colId, int docId, int nValues) throws SessionExpiredException, ServerErrorException, ClientErrorException{
-		return listActions(typeId, null, colId, docId, null, null, null, null, null, 0, nValues, null, null);
-	}
-	
-	public TrpAction getMostRecentDocLoadAction() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
-		final int typeId = 4; // = Access Document
-		List<TrpAction> list = listActions(typeId, null, null, null, null, null, null, null, null, 0, 1, null, null);
+	public TrpAction getMostRecentDocumentAction() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
+		final Integer[] typeIds = {1, 3, 4}; // = Save | Status Change | Access Document
+		List<TrpAction> list = listActions(typeIds, null, null, null, null, null, null, null, null, 0, 1, null, null);
 		if(list == null ||  list.size() != 1) {
 			logger.warn("Could not retrieve most recent doc load action from server!");
 			return null;
@@ -656,12 +657,11 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws TrpClientErrorException
 	 * @throws SessionExpiredException
 	 */
-	private List<TrpAction> listActions(Integer typeId, Integer userId, Integer colId, Integer docId, Integer pageId, 
+	private List<TrpAction> listActions(Integer[] typeIds, Integer userId, Integer colId, Integer docId, Integer pageId, 
 			Integer pageNr, Integer clientId, Long start, Long end, int index, int nValues, String sortColumnField, String sortDirection
 			) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
 		WebTarget target = baseTarget.path(RESTConst.ACTIONS_PATH).path(RESTConst.LIST_PATH);
-		target = target.queryParam(RESTConst.TYPE_ID_PARAM, typeId)
-			.queryParam(RESTConst.USER_ID_PARAM, userId)
+		target = target.queryParam(RESTConst.USER_ID_PARAM, userId)
 			.queryParam(RESTConst.COLLECTION_ID_PARAM, colId)
 			.queryParam(RESTConst.DOC_ID_PARAM, docId)
 			.queryParam(RESTConst.PAGE_ID_PARAM, pageId)
@@ -671,6 +671,11 @@ public class TrpServerConn extends ATrpServerConn {
 			.queryParam(RESTConst.END_PARAM, end)
 			.queryParam(RESTConst.SORT_COLUMN_PARAM, sortColumnField)
 			.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
+		
+		if(typeIds != null && typeIds.length > 0){
+			target = target.queryParam(RESTConst.TYPE_ID_PARAM, (Object[])typeIds);
+		}
+		
 		if(index > 0) {
 			target = target.queryParam(RESTConst.PAGING_INDEX_PARAM, index);
 		}
