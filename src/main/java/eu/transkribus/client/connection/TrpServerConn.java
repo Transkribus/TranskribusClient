@@ -1304,9 +1304,11 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getList(target, new GenericType<List<HtrModel>>(){});
 	}
 	
-	public List<TrpHtr> getHtrs(final int colId, final String provider) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public List<TrpHtr> getHtrs(final int colId, final String provider) throws SessionExpiredException, ServerErrorException, ClientErrorException {		
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path(RESTConst.LIST_PATH);
-		target = target.queryParam(RESTConst.PROVIDER_PARAM, provider);
+		if(provider != null) {
+			target = target.queryParam(RESTConst.PROVIDER_PARAM, provider);
+		}
 		return super.getList(target, new GenericType<List<TrpHtr>>(){});
 	}
 	
