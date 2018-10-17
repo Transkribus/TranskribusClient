@@ -84,7 +84,7 @@ public class ATrpClientTest {
 	}
 	
 	public List<DocumentSelectionDescriptor> getDds(int collId) throws Exception {
-		List<TrpDocMetadata> docMds = client.getAllDocs(collId, 0, 0, null, null, 0);
+		List<TrpDocMetadata> docMds = client.getAllDocs(collId, 0, 0, null, null, false);
 		System.out.println("n-docs = "+docMds.size());
 		List<DocumentSelectionDescriptor> dds = new ArrayList<>();
 		
