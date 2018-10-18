@@ -16,6 +16,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -2116,6 +2117,15 @@ public class TrpServerConn extends ATrpServerConn {
 		}
 	}
 	
+	/**
+	 * Retrieves all JobImplRegistry entries, where the logged in user is enabled, from the server and returns a list with the jobImpl strings.<br>
+	 * The list is cached after the first call so a new login is required for refreshing list.
+	 * 
+	 * @return
+	 * @throws SessionExpiredException
+	 * @throws ServerErrorException
+	 * @throws ClientErrorException
+	 */
 	public List<String> getJobAcl() throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(jobAcl == null) {
 			logger.debug("Job ACL is not initialized. Doing that now...");
@@ -2128,6 +2138,39 @@ public class TrpServerConn extends ATrpServerConn {
 			sw.stop("Loaded ACL from server: ", logger);
 		}
 		return jobAcl;
+	}
+	
+	/**
+	 * Calls {@link #getJobAcl()} and maps values to known JobImpl enum values. Unknown values are excluded.
+	 * 
+	 * @return
+	 * @throws SessionExpiredException
+	 * @throws ServerErrorException
+	 * @throws ClientErrorException
+	 */
+	public List<JobImpl> getJobImplAcl() throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		return getJobImplAcl(null);
+	}
+	
+	/**
+	 * Calls {@link #getJobAcl()} and maps values to known JobImpl enum values. Unknown values are excluded.
+	 * 
+	 * @param filter a predicate to further filter the JobImpl values returned by this method. If filter is null then all values will be returned.
+	 * @return
+	 * @throws ClientErrorException 
+	 * @throws ServerErrorException 
+	 * @throws SessionExpiredException 
+	 */
+	public List<JobImpl> getJobImplAcl(Predicate<JobImpl> filter) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(filter == null) {
+			filter = j -> true;
+		}
+		return getJobAcl().stream()
+				//exclude jobImpls unknown to this gui version
+				.filter(s -> JobImpl.fromStr(s) != null)
+				.map(s -> JobImpl.fromStr(s))
+				.filter(filter)
+				.collect(Collectors.toList());
 	}
 
 	public TrpCrowdProject getCrowdProject(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
