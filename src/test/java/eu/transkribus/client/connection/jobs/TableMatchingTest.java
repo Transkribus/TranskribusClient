@@ -18,7 +18,7 @@ import eu.transkribus.core.model.beans.job.TrpJobStatus;
 public class TableMatchingTest extends ATrpClientTest {
 	private static final Logger logger = LoggerFactory.getLogger(TableMatchingTest.class);
 	
-	@Test
+//	@Test
 	public void tableMatchingTest() throws SessionExpiredException, ClientErrorException, ServerErrorException {
 		final int docId = 4263;
 		final int templateTsId = 35165;

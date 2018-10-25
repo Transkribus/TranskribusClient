@@ -13,7 +13,7 @@ import eu.transkribus.core.model.beans.job.TrpJobStatus;
 
 public class HtrTest extends ATrpClientTest {
 	
-	@Test
+//	@Test
 	public void testHtrWithDescriptor() throws Exception {
 		final int colId = 2;
 		final int docId = 2278;
