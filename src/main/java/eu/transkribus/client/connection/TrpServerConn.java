@@ -62,6 +62,7 @@ import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
 import eu.transkribus.core.model.beans.DocumentUploadDescriptor;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.EdOption;
+import eu.transkribus.core.model.beans.ExportParameters;
 import eu.transkribus.core.model.beans.HtrModel;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
@@ -109,6 +110,7 @@ import eu.transkribus.core.program_updater.HttpProgramPackageFile;
 import eu.transkribus.core.rest.JobConst;
 import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.GsonUtil;
+import eu.transkribus.core.util.JaxbUtils;
 import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
 import eu.transkribus.core.util.SebisStopWatch.SSW;
@@ -1356,6 +1358,70 @@ public class TrpServerConn extends ATrpServerConn {
 			DocxExportPars docxPars
 			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.EXPORT_PATH + "_v2");
+		
+		if (commonPars!=null && !StringUtils.isEmpty(commonPars.getPages())) {
+			target = target.queryParam(RESTConst.PAGES_PARAM, commonPars.getPages());
+		}
+				
+		ExportParameters params = new ExportParameters();
+		params.setCommonPars(commonPars);
+		params.setAltoPars(altoPars);
+		params.setPdfPars(pdfPars);
+		params.setTeiPars(teiPars);
+		params.setDocxPars(docxPars);
+		params.setDocDescriptorList(dsds);
+				
+		try {
+			logger.debug("ExportParameters JSON: " + JaxbUtils.marshalToJsonString(params, true));
+		} catch (JAXBException e) {
+			logger.error("Could log export parameters as JSON!", e);
+		}
+		return postEntityReturnObject(target, params, MediaType.APPLICATION_JSON_TYPE, 
+		String.class, MediaType.TEXT_PLAIN_TYPE);		
+	}
+	
+	public String exportDocument(int colId, int docId,			
+			CommonExportPars commonPars,
+			AltoExportPars altoPars,
+			PdfExportPars pdfPars,
+			TeiExportPars teiPars,
+			DocxExportPars docxPars
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.EXPORT_PATH + "_v2");
+		
+		if (commonPars!=null && !StringUtils.isEmpty(commonPars.getPages())) {
+			target = target.queryParam(RESTConst.PAGES_PARAM, commonPars.getPages());
+		}
+				
+		ExportParameters params = new ExportParameters();
+		params.setCommonPars(commonPars);
+		params.setAltoPars(altoPars);
+		params.setPdfPars(pdfPars);
+		params.setTeiPars(teiPars);
+		params.setDocxPars(docxPars);
+		
+		try {
+			logger.debug("ExportParameters JSON: " + JaxbUtils.marshalToJsonString(params, true));
+		} catch (JAXBException e) {
+			logger.error("Could log export parameters as JSON!", e);
+		}
+		return postEntityReturnObject(target, params, MediaType.APPLICATION_JSON_TYPE, 
+		String.class, MediaType.TEXT_PLAIN_TYPE);		
+	}
+	
+	/**
+	 * The endpoint used here is no longer supported as it would only accept JSON with escaped JSON strings inside.
+	 */
+	@Deprecated
+	public String exportDocumentsOld(int colId, List<DocumentSelectionDescriptor> dsds,			
+			CommonExportPars commonPars,
+			AltoExportPars altoPars,
+			PdfExportPars pdfPars,
+			TeiExportPars teiPars,
+			DocxExportPars docxPars
+			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.EXPORT_PATH);
 		
 		if (commonPars!=null && !StringUtils.isEmpty(commonPars.getPages())) {
@@ -1386,7 +1452,11 @@ public class TrpServerConn extends ATrpServerConn {
 		String.class, MediaType.APPLICATION_XML_TYPE);		
 	}
 	
-	public String exportDocument(int colId, int docId,			
+	/**
+	 * The endpoint used here is no longer supported as it would only accept JSON with escaped JSON strings inside.
+	 */
+	@Deprecated
+	public String exportDocumentOld(int colId, int docId,			
 			CommonExportPars commonPars,
 			AltoExportPars altoPars,
 			PdfExportPars pdfPars,
@@ -1420,56 +1490,6 @@ public class TrpServerConn extends ATrpServerConn {
 		logger.debug("json export string example: " + GsonUtil.toJson(parAsJsonMap));
 		return postEntityReturnObject(target, GsonUtil.toJson(parAsJsonMap), MediaType.APPLICATION_JSON_TYPE, 
 		String.class, MediaType.APPLICATION_XML_TYPE);		
-	}
-	
-	public String exportDocument_Old(int colId, int docId, 
-			String pages, 
-			boolean doWriteMets, boolean doWriteImages, boolean doExportPageXml, 
-			boolean doExportAltoXml, boolean splitIntoWordsInAltoXml, boolean doWritePdf, boolean doWriteTei, boolean doWriteDocx,
-			boolean doWriteTagsXlsx, boolean doWriteTablesXlsx, 
-			boolean doPdfImagesOnly, boolean doPdfImagesPlusText, boolean doPdfWithTextPages, boolean doPdfWithTags, 
-			boolean doTeiWithNoZones, boolean doTeiWithZonePerRegion, boolean doTeiWithZonePerLine, boolean doTeiWithZonePerWord, boolean doTeiWithLineTags, boolean doTeiWithLineBreaks, 
-			boolean doDocxWithTags, boolean doDocxPreserveLineBreaks, boolean doDocxMarkUnclear, boolean doDocxKeepAbbrevs, boolean doDocxExpandAbbrevs, boolean doDocxSubstituteAbbrevs, 
-			boolean doWordBased, boolean doBlackening,
-			boolean doCreateTitle, String useVersionStatus) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
-				.path(""+colId)
-				.path(""+docId)
-				.path(RESTConst.EXPORT_PATH)
-				.queryParam(RESTConst.PAGES_PARAM, pages)
-				.queryParam(RESTConst.WRITE_METS_PARAM, doWriteMets)
-				.queryParam(RESTConst.DO_WRITE_IMAGES_PARAM, doWriteImages)
-				.queryParam(RESTConst.DO_EXPORT_PAGE_PARAM, doExportPageXml)
-				.queryParam(RESTConst.DO_EXPORT_ALTO_PARAM, doExportAltoXml)
-				.queryParam(RESTConst.DO_SPLIT_WORDS_IN_ALTO_PARAM, splitIntoWordsInAltoXml)
-				.queryParam(RESTConst.WRITE_PDF_PARAM, doWritePdf)
-				.queryParam(RESTConst.WRITE_TEI_PARAM, doWriteTei)
-				.queryParam(RESTConst.WRITE_DOCX_PARAM, doWriteDocx)
-				.queryParam(RESTConst.WRITE_TAGS_EXCEL_PARAM, doWriteTagsXlsx)
-				.queryParam(RESTConst.WRITE_TABLES_EXCEL_PARAM, doWriteTablesXlsx)
-				.queryParam(RESTConst.DO_PDF_IMAGES_ONLY_PARAM, doPdfImagesOnly)
-				.queryParam(RESTConst.DO_PDF_IMAGES_PLUS_TEXT_PARAM, doPdfImagesPlusText)
-				.queryParam(RESTConst.DO_PDF_EXTRA_TEXT_PARAM, doPdfWithTextPages)
-				.queryParam(RESTConst.DO_PDF_HIGHLIGHT_TAGS_PARAM, doPdfWithTags)
-				.queryParam(RESTConst.DO_TEI_NO_ZONES_PARAM, doTeiWithNoZones)
-				.queryParam(RESTConst.DO_TEI_REGION_ZONE_PARAM, doTeiWithZonePerRegion)
-				.queryParam(RESTConst.DO_TEI_LINE_ZONE_PARAM, doTeiWithZonePerLine)
-				.queryParam(RESTConst.DO_TEI_WORD_ZONE_PARAM, doTeiWithZonePerWord)
-				.queryParam(RESTConst.DO_TEI_LINE_TAGS_PARAM, doTeiWithLineTags)
-				.queryParam(RESTConst.DO_TEI_LINE_BREAKS_PARAM, doTeiWithLineBreaks)
-				.queryParam(RESTConst.DO_DOCX_EXPORT_TAGS, doDocxWithTags)
-				.queryParam(RESTConst.DO_DOCX_PRESERVE_BREAKS_PARAM, doDocxPreserveLineBreaks)
-				.queryParam(RESTConst.DO_DOCX_MARK_UNCLEAR_PARAM, doDocxMarkUnclear)
-				.queryParam(RESTConst.DO_DOCX_KEEP_ABBREVS_PARAM, doDocxKeepAbbrevs)
-				.queryParam(RESTConst.DO_DOCX_EXPAND_ABBREVS_PARAM, doDocxExpandAbbrevs)
-				.queryParam(RESTConst.DO_DOCX_SUBSTITUTE_ABBREVS_PARAM, doDocxSubstituteAbbrevs)
-				.queryParam(RESTConst.DO_WORD_BASED_EXPORT_PARAM, doWordBased)
-				.queryParam(RESTConst.DO_BLACKENING_PARAM, doBlackening)
-				.queryParam(RESTConst.DO_CREATE_TITLE_PARAM, doCreateTitle)
-				.queryParam(RESTConst.USE_VERSION_STATUS_PARAM, useVersionStatus);
-		
-		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
-				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 
 	public List<TrpUser> findUsers(String username, String firstName, String lastName, boolean exactMatch, boolean caseSensitive) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
