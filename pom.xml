@@ -8,7 +8,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- Transkribus components' version numbers -->
-		<core.version>0.1.4-SNAPSHOT</core.version>
+		<core.version>0.1.5-SNAPSHOT</core.version>
 		<jersey.version>2.7</jersey.version>
 		<!-- the server uses 2.22.2. TODO switch -->
 <!-- 		<jersey.version>2.22.2</jersey.version> -->
