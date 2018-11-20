@@ -2006,6 +2006,7 @@ public class TrpServerConn extends ATrpServerConn {
 		t = JerseyUtils.queryParam(t, RESTConst.EXACT_MATCH_PARAM, exactMatch);
 		t = JerseyUtils.queryParam(t, RESTConst.CASE_SENSITIVE_PARAM, caseSensitive);
 		t = JerseyUtils.queryParam(t, RESTConst.ATTRIBUTES_PARAM, attributesJson);
+		logger.debug("searching tags target uri = "+t.getUri());
 		
 		return t;
 	}
