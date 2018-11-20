@@ -1358,7 +1358,7 @@ public class TrpServerConn extends ATrpServerConn {
 			DocxExportPars docxPars
 			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		
-		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.EXPORT_PATH + "_v2");
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.EXPORT_PATH);
 		
 		if (commonPars!=null && !StringUtils.isEmpty(commonPars.getPages())) {
 			target = target.queryParam(RESTConst.PAGES_PARAM, commonPars.getPages());
@@ -1388,12 +1388,11 @@ public class TrpServerConn extends ATrpServerConn {
 			TeiExportPars teiPars,
 			DocxExportPars docxPars
 			) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.EXPORT_PATH + "_v2");
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.EXPORT_PATH);
 		
 		if (commonPars!=null && !StringUtils.isEmpty(commonPars.getPages())) {
 			target = target.queryParam(RESTConst.PAGES_PARAM, commonPars.getPages());
 		}
-				
 		ExportParameters params = new ExportParameters();
 		params.setCommonPars(commonPars);
 		params.setAltoPars(altoPars);
@@ -1407,11 +1406,11 @@ public class TrpServerConn extends ATrpServerConn {
 			logger.error("Could log export parameters as JSON!", e);
 		}
 		return postEntityReturnObject(target, params, MediaType.APPLICATION_JSON_TYPE, 
-		String.class, MediaType.TEXT_PLAIN_TYPE);		
+				String.class, MediaType.TEXT_PLAIN_TYPE);		
 	}
 	
 	/**
-	 * The endpoint used here is no longer supported as it would only accept JSON with escaped JSON strings inside.
+	 * This should be no longer used as the server's support for the format will be removed.
 	 */
 	@Deprecated
 	public String exportDocumentsOld(int colId, List<DocumentSelectionDescriptor> dsds,			
@@ -1453,7 +1452,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	/**
-	 * The endpoint used here is no longer supported as it would only accept JSON with escaped JSON strings inside.
+	 * This should be no longer used as the server's support for the format will be removed.
 	 */
 	@Deprecated
 	public String exportDocumentOld(int colId, int docId,			
