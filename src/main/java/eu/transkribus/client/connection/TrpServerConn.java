@@ -109,6 +109,7 @@ import eu.transkribus.core.model.builder.tei.TeiExportPars;
 import eu.transkribus.core.program_updater.HttpProgramPackageFile;
 import eu.transkribus.core.rest.JobConst;
 import eu.transkribus.core.rest.RESTConst;
+import eu.transkribus.core.util.DescriptorUtils;
 import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.JaxbUtils;
 import eu.transkribus.core.util.PageXmlUtils;
@@ -1799,6 +1800,36 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(target, EVENT_LIST_TYPE);
 	}
 	
+	public TrpJobStatus createSampleJob(int colId, List<DocumentSelectionDescriptor> descList, int nrOfLines, String sampleName, String sampleDescription) {
+		
+		
+//		JobParameters params = new JobParameters();
+//		params.setDocs(descList);
+//		params.setJobImpl(JobImpl.CreateSampleSetJob.toString());
+//		
+//		params.getParams().addParameter(JobConst.PROP_TITLE, sampleName);
+//		
+//		return duplicateDocument(colId, duplicateParams);
+		return null;
+	}
+	
+//	public String duplicateDocument(final int colId, List<DocumentSelectionDescriptor> descList, final String targetDocName, final Integer toColId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
+//		//TODO see createSampleJob()
+//		JobParameters params = new JobParameters();
+//		params.setDocs(descList);
+//		params.setJobImpl(JobImpl.DuplicateDocumentJob.toString());
+//		//TODO set targetdocName etc in parameters
+//		return duplicateDocument(colId, params);
+//	}
+	
+	private String duplicateDocument(final int colId, JobParameters duplicateParams) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
+		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId)
+				.path(RESTConst.DUPLICATE_PATH);
+		return postEntityReturnObject(docTarget, duplicateParams, MediaType.APPLICATION_XML_TYPE, 
+				TrpJobStatus.class, MediaType.APPLICATION_XML_TYPE).getJobId();
+	}
+	
 	public String duplicateDocument(final int colId, final int docId, final String targetDocName, final Integer toColId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
@@ -2316,4 +2347,6 @@ public class TrpServerConn extends ATrpServerConn {
 				.path(RESTConst.STATS_PATH);
 		return getObject(docTarget, TrpTotalTranscriptStatistics.class);
 	}
+
+	
 }
