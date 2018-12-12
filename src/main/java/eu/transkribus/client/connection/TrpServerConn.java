@@ -1800,17 +1800,14 @@ public class TrpServerConn extends ATrpServerConn {
 		return getList(target, EVENT_LIST_TYPE);
 	}
 	
-	public TrpJobStatus createSampleJob(int colId, List<DocumentSelectionDescriptor> descList, int nrOfLines, String sampleName, String sampleDescription) {
+	public String createSampleJob(int colId, List<DocumentSelectionDescriptor> descList, int nrOfLines, String sampleName, String sampleDescription) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
+		JobParameters params = new JobParameters();
+		params.setDocs(descList);
+		params.setJobImpl(JobImpl.CreateSampleDocJob.toString());
 		
+		params.getParams().addParameter(JobConst.PROP_TITLE, sampleName);
 		
-//		JobParameters params = new JobParameters();
-//		params.setDocs(descList);
-//		params.setJobImpl(JobImpl.CreateSampleSetJob.toString());
-//		
-//		params.getParams().addParameter(JobConst.PROP_TITLE, sampleName);
-//		
-//		return duplicateDocument(colId, duplicateParams);
-		return null;
+		return duplicateDocument(colId, params);
 	}
 	
 //	public String duplicateDocument(final int colId, List<DocumentSelectionDescriptor> descList, final String targetDocName, final Integer toColId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
