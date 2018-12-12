@@ -36,6 +36,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.dea.fimgstoreclient.FimgStoreGetClient;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
@@ -77,6 +78,7 @@ import eu.transkribus.core.model.beans.TrpDocDir;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpErrorRateResult;
 import eu.transkribus.core.model.beans.TrpEvent;
+import eu.transkribus.core.model.beans.TrpFImagestore;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpJobImplRegistry;
 import eu.transkribus.core.model.beans.TrpPage;
@@ -109,7 +111,6 @@ import eu.transkribus.core.model.builder.tei.TeiExportPars;
 import eu.transkribus.core.program_updater.HttpProgramPackageFile;
 import eu.transkribus.core.rest.JobConst;
 import eu.transkribus.core.rest.RESTConst;
-import eu.transkribus.core.util.DescriptorUtils;
 import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.JaxbUtils;
 import eu.transkribus.core.util.PageXmlUtils;
@@ -158,6 +159,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * The list is accessed with {@link #isUserAllowedForJob(String)}. If it is not yet initialized, this will be done with a call of {@link #getJobAcl()}
 	 */
 	private List<String> jobAcl = null;
+	private TrpFImagestore fimagestoreConfig = null;
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
@@ -195,6 +197,7 @@ public class TrpServerConn extends ATrpServerConn {
 	public void close() {
 		super.close();
 		jobAcl = null;
+		fimagestoreConfig = null;
 	}
 	
 //	private TrpServerConn(String uriStr, final String user, final String pw) throws LoginException {
@@ -260,6 +263,29 @@ public class TrpServerConn extends ATrpServerConn {
 	public void refreshSession() throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.REFRESH_PATH);
 		super.postNull(docTarget);
+	}
+	
+	public TrpFImagestore getFImagestoreConfig() throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		if(fimagestoreConfig == null) {
+			final WebTarget target = baseTarget.path(RESTConst.SYSTEM_PATH).path(RESTConst.FIMAGESTORE_DETAILS_PATH);
+			fimagestoreConfig = super.getObject(target, TrpFImagestore.class, MediaType.APPLICATION_JSON_TYPE);
+		}
+		return fimagestoreConfig;
+	}
+	
+	/**
+	 * Factory method for FimgStoreGetClient instances.<br>
+	 * The URL parts of the fimagestore to use are retrieved from the TranskribusServer once (see {@link #getFImagestoreConfig()} 
+	 * on first use and then cached until logout or disposal of this TrpServerConn object.
+	 *  
+	 * @return a new {@link FimgStoreGetClient} instance
+	 */
+	public FimgStoreGetClient newFImagestoreGetClient() {
+		try {
+			return new FimgStoreGetClient(getFImagestoreConfig());
+		} catch (TrpServerErrorException | TrpClientErrorException | SessionExpiredException e) {
+			throw new IllegalStateException("Could not retrieve file server details.", e);
+		}
 	}
 	
 	/**
