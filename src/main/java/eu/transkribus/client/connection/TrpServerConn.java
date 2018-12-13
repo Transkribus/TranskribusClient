@@ -1830,8 +1830,8 @@ public class TrpServerConn extends ATrpServerConn {
 		JobParameters params = new JobParameters();
 		params.setDocs(descList);
 		params.setJobImpl(JobImpl.CreateSampleDocJob.toString());
-		
 		params.getParams().addParameter(JobConst.PROP_TITLE, sampleName);
+		params.getParams().addParameter(JobConst.PROP_QUERY, nrOfLines);
 		
 		return duplicateDocument(colId, params);
 	}
