@@ -1836,6 +1836,14 @@ public class TrpServerConn extends ATrpServerConn {
 		return duplicateDocument(colId, params);
 	}
 	
+	public TrpJobStatus computeSampleJob(int docId, ParameterMap params) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {	
+		params.addParameter(JobConst.PROP_DOC_ID, docId);
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.COMPUTE_SAMPLE);
+		
+		return postEntityReturnObject(target, params, MediaType.APPLICATION_JSON_TYPE, 
+				TrpJobStatus.class, MediaType.APPLICATION_XML_TYPE);	
+	}
+	
 //	public String duplicateDocument(final int colId, List<DocumentSelectionDescriptor> descList, final String targetDocName, final Integer toColId) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 //		//TODO see createSampleJob()
 //		JobParameters params = new JobParameters();
@@ -2370,6 +2378,8 @@ public class TrpServerConn extends ATrpServerConn {
 				.path(RESTConst.STATS_PATH);
 		return getObject(docTarget, TrpTotalTranscriptStatistics.class);
 	}
+
+	
 
 	
 }
