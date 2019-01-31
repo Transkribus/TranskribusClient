@@ -656,6 +656,10 @@ public class TrpServerConn extends ATrpServerConn {
 		return listActions(typeId != null ? new Integer[] { typeId } : null, null, colId, docId, null, null, null, null, null, 0, nValues, null, null);
 	}
 	
+	public List<TrpAction> listActions(Integer[] typeIds, Integer colId, Integer docId, int nValues) throws SessionExpiredException, ServerErrorException, ClientErrorException{
+		return listActions(typeIds, null, colId, null, null, null, null, null, null, 0, nValues, null, null);
+	}
+	
 	public TrpAction getMostRecentDocumentAction() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		final Integer[] typeIds = {1, 3, 4}; // = Save | Status Change | Access Document
 		List<TrpAction> list = listActions(typeIds, null, null, null, null, null, null, null, null, 0, 1, null, null);
