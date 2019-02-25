@@ -494,15 +494,10 @@ public class TrpServerConn extends ATrpServerConn {
 		return Integer.parseInt(getObject(t, String.class));
 	}
 	
+	@Deprecated
 	public List<TrpWordgraph> getWordgraphs(final int colId, final int docId, final int pageNr) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget docTarget = baseTarget
-			.path(RESTConst.COLLECTION_PATH)
-			.path(""+colId)
-			.path("" + docId)
-			.path("" + pageNr)
-			.path(RESTConst.WORDGRAPHS_PATH);
-		
-		return getList(docTarget, WORDGRAPH_LIST_TYPE);
+		logger.warn("Wordgraphs are no longer stored on the server. Returning empty wordgraph list.");
+		return new ArrayList<>(0);
 	}
 	
 	
