@@ -38,22 +38,9 @@ import eu.transkribus.client.util.TrpClientErrorException;
 import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.exceptions.ClientVersionNotSupportedException;
 import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
-import eu.transkribus.core.model.beans.EdFeature;
-import eu.transkribus.core.model.beans.PageLock;
-import eu.transkribus.core.model.beans.TestBean;
-import eu.transkribus.core.model.beans.TrpAction;
-import eu.transkribus.core.model.beans.TrpCollection;
-import eu.transkribus.core.model.beans.TrpDbTag;
-import eu.transkribus.core.model.beans.TrpDocDir;
-import eu.transkribus.core.model.beans.TrpDocMetadata;
-import eu.transkribus.core.model.beans.TrpEvent;
-import eu.transkribus.core.model.beans.TrpJobImplRegistry;
-import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
-import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.adapters.MetsMessageBodyWriter;
 import eu.transkribus.core.model.beans.auth.TrpUserLogin;
 import eu.transkribus.core.model.beans.enums.OAuthProvider;
-import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.rest.RESTConst;
 
 /**
@@ -69,20 +56,6 @@ public abstract class ATrpServerConn implements Closeable {
 	 * Set DEBUG=true if you want this Connection to log all requests/responses in detail
 	 */
 	public final static boolean DEBUG = false;
-	
-	public static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
-	public static final GenericType<List<TrpCollection>> COL_LIST_TYPE = new GenericType<List<TrpCollection>>() {};
-	public static final GenericType<List<TrpDocMetadata>> DOC_MD_LIST_TYPE = new GenericType<List<TrpDocMetadata>>() {};
-	public static final GenericType<List<TrpJobStatus>> JOB_LIST_TYPE = new GenericType<List<TrpJobStatus>>() {};
-	public static final GenericType<List<PageLock>> PAGELOCK_LIST_TYPE = new GenericType<List<PageLock>>() {};
-	public static final GenericType<List<TrpAction>> ACTION_LIST_TYPE = new GenericType<List<TrpAction>>() {};
-	public static final GenericType<List<EdFeature>> ED_FEATURE_LIST_TYPE = new GenericType<List<EdFeature>>() {};
-	public static final GenericType<List<TrpDocDir>> DOC_DIR_LIST_TYPE = new GenericType<List<TrpDocDir>>() {};
-	public static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
-	public static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
-	public static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
-	public static final GenericType<List<String>> STRING_LIST_TYPE = new GenericType<List<String>>() {};
-	public static final GenericType<List<TrpJobImplRegistry>> JOB_IMPL_REG_LIST_TYPE = new GenericType<List<TrpJobImplRegistry>>() {};
 	
 	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
 	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";

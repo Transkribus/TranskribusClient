@@ -67,6 +67,7 @@ import eu.transkribus.core.model.beans.ExportParameters;
 import eu.transkribus.core.model.beans.HtrModel;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
+import eu.transkribus.core.model.beans.TestBean;
 import eu.transkribus.core.model.beans.TrpAction;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpCrowdProject;
@@ -79,6 +80,7 @@ import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpErrorRateResult;
 import eu.transkribus.core.model.beans.TrpEvent;
 import eu.transkribus.core.model.beans.TrpFImagestore;
+import eu.transkribus.core.model.beans.TrpGroundTruthPage;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpJobImplRegistry;
 import eu.transkribus.core.model.beans.TrpPage;
@@ -142,17 +144,20 @@ public class TrpServerConn extends ATrpServerConn {
 //	};	
 //	public static final int DEFAULT_URI_INDEX = 0;
 	
-//	private static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
-//	private static final GenericType<List<TrpCollection>> COL_LIST_TYPE = new GenericType<List<TrpCollection>>() {};
-//	private static final GenericType<List<TrpDocMetadata>> DOC_MD_LIST_TYPE = new GenericType<List<TrpDocMetadata>>() {};
-//	private static final GenericType<List<TrpJobStatus>> JOB_LIST_TYPE = new GenericType<List<TrpJobStatus>>() {};
-//	private static final GenericType<List<TrpWordgraph>> WORDGRAPH_LIST_TYPE = new GenericType<List<TrpWordgraph>>() {};
-//	private static final GenericType<List<PageLock>> PAGELOCK_LIST_TYPE = new GenericType<List<PageLock>>() {};
-//	private static final GenericType<List<EdFeature>> ED_FEATURE_LIST_TYPE = new GenericType<List<EdFeature>>() {};
-//	private static final GenericType<List<TrpDocDir>> DOC_DIR_LIST_TYPE = new GenericType<List<TrpDocDir>>() {};
-//	private static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
-//	private static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
-//	private static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
+	public static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
+	public static final GenericType<List<TrpCollection>> COL_LIST_TYPE = new GenericType<List<TrpCollection>>() {};
+	public static final GenericType<List<TrpDocMetadata>> DOC_MD_LIST_TYPE = new GenericType<List<TrpDocMetadata>>() {};
+	public static final GenericType<List<TrpJobStatus>> JOB_LIST_TYPE = new GenericType<List<TrpJobStatus>>() {};
+	public static final GenericType<List<PageLock>> PAGELOCK_LIST_TYPE = new GenericType<List<PageLock>>() {};
+	public static final GenericType<List<TrpAction>> ACTION_LIST_TYPE = new GenericType<List<TrpAction>>() {};
+	public static final GenericType<List<EdFeature>> ED_FEATURE_LIST_TYPE = new GenericType<List<EdFeature>>() {};
+	public static final GenericType<List<TrpDocDir>> DOC_DIR_LIST_TYPE = new GenericType<List<TrpDocDir>>() {};
+	public static final GenericType<List<TrpEvent>> EVENT_LIST_TYPE = new GenericType<List<TrpEvent>>() {};
+	public static final GenericType<List<TrpDbTag>> DB_TAG_LIST_TYPE = new GenericType<List<TrpDbTag>>() {};
+	public static final GenericType<List<TestBean>> TEST_BEAN_LIST_TYPE = new GenericType<List<TestBean>>() {};
+	public static final GenericType<List<String>> STRING_LIST_TYPE = new GenericType<List<String>>() {};
+	public static final GenericType<List<TrpJobImplRegistry>> JOB_IMPL_REG_LIST_TYPE = new GenericType<List<TrpJobImplRegistry>>() {};
+	public static final GenericType<List<TrpGroundTruthPage>> GROUND_TRUTH_PAGE_LIST_TYPE = new GenericType<List<TrpGroundTruthPage>>() {};
 	
 	/**
 	 * a list of JobImpls identified by Strings where the server side execution is restricted and the logged in user is allowed to execute them.<br>
@@ -655,6 +660,15 @@ public class TrpServerConn extends ATrpServerConn {
 		return listActions(typeIds, null, colId, null, null, null, null, null, null, 0, nValues, null, null);
 	}
 	
+	/**
+	 * Retrieve the most recent action of type Save, Status Change or Access Document taken with this account from the server.
+	 * 
+	 * @return The most recent action or null if none exists
+	 * @throws SessionExpiredException
+	 * @throws ServerErrorException
+	 * @throws IllegalArgumentException
+	 * @throws ClientErrorException
+	 */
 	public TrpAction getMostRecentDocumentAction() throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		final Integer[] typeIds = {1, 3, 4}; // = Save | Status Change | Access Document
 		List<TrpAction> list = listActions(typeIds, null, null, null, null, null, null, null, null, 0, 1, null, null);
@@ -2113,6 +2127,18 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.STATUS_PARAM, status.toString());
 		target = target.queryParam(RESTConst.NOTE_PARAM, note);
 		super.postNull(target);
+	}
+	
+	public List<TrpGroundTruthPage> getHtrTrainData(final int colId, final int htrId) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
+		final WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htrId)
+				.path(RESTConst.TRAIN_GT_PATH);
+		return getList(target, GROUND_TRUTH_PAGE_LIST_TYPE);
+	}
+	
+	public List<TrpGroundTruthPage> getHtrValidationData(final int colId, final int htrId) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
+		final WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htrId)
+				.path(RESTConst.VALIDATION_GT_PATH);
+		return getList(target, GROUND_TRUTH_PAGE_LIST_TYPE);
 	}
 	
 	public TrpDoc getHtrTrainDoc(final int colId, final int htrId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {

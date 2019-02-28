@@ -62,7 +62,7 @@ public class TrpJobsConnection extends ATrpServerConn {
 		t = queryParam(t, RESTConst.PAGING_NVALUES_PARAM, ""+nValues);
 		t = queryParam(t, RESTConst.USERS_PARAM, CoreUtils.join(excludeUsers));
 		
-		return getList(t, JOB_LIST_TYPE);
+		return getList(t, TrpServerConn.JOB_LIST_TYPE);
 	}
 	
 	public boolean scheduleJob(String jobId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
