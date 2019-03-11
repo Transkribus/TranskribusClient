@@ -278,6 +278,21 @@ public abstract class ATrpServerConn implements Closeable {
 			} else {
 				throw new LoginException(e.getMessage());
 			}
+		} catch (IllegalStateException e) {
+			login = null;
+			logger.error("Login request failed!", e);
+			if("Already connected".equals(e.getMessage()) && e.getCause() != null) {
+				/*
+				 * Jersey throws an IllegalStateException "Already connected" for a variety of issues where actually no connection can be established.
+				 * see https://github.com/jersey/jersey/issues/3000
+				 */
+				Throwable cause = e.getCause();
+				logger.error("'Already connected' caused by: " + cause.getMessage(), cause);
+				//override misleading "Already connected" message
+				throw new LoginException(cause.getMessage());
+			} else {
+				throw new LoginException(e.getMessage());
+			}
 		} catch(Exception e) {
 			login = null;
 			logger.error("Login request failed!", e);
