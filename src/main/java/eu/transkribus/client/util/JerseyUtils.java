@@ -23,6 +23,9 @@ public class JerseyUtils {
 	private final static Logger logger = LoggerFactory.getLogger(JerseyUtils.class);
 	
 	public static String getFilenameFromContentDisposition(Response resp) throws ParseException {
+		/*
+		 * FIXME javax.mail can be removed from TranskribusCore dependencies when this type is replaced
+		 */
 		ContentDisposition cd = new ContentDisposition(resp.getHeaderString("Content-Disposition"));
 		return cd.getParameter("filename");
 	}
