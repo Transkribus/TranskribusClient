@@ -89,6 +89,7 @@ import eu.transkribus.core.model.beans.TrpUpload.UploadType;
 import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.auth.TrpRole;
 import eu.transkribus.core.model.beans.auth.TrpUser;
+import eu.transkribus.core.model.beans.auth.TrpUserInfo;
 import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
@@ -1594,6 +1595,14 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.ROLE_PARAM, role);
 		
 		return Integer.parseInt(getObject(t, String.class));
+	}
+	
+	public List<TrpUserInfo> getUserInfoForCollection(int colId, TrpRole role, int index, int nValues, String sortFieldName, String sortDirection) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
+		
+		WebTarget t = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(RESTConst.USER_STATS_PATH)
+				.queryParam(RESTConst.ROLE_PARAM, role);
+		
+		return getList(t, new GenericType<List<TrpUserInfo>>(){});
 	}
 	
 //	public void allow(String userName, int docId, TrpRole role) throws SessionExpiredException, ServerErrorException{
