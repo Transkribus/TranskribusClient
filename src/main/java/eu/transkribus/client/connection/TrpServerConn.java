@@ -83,6 +83,7 @@ import eu.transkribus.core.model.beans.TrpFImagestore;
 import eu.transkribus.core.model.beans.TrpGroundTruthPage;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpJobImplRegistry;
+import eu.transkribus.core.model.beans.TrpP2PaLAModel;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTotalTranscriptStatistics;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
@@ -2414,7 +2415,12 @@ public class TrpServerConn extends ATrpServerConn {
 		return getObject(docTarget, TrpTotalTranscriptStatistics.class);
 	}
 
-	
-
+	public List<TrpP2PaLAModel> getP2PaLAModels(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.P2PALA_PATH);
+		target = target.path(""+colId);
+		target = target.path(RESTConst.LIST_PATH);
+		
+		return super.getList(target, new GenericType<List<TrpP2PaLAModel>>(){});
+	}
 	
 }

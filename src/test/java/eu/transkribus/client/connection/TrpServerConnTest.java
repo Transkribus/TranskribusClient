@@ -28,6 +28,7 @@ import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
+import eu.transkribus.core.model.beans.TrpP2PaLAModel;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.auth.TrpUser;
@@ -656,10 +657,20 @@ public class TrpServerConnTest {
 		}
 	}
 	
+	public static void testGetP2PaLAModels(String user, String pw) throws Exception {
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			List<TrpP2PaLAModel> models = conn.getP2PaLAModels(1);
+			System.out.println("Got models: "+models.size());
+			models.stream().forEach(System.out::println);
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 		if(args.length != 2){
 			throw new IllegalArgumentException("No credentials");
 		}
+		
+		testGetP2PaLAModels(args[0], args[1]);
 		
 //		testDocMdDescriptionSizeLimit(args[0], args[1]);
 		
