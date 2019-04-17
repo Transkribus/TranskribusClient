@@ -35,6 +35,25 @@ public class HtrTest extends ATrpClientTest {
 		
 	}
 	
+//	@Test
+	public void testHtrWithDescriptorOnFaultyPage() throws Exception {
+		final int colId = 2;
+		final int docId = 6766;
+		final int pageId = 24054; //pageNr 1, has a very short baseline
+		final int tsId = 45696;
+		
+		final int modelId = 241;
+		
+		//generate a page descriptor for a single page HTR job
+		DocumentSelectionDescriptor descriptor = new DocumentSelectionDescriptor(docId);
+		PageDescriptor pd = new PageDescriptor(pageId, tsId);
+		descriptor.addPage(pd);
+		
+		String jobId = client.runCitLabHtr(colId, descriptor, modelId, null);
+		TrpJobStatus job = waitForJobToEnd(client.getJob(jobId));
+		//this job fails with a job error in CITlabModule <= 2.3.0 due to the very short baseline.
+	}
+	
 	public void startHtrTraining(final String user, final String pw) throws Exception {
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw)) {
 			
