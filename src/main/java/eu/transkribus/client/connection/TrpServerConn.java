@@ -1022,6 +1022,14 @@ public class TrpServerConn extends ATrpServerConn {
 
 	}
 	
+	public void ingestDocFromIiifUrl(final int colId , final String iiiUrl) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.UPLOAD_PATH_IIIF_URL);
+		target = target.queryParam(RESTConst.FILE_NAME_PARAM, iiiUrl);
+		super.postNull(target);
+		
+	}
+	
 	public void ingestDocFromLocalMetsUrl(final int colId, final URL metsUrl) throws SessionExpiredException, ServerErrorException, ClientErrorException, MalformedURLException, IOException{
 		final WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.UPLOAD_PATH_METS);
