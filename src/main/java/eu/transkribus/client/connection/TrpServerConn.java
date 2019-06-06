@@ -1022,9 +1022,16 @@ public class TrpServerConn extends ATrpServerConn {
 
 	}
 	
-	public void ingestDocFromIiifUrl(final int colId , final String iiiUrl) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+	public void ingestDocFromIiifUrl(final int colId , String iiiUrl) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException, UnsupportedEncodingException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.UPLOAD_PATH_IIIF_URL);
+		
+		try {
+			iiiUrl = URLEncoder.encode(iiiUrl,DEFAULT_URI_ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Encoding not supported on this platform: " + DEFAULT_URI_ENCODING, e);
+			throw e;
+		}
 		target = target.queryParam(RESTConst.FILE_NAME_PARAM, iiiUrl);
 		super.postNull(target);
 		
