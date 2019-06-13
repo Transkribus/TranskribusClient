@@ -1,6 +1,7 @@
 package eu.transkribus.client.connection;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -665,12 +666,41 @@ public class TrpServerConnTest {
 		}
 	}
 	
+	public static void testGetImageNames(String user, String pw) throws Exception {
+		int colId = 2875;
+		int docId = 7645;
+		
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+//		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.PROD_SERVER_URI, user, pw)) {
+			List<String> imageNames = conn.getImageNames(colId, docId);
+			imageNames.stream().forEach(i -> System.out.println(i));
+		}
+	}
+	
+	public static void testMoveImagesByName(String user, String pw) throws Exception {
+		File filelist = new File("./src/test/resources/filelist_2875_7645.txt");
+		int colId = 2875;
+		int docId = 7645;
+		
+		if (!filelist.exists()) {
+			throw new FileNotFoundException("Filelist not found: "+filelist.getAbsolutePath());
+		}
+		
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			conn.moveImagesByNames(colId, docId, filelist);
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 		if(args.length != 2){
 			throw new IllegalArgumentException("No credentials");
 		}
 		
-		testGetP2PaLAModels(args[0], args[1]);
+//		testGetImageNames(args[0], args[1]);
+		
+		testMoveImagesByName(args[0], args[1]);
+		
+//		testGetP2PaLAModels(args[0], args[1]);
 		
 //		testDocMdDescriptionSizeLimit(args[0], args[1]);
 		

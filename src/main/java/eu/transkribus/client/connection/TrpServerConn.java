@@ -1022,6 +1022,21 @@ public class TrpServerConn extends ATrpServerConn {
 
 	}
 	
+	public void ingestDocFromIiifUrl(final int colId , String iiiUrl) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException, UnsupportedEncodingException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(RESTConst.UPLOAD_PATH_IIIF_URL);
+		
+		try {
+			iiiUrl = URLEncoder.encode(iiiUrl,DEFAULT_URI_ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			logger.error("Encoding not supported on this platform: " + DEFAULT_URI_ENCODING, e);
+			throw e;
+		}
+		target = target.queryParam(RESTConst.FILE_NAME_PARAM, iiiUrl);
+		super.postNull(target);
+		
+	}
+	
 	public void ingestDocFromLocalMetsUrl(final int colId, final URL metsUrl) throws SessionExpiredException, ServerErrorException, ClientErrorException, MalformedURLException, IOException{
 		final WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId).path(RESTConst.UPLOAD_PATH_METS);
@@ -2421,6 +2436,30 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.path(RESTConst.LIST_PATH);
 		
 		return super.getList(target, new GenericType<List<TrpP2PaLAModel>>(){});
+	}
+	
+	public List<String> getImageNames(int colId, int docId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId).path(""+docId).path(RESTConst.IMAGE_NAMES_PATH);
+		
+		final String imageNamesStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
+		return new ArrayList<String>(Arrays.asList(imageNamesStr.split("\n")));
+		
+//		return super.getList(target, STRING_LIST_TYPE);
+	}
+	
+	public void moveImagesByNames(int colId, int docId, File imageFilelist) throws TrpClientErrorException, TrpServerErrorException, SessionExpiredException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.IMAGE_NAMES_PATH);
+
+		MultiPart mp = new MultiPart();
+		mp.setMediaType(MediaType.MULTIPART_FORM_DATA_TYPE);
+		
+		FileDataBodyPart imgPart = new FileDataBodyPart(RESTConst.FILE_LIST_PARAM, imageFilelist, 
+				MediaType.TEXT_PLAIN_TYPE);
+		mp.bodyPart(imgPart);
+		
+		Response resp = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA));
+		checkStatus(resp, target);
 	}
 	
 }
