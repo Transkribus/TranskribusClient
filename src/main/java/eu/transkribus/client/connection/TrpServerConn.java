@@ -891,7 +891,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws SessionExpiredException 
 	 */
 	public TrpTranscriptMetadata updateTranscript(final int colId, final int docId, int pageNr, EditStatus status,
-			final PcGtsType transcript, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+			final PcGtsType transcript, final int parentId, final String toolname) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
 				.path(RESTConst.TRANSCRIPT_PATH);
 		if (status != null) {
@@ -899,7 +899,7 @@ public class TrpServerConn extends ATrpServerConn {
 		}
 		docTarget = docTarget.queryParam(RESTConst.OVERWRITE_PARAM, false)
 				.queryParam(RESTConst.PARENT_ID_PARAM, parentId)
-				.queryParam(RESTConst.NOTE_PARAM, note);
+				.queryParam(RESTConst.TOOL_NAME_PARAM, toolname);
 		return postXmlEntityReturnObject(docTarget, transcript, TrpTranscriptMetadata.class);
 	}
 	
