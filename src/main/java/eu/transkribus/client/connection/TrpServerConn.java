@@ -905,7 +905,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public TrpTranscriptMetadata assignPlainTextToPage(int colId, int docId, int pageNr, EditStatus status,
-			String text, int parentId, boolean useExistingLayout) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+			String text, int parentId, boolean useExistingLayout, String toolname) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
 				.path(RESTConst.PLAINTEXT_PATH);
 		if (status != null) {
@@ -914,6 +914,7 @@ public class TrpServerConn extends ATrpServerConn {
 		docTarget = docTarget
 				.queryParam(RESTConst.USE_EXISTING_LAYOUT_PARAM, useExistingLayout)
 				.queryParam(RESTConst.PARENT_ID_PARAM, parentId)
+				.queryParam(RESTConst.TOOL_NAME_PARAM, toolname)
 				;
 		return postEntityReturnObject(docTarget, text, MediaType.TEXT_PLAIN_TYPE, TrpTranscriptMetadata.class, MediaType.APPLICATION_JSON_TYPE);
 	}
