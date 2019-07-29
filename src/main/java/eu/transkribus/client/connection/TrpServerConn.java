@@ -105,6 +105,7 @@ import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.rest.JobErrorList;
 import eu.transkribus.core.model.beans.rest.JobParameters;
 import eu.transkribus.core.model.beans.rest.ParameterMap;
+import eu.transkribus.core.model.beans.rest.TrpHtrList;
 import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
 import eu.transkribus.core.model.beans.searchresult.KeywordSearchResult;
 import eu.transkribus.core.model.builder.CommonExportPars;
@@ -1382,6 +1383,15 @@ public class TrpServerConn extends ATrpServerConn {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path(RESTConst.LIST_PATH);
 		target = target.queryParam(RESTConst.PROVIDER_PARAM, provider);
 		return super.getList(target, new GenericType<List<TrpHtr>>(){});
+	}
+	
+	public TrpHtrList getHtrs(final Integer colId, final String provider, int index, int nValues) throws SessionExpiredException, ServerErrorException, ClientErrorException {		
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.LIST_PATH)
+				.queryParam(RESTConst.COLLECTION_ID_PARAM, colId)
+				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
+				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
+				.queryParam(RESTConst.PROVIDER_PARAM, provider);
+		return super.getObject(target, TrpHtrList.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
 	public void addOrModifyUserInCollection(int colId, int userId, TrpRole role) throws SessionExpiredException, ServerErrorException, ClientErrorException  {
