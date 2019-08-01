@@ -55,7 +55,7 @@ public class ATrpClientTest {
 		username = creds.getProperty("username");
 		password = creds.getProperty("password");
 		client = new TrpServerConn(TrpServer.Test, username, password);		
-		client.enableDebugLogging(true);
+		client.enableDebugLogging();
 	}
 	
 	@Test

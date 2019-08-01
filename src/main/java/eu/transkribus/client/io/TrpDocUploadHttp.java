@@ -82,7 +82,9 @@ public class TrpDocUploadHttp extends ASingleDocUpload {
 		logger.debug("docMd localFolder: " + doc.getMd().getLocalFolder().getAbsolutePath());
 		logger.debug("File.separator: " + File.separator);
 		logger.debug("Setting upload.xml path: " + this.uploadXml.getAbsolutePath());
-		this.conn.enableDebugLogging(DEBUG);
+		if(DEBUG) {
+			this.conn.enableDebugLogging();
+		}
 	}
 
 	@Override

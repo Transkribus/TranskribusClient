@@ -25,6 +25,7 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.client.ClientConfig;
 import org.glassfish.jersey.client.HttpUrlConnectorProvider;
+import org.glassfish.jersey.client.filter.EncodingFilter;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.message.GZipEncoder;
@@ -82,12 +83,12 @@ public abstract class ATrpServerConn implements Closeable {
 	
 	public static final int DEFAULT_URI_INDEX = 0;
 	
-	private /*static*/ Client client;
-	private /*static*/ TrpUserLogin login;
-	private /*static*/ URI serverUri;
-	protected /*static*/ WebTarget baseTarget;
-	private /*static*/ WebTarget loginTarget;
-	private /*static*/ WebTarget loginOAuthTarget;
+	private Client client;
+	private TrpUserLogin login;
+	private URI serverUri;
+	protected WebTarget baseTarget;
+	private WebTarget loginTarget;
+	private WebTarget loginOAuthTarget;
 	
 	protected final static MediaType DEFAULT_RESP_TYPE = MediaType.APPLICATION_JSON_TYPE;
 	
@@ -128,7 +129,9 @@ public abstract class ATrpServerConn implements Closeable {
 		//TrpDocUploadHttp might send METS
 		client.register(new MetsMessageBodyWriter());
 		
-		enableDebugLogging(DEBUG);
+		if(DEBUG) {
+			enableDebugLogging();
+		}
 		
 		initTargets();
 //		initBaseTarget();	
@@ -143,72 +146,30 @@ public abstract class ATrpServerConn implements Closeable {
 	 * TODO If Jersey is updated, LoggingFilter has to be replaced with LoggingFeature
 	 * @param enableDebugLog
 	 */
-	public void enableDebugLogging(boolean enableDebugLog) {
-		if(enableDebugLog) {
-			LoggingFilter lf = new LoggingFilter(new JulFacade(logger), true);
-			client.register(lf);
+	public void enableDebugLogging() {
+		LoggingFilter lf = new LoggingFilter(new JulFacade(logger), true);
+		client.register(lf);
+	}
+	
+	public void enableGzipEncoding() {
+		final Class<?>[] encodingComponents = { GZipEncoder.class, EncodingFilter.class };
+		for(Class<?> c : encodingComponents) {
+			client.register(c);
 		}
+		//found no way to de-register them yet...
 	}
 
 	protected boolean isSameServer(final String uriStr) {
 		URI serverUriStr = UriBuilder.fromUri(uriStr).build();
 		return serverUriStr.equals(serverUri);		
 	}
-	
-//	protected ATrpServerConn(final String uriStr, final String user, final String pw) throws LoginException {
-//		this(uriStr);
-//		
-//		if (user == null || user.isEmpty() || pw == null || pw.isEmpty()) {
-//			throw new LoginException("Credentials must not be empty!");
-//		}
-//		
-//		// LOGIN STUFF:
-//		//authenticate and retrieve the session data
-//		login = login(user, pw);
-//		
-//		//register auth filter with the jSessionId and update the WebTarget accordingly
-//		client.register(new ClientRequestAuthFilter(login.getSessionId()));
-//		initBaseTarget();
-//	}
-	
+
 	private void initTargets() {
 		loginTarget = client.target(serverUri).path(RESTConst.BASE_PATH).path(RESTConst.AUTH_PATH).path(RESTConst.LOGIN_PATH);
 		loginOAuthTarget = client.target(serverUri).path(RESTConst.BASE_PATH).path(RESTConst.AUTH_PATH).path(RESTConst.LOGIN_OAUTH_PATH);
 		baseTarget = client.target(serverUri).path(RESTConst.BASE_PATH);
-		baseTarget.register(GZipEncoder.class);
 	}
-	
-	// OLD: 
-//	protected ATrpServerConn(final String uriStr, final String user, final String pw) throws LoginException {
-//		if (user == null || user.isEmpty() || pw == null || pw.isEmpty()) {
-//			throw new LoginException("Credentials must not be empty!");
-//		}
-//		if (uriStr == null || uriStr.isEmpty()) {
-//			throw new LoginException("Server URI is not set!");
-//		}
-//		serverUri = UriBuilder.fromUri(uriStr).build();
-//		
-//		//FIXME it seems like there is some internal buffering.
-//		// how to get to this property?
-//		//httpUrlConnection.setChunkedStreamingMode(chunklength) - disables buffering and uses chunked transfer encoding to send request
-//		ClientConfig config = new ClientConfig();
-//		HttpUrlConnectorProvider prov = new HttpUrlConnectorProvider();
-//		prov.chunkSize(1024);
-////		logger.debug("USE_FIXED_STREAMING_LENGTH = " + prov.USE_FIXED_LENGTH_STREAMING.toString());
-//		config.connectorProvider(prov);
-//		config.register(MultiPartFeature.class);
-//		client = ClientBuilder.newClient(config);
-//		loginTarget = client.target(serverUri).path(RESTConst.BASE_PATH).path(RESTConst.AUTH_PATH).path(RESTConst.LOGIN_PATH);
-//		//authenticate and retrieve the session data
-//		login = login(user, pw);
-//		//register auth filter with the jSessionId and update the WebTarget accordingly
-//		client.register(new ClientRequestAuthFilter(login.getSessionId()));
-//		baseTarget = client.target(serverUri).path(RESTConst.BASE_PATH);
-//		//TODO test this:
-//		baseTarget.register(GZipEncoder.class);
-//	}
-	// END OLD
-		
+			
 	@Override
 	public void close() {
 		logout();
