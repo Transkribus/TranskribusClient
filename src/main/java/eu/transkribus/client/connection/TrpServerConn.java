@@ -1890,7 +1890,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 
-	public String runCitLabHtr(int colId, int docId, String pages, final int modelId, final String dictName) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+	public String runCitLabHtr(int colId, int docId, String pages, final int modelId, final String dictName, boolean doLinePolygonSimplification, boolean keepOriginalLinePolygons) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH)
 				.path(""+colId)
 				.path(""+modelId)
@@ -1898,6 +1898,9 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGES_PARAM, pages);
 		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
+		target = target.queryParam(JobConst.PROP_DO_LINE_POLYGON_SIMPLIFICATION, doLinePolygonSimplification);
+		target = target.queryParam(JobConst.PROP_KEEP_ORIGINAL_LINE_POLYGONS, keepOriginalLinePolygons);
+		
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.TEXT_PLAIN_TYPE);
 	}
