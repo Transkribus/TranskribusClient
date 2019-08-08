@@ -1332,7 +1332,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return target;
 	}
 	
-	public Future<TrpHtrList> getHtrs(final int colId, final String provider, InvocationCallback<TrpHtrList> callback) {
+	public Future<TrpHtrList> getHtrs(final Integer colId, final String provider, InvocationCallback<TrpHtrList> callback) {
 		return getHtrs(colId, provider, 0, -1, callback);
 	}
 	
