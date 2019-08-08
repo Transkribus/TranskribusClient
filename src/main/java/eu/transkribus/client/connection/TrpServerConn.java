@@ -1307,19 +1307,38 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getList(target, new GenericType<List<HtrModel>>(){});
 	}
 	
+	/**
+	 * @deprecated uses old HTR list endpoint that does not support filtering and paging
+	 * 
+	 * @param colId
+	 * @param provider
+	 * @return
+	 * @throws SessionExpiredException
+	 * @throws ServerErrorException
+	 * @throws ClientErrorException
+	 */
 	public List<TrpHtr> getHtrs(final int colId, final String provider) throws SessionExpiredException, ServerErrorException, ClientErrorException {		
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path(RESTConst.LIST_PATH);
 		target = target.queryParam(RESTConst.PROVIDER_PARAM, provider);
 		return super.getList(target, new GenericType<List<TrpHtr>>(){});
-	}
+	}	
 	
-	public TrpHtrList getHtrs(final Integer colId, final String provider, int index, int nValues) throws SessionExpiredException, ServerErrorException, ClientErrorException {		
+	private WebTarget buildHtrListTarget(final Integer colId, final String provider, int index, int nValues) throws SessionExpiredException, ServerErrorException, ClientErrorException {		
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.LIST_PATH)
 				.queryParam(RESTConst.COLLECTION_ID_PARAM, colId)
 				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
 				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
 				.queryParam(RESTConst.PROVIDER_PARAM, provider);
-		return super.getObject(target, TrpHtrList.class, MediaType.APPLICATION_XML_TYPE);
+		return target;
+	}
+	
+	public Future<TrpHtrList> getHtrs(final int colId, final String provider, InvocationCallback<TrpHtrList> callback) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		return getHtrs(colId, provider, 0, -1, callback);
+	}
+	
+	public Future<TrpHtrList> getHtrs(final Integer colId, final String provider, int index, int nValues, InvocationCallback<TrpHtrList> callback) throws SessionExpiredException, ServerErrorException, ClientErrorException {		
+		WebTarget target = buildHtrListTarget(colId, provider, index, nValues);
+		return target.request(MediaType.APPLICATION_XML_TYPE).async().get(callback);
 	}
 	
 	public void addOrModifyUserInCollection(int colId, int userId, TrpRole role) throws SessionExpiredException, ServerErrorException, ClientErrorException  {
