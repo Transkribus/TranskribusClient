@@ -1323,7 +1323,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return super.getList(target, new GenericType<List<TrpHtr>>(){});
 	}	
 	
-	private WebTarget buildHtrListTarget(final Integer colId, final String provider, int index, int nValues) throws SessionExpiredException, ServerErrorException, ClientErrorException {		
+	private WebTarget buildHtrListTarget(final Integer colId, final String provider, int index, int nValues) {		
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.LIST_PATH)
 				.queryParam(RESTConst.COLLECTION_ID_PARAM, colId)
 				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
@@ -1332,11 +1332,11 @@ public class TrpServerConn extends ATrpServerConn {
 		return target;
 	}
 	
-	public Future<TrpHtrList> getHtrs(final int colId, final String provider, InvocationCallback<TrpHtrList> callback) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+	public Future<TrpHtrList> getHtrs(final int colId, final String provider, InvocationCallback<TrpHtrList> callback) {
 		return getHtrs(colId, provider, 0, -1, callback);
 	}
 	
-	public Future<TrpHtrList> getHtrs(final Integer colId, final String provider, int index, int nValues, InvocationCallback<TrpHtrList> callback) throws SessionExpiredException, ServerErrorException, ClientErrorException {		
+	public Future<TrpHtrList> getHtrs(final Integer colId, final String provider, int index, int nValues, InvocationCallback<TrpHtrList> callback) {		
 		WebTarget target = buildHtrListTarget(colId, provider, index, nValues);
 		return target.request(MediaType.APPLICATION_XML_TYPE).async().get(callback);
 	}
