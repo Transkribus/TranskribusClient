@@ -880,7 +880,7 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public TrpTranscriptMetadata updateTranscript(final int colId, final int docId, int pageNr, EditStatus status,
 			final PcGtsType transcript, final int parentId, final String toolname) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return updateTranscript(colId, docId, pageNr, status, transcript, parentId, toolname);
+		return updateTranscript(colId, docId, pageNr, status, transcript, parentId, toolname, null);
 	}
 	
 	/**
