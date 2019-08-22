@@ -863,19 +863,24 @@ public class TrpServerConn extends ATrpServerConn {
 //		return fn;
 //	}
 
-	/**
-	 * Just update the edit status for a transcript in the server
-	 * 
-	 * @param docId
-	 * @param pageNr
-	 * @param status
-	 * @return Updated transcript list for this page
-	 * @throws IllegalArgumentException 
-	 * @throws ServerErrorException 
-	 * @throws SessionExpiredException 
-	 */
-	public TrpTranscriptMetadata updateTranscriptStatus(final int colId, final int docId, int pageNr, EditStatus status, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		return updateTranscript(colId, docId, pageNr, status, null, parentId, note);
+//	/**
+//	 * Just update the edit status for a transcript in the server
+//	 * 
+//	 * @param docId
+//	 * @param pageNr
+//	 * @param status
+//	 * @return Updated transcript list for this page
+//	 * @throws IllegalArgumentException 
+//	 * @throws ServerErrorException 
+//	 * @throws SessionExpiredException 
+//	 */
+//	public TrpTranscriptMetadata updateTranscriptStatus(final int colId, final int docId, int pageNr, EditStatus status, final int parentId, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+//		return updateTranscript(colId, docId, pageNr, status, null, parentId, null, note);
+//	}
+	
+	public TrpTranscriptMetadata updateTranscript(final int colId, final int docId, int pageNr, EditStatus status,
+			final PcGtsType transcript, final int parentId, final String toolname) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		return updateTranscript(colId, docId, pageNr, status, transcript, parentId, toolname);
 	}
 	
 	/**
@@ -892,7 +897,7 @@ public class TrpServerConn extends ATrpServerConn {
 	 * @throws SessionExpiredException 
 	 */
 	public TrpTranscriptMetadata updateTranscript(final int colId, final int docId, int pageNr, EditStatus status,
-			final PcGtsType transcript, final int parentId, final String toolname) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+			final PcGtsType transcript, final int parentId, final String toolname, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
 				.path(RESTConst.TRANSCRIPT_PATH);
 		if (status != null) {
@@ -901,11 +906,15 @@ public class TrpServerConn extends ATrpServerConn {
 		docTarget = docTarget.queryParam(RESTConst.OVERWRITE_PARAM, false)
 				.queryParam(RESTConst.PARENT_ID_PARAM, parentId)
 				.queryParam(RESTConst.TOOL_NAME_PARAM, toolname);
+		if (!StringUtils.isEmpty(note)) {
+			docTarget = docTarget.queryParam(RESTConst.NOTE_PARAM, note);
+		}
+		
 		return postXmlEntityReturnObject(docTarget, transcript, TrpTranscriptMetadata.class);
 	}
 	
 	public TrpTranscriptMetadata assignPlainTextToPage(int colId, int docId, int pageNr, EditStatus status,
-			String text, int parentId, boolean useExistingLayout, String toolname) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+			String text, int parentId, boolean useExistingLayout, String toolname, String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
 				.path(RESTConst.PLAINTEXT_PATH);
 		if (status != null) {
@@ -914,8 +923,10 @@ public class TrpServerConn extends ATrpServerConn {
 		docTarget = docTarget
 				.queryParam(RESTConst.USE_EXISTING_LAYOUT_PARAM, useExistingLayout)
 				.queryParam(RESTConst.PARENT_ID_PARAM, parentId)
-				.queryParam(RESTConst.TOOL_NAME_PARAM, toolname)
-				;
+				.queryParam(RESTConst.TOOL_NAME_PARAM, toolname);
+		if (!StringUtils.isEmpty(note)) {
+			docTarget = docTarget.queryParam(RESTConst.NOTE_PARAM, note);
+		}		
 		return postEntityReturnObject(docTarget, text, MediaType.TEXT_PLAIN_TYPE, TrpTranscriptMetadata.class, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
