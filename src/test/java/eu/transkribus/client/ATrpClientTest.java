@@ -12,6 +12,7 @@ import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -47,9 +48,9 @@ public class ATrpClientTest {
 		Properties creds = new Properties();
 		try (InputStream is = ATrpClientTest.class.getClassLoader().getResourceAsStream(TEST_CREDS_FILE_NAME)) {
 			if(is == null) {
-				URL url = ATrpClientTest.class.getClassLoader().getResource(TEST_CREDS_FILE_NAME);
-				throw new RuntimeException("Could not find credentials file for test user at: " + url);
+				logger.warn("Could not find credentials file for test user: {}", TEST_CREDS_FILE_NAME);
 			}
+			Assume.assumeNotNull("Skipping client test due to missing credentials file.", is);
 			creds.load(is);
 		}
 		username = creds.getProperty("username");
