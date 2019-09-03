@@ -1230,6 +1230,17 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
+	public String runTypewrittenBlockSegmentation(final int colId, final int docId, final String pageStr) 
+			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.OCR_PATH);
+		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
+		target = target.queryParam(RESTConst.PAGES_PARAM, pageStr);
+		target = target.queryParam(RESTConst.DO_BLOCK_SEG_ONLY_PARAM, true);
+		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
+				String.class, MediaType.APPLICATION_XML_TYPE);
+	}
+	
 	public String runOcr(final int colId, final int docId, final String pageStr,
 			final ScriptType typeFace, final String languages) 
 			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
