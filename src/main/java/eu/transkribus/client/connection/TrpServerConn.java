@@ -8,6 +8,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -2154,15 +2155,20 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public List<TrpGroundTruthPage> getHtrTrainData(final int colId, final int htrId) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
-		final WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htrId)
-				.path(RESTConst.TRAIN_GT_PATH);
-		return getList(target, GROUND_TRUTH_PAGE_LIST_TYPE);
+		return getHtrData(colId, htrId, RESTConst.TRAIN_GT_PATH);
 	}
 	
 	public List<TrpGroundTruthPage> getHtrValidationData(final int colId, final int htrId) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
+		return getHtrData(colId, htrId, RESTConst.VALIDATION_GT_PATH);
+	}
+	
+	private List<TrpGroundTruthPage> getHtrData(final int colId, final int htrId, final String gtPath) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htrId)
-				.path(RESTConst.VALIDATION_GT_PATH);
-		return getList(target, GROUND_TRUTH_PAGE_LIST_TYPE);
+				.path(gtPath);
+		List<TrpGroundTruthPage> gtList = getList(target, GROUND_TRUTH_PAGE_LIST_TYPE);
+		//FIXME server 2.8.2 seems to not sort this properly
+		Collections.sort(gtList);
+		return gtList;		
 	}
 	
 	public TrpDoc getHtrTrainDoc(final int colId, final int htrId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
