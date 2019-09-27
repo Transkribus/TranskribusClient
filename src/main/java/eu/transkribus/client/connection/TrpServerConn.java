@@ -2172,6 +2172,17 @@ public class TrpServerConn extends ATrpServerConn {
 		return gtList;		
 	}
 	
+	/**
+	 * @deprecated datasets are no longer duplicated to documents but stored as ground truth
+	 * 
+	 * @param colId
+	 * @param htrId
+	 * @param nrOfTranscriptsPerPage
+	 * @return
+	 * @throws SessionExpiredException
+	 * @throws IllegalArgumentException
+	 * @throws ClientErrorException
+	 */
 	public TrpDoc getHtrTrainDoc(final int colId, final int htrId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htrId)
 				.path(RESTConst.TRAIN_DOC_PATH)
@@ -2179,6 +2190,17 @@ public class TrpServerConn extends ATrpServerConn {
 		return getObject(docTarget, TrpDoc.class);
 	}
 	
+	/**
+	 * @deprecated datasets are no longer duplicated to documents but stored as ground truth
+	 * 
+	 * @param colId
+	 * @param htrId
+	 * @param nrOfTranscriptsPerPage
+	 * @return
+	 * @throws SessionExpiredException
+	 * @throws IllegalArgumentException
+	 * @throws ClientErrorException
+	 */
 	public TrpDoc getHtrTestDoc(final int colId, final int htrId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htrId)
 				.path(RESTConst.TEST_DOC_PATH)
