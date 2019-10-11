@@ -900,7 +900,7 @@ public class TrpServerConn extends ATrpServerConn {
 	public TrpTranscriptMetadata updateTranscript(final int colId, final int docId, int pageNr, EditStatus status,
 			final PcGtsType transcript, final int parentId, final String toolname, final String note) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId).path("" + pageNr)
-				.path(RESTConst.TRANSCRIPT_PATH);
+				.path(RESTConst.TEXT_PATH);
 		if (status != null) {
 			docTarget = docTarget.queryParam(RESTConst.STATUS_PARAM, status.toString());
 		}
