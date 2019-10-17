@@ -1917,20 +1917,6 @@ public class TrpServerConn extends ATrpServerConn {
 				.queryParam(RESTConst.CONFIDENCE_PARAM, confidence);
 		return super.getList(docTarget, new GenericType<List<KwsDocHit>>() {});
 	}
-	
-	@Deprecated
-	public String runRnnHtr(final int colId, final int docId, final String pageStr, final String modelName, final String dictName) 
-				throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-			WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_RNN_PATH);
-			target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
-			target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
-			target = target.queryParam(RESTConst.PAGES_PARAM, pageStr);
-			target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
-			target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
-			return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
-					String.class, MediaType.APPLICATION_XML_TYPE);
-	}
-	
 
 	public String runCitLabHtr(int colId, int docId, String pages, final int modelId, final String dictName, 
 			boolean doLinePolygonSimplification, boolean keepOriginalLinePolygons, boolean doStoreConfMats, List<String> structures) 
@@ -1945,22 +1931,31 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(JobConst.PROP_DO_LINE_POLYGON_SIMPLIFICATION, doLinePolygonSimplification);
 		target = target.queryParam(JobConst.PROP_KEEP_ORIGINAL_LINE_POLYGONS, keepOriginalLinePolygons);
 		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
-		target = target.queryParam(JobConst.PROP_STRUCTURES, new ArrayList<>(structures).toArray());
+		if(!CollectionUtils.isEmpty(structures)) {
+			target = target.queryParam(JobConst.PROP_STRUCTURES, new ArrayList<>(structures).toArray());
+		}
 		
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.TEXT_PLAIN_TYPE);
 	}
-	
-	public String runCitLabHtr(int colId, DocumentSelectionDescriptor descriptor, final int modelId, final String dictName) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		if(descriptor == null || descriptor.getPages().isEmpty()) {
-			throw new IllegalArgumentException("descriptor must not be null or empty!");
+
+	public String runCitLabHtr(int colId, DocumentSelectionDescriptor descriptor, final int modelId, final String dictName,
+			boolean doLinePolygonSimplification, boolean keepOriginalLinePolygons, boolean doStoreConfMats, List<String> structures)
+					throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		if(descriptor == null || descriptor.getDocId() < 1) {
+			throw new IllegalArgumentException("No document selected!");
 		}
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH)
 				.path(""+colId)
 				.path(""+modelId)
 				.path(RESTConst.HTR_CITLAB_TEST_PATH);
-		target = target.queryParam(RESTConst.DOC_ID_PARAM, descriptor.getDocId());
 		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
+		target = target.queryParam(JobConst.PROP_DO_LINE_POLYGON_SIMPLIFICATION, doLinePolygonSimplification);
+		target = target.queryParam(JobConst.PROP_KEEP_ORIGINAL_LINE_POLYGONS, keepOriginalLinePolygons);
+		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
+		if(!CollectionUtils.isEmpty(structures)) {
+			target = target.queryParam(JobConst.PROP_STRUCTURES, new ArrayList<>(structures).toArray());
+		}
 		return postEntityReturnObject(target, descriptor, MediaType.APPLICATION_JSON_TYPE, 
 				String.class, MediaType.TEXT_PLAIN_TYPE);
 	}
