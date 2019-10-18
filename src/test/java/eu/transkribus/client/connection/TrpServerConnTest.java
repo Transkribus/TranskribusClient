@@ -658,9 +658,9 @@ public class TrpServerConnTest {
 		}
 	}
 	
-	public static void testGetP2PaLAModels(String user, String pw) throws Exception {
+	public static void testGetP2PaLAModelsOld(String user, String pw) throws Exception {
 		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
-			List<TrpP2PaLAModel> models = conn.getP2PaLAModels(1);
+			List<TrpP2PaLAModel> models = conn.getP2PaLAModelsOld(1);
 			System.out.println("Got models: "+models.size());
 			models.stream().forEach(System.out::println);
 		}

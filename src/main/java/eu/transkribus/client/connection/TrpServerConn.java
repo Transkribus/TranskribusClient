@@ -84,6 +84,7 @@ import eu.transkribus.core.model.beans.TrpFImagestore;
 import eu.transkribus.core.model.beans.TrpGroundTruthPage;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpJobImplRegistry;
+import eu.transkribus.core.model.beans.TrpP2PaLA;
 import eu.transkribus.core.model.beans.TrpP2PaLAModel;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTotalTranscriptStatistics;
@@ -105,6 +106,7 @@ import eu.transkribus.core.model.beans.mets.Mets;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
 import eu.transkribus.core.model.beans.rest.JobErrorList;
 import eu.transkribus.core.model.beans.rest.JobParameters;
+import eu.transkribus.core.model.beans.rest.P2PaLATrainJobPars;
 import eu.transkribus.core.model.beans.rest.ParameterMap;
 import eu.transkribus.core.model.beans.rest.TrpHtrList;
 import eu.transkribus.core.model.beans.searchresult.FulltextSearchResult;
@@ -2458,12 +2460,27 @@ public class TrpServerConn extends ATrpServerConn {
 		return getObject(docTarget, TrpTotalTranscriptStatistics.class);
 	}
 
-	public List<TrpP2PaLAModel> getP2PaLAModels(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.P2PALA_PATH);
+	public List<TrpP2PaLAModel> getP2PaLAModelsOld(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.P2PALA_PATH);
 		target = target.path(""+colId);
 		target = target.path(RESTConst.LIST_PATH);
 		
 		return super.getList(target, new GenericType<List<TrpP2PaLAModel>>(){});
+	}
+	
+	public List<TrpP2PaLA> getP2PaLAModels(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget target = baseTarget.path(RESTConst.P2PALA_PATH);
+		target = target.path(""+colId);
+		target = target.path(RESTConst.LIST_PATH);
+		
+		return super.getList(target, new GenericType<List<TrpP2PaLA>>(){});
+	}	
+	
+	public String trainP2PaLAModel(int colId, P2PaLATrainJobPars jobPars)
+			throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget target = baseTarget.path(RESTConst.P2PALA_PATH).path("" + colId).path(RESTConst.TRAIN_PATH);
+		return postEntityReturnObject(target, jobPars, MediaType.APPLICATION_XML_TYPE, String.class,
+				MediaType.APPLICATION_XML_TYPE);
 	}
 	
 	public List<String> getImageNames(int colId, int docId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {

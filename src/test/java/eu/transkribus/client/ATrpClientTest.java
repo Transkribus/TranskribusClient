@@ -11,6 +11,7 @@ import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.BeforeClass;
@@ -43,20 +44,28 @@ public class ATrpClientTest {
 	 */
 	protected static final int TEST_COLLECTION_ID = 1915;
 	
-	@BeforeClass
-	public static void initClient() throws IOException, LoginException {
+	public static Pair<Properties, TrpServerConn> initClient(String credsFileName) throws IOException, LoginException {
 		Properties creds = new Properties();
-		try (InputStream is = ATrpClientTest.class.getClassLoader().getResourceAsStream(TEST_CREDS_FILE_NAME)) {
+		try (InputStream is = ATrpClientTest.class.getClassLoader().getResourceAsStream(credsFileName)) {
 			if(is == null) {
-				logger.warn("Could not find credentials file for test user: {}", TEST_CREDS_FILE_NAME);
+				logger.warn("Could not find credentials file for test user: {}", credsFileName);
 			}
 			Assume.assumeNotNull("Skipping client test due to missing credentials file.", is);
 			creds.load(is);
 		}
+		TrpServerConn client = new TrpServerConn(TrpServer.Test, creds.getProperty("username"), creds.getProperty("password"));
+		client.enableDebugLogging();
+		return Pair.of(creds, client);
+	}	
+
+	@BeforeClass
+	public static void initClient() throws IOException, LoginException {
+		Pair<Properties, TrpServerConn> p = initClient(TEST_CREDS_FILE_NAME);
+		Properties creds = p.getLeft();
+		
 		username = creds.getProperty("username");
 		password = creds.getProperty("password");
-		client = new TrpServerConn(TrpServer.Test, username, password);		
-		client.enableDebugLogging();
+		client = p.getRight();
 	}
 	
 	@Test
