@@ -1,8 +1,6 @@
 package eu.transkribus.client;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -13,22 +11,23 @@ import javax.ws.rs.ServerErrorException;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.AfterClass;
-import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.transkribus.client.connection.TrpServerConn;
 import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
+import eu.transkribus.client.util.ClientTestUtil;
 import eu.transkribus.client.util.SessionExpiredException;
+import eu.transkribus.core.io.util.TrpProperties;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
+import eu.transkribus.core.model.beans.DocumentSelectionDescriptor.PageDescriptor;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
-import eu.transkribus.core.model.beans.DocumentSelectionDescriptor.PageDescriptor;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
-import eu.transkribus.client.connection.TrpServerConn;
 
 public class ATrpClientTest {
 	private static final Logger logger = LoggerFactory.getLogger(ATrpClientTest.class);
@@ -44,28 +43,13 @@ public class ATrpClientTest {
 	 */
 	protected static final int TEST_COLLECTION_ID = 1915;
 	
-	public static Pair<Properties, TrpServerConn> initClient(String credsFileName) throws IOException, LoginException {
-		Properties creds = new Properties();
-		try (InputStream is = ATrpClientTest.class.getClassLoader().getResourceAsStream(credsFileName)) {
-			if(is == null) {
-				logger.warn("Could not find credentials file for test user: {}", credsFileName);
-			}
-			Assume.assumeNotNull("Skipping client test due to missing credentials file.", is);
-			creds.load(is);
-		}
-		TrpServerConn client = new TrpServerConn(TrpServer.Test, creds.getProperty("username"), creds.getProperty("password"));
-		client.enableDebugLogging();
-		return Pair.of(creds, client);
-	}	
-
 	@BeforeClass
 	public static void initClient() throws IOException, LoginException {
-		Pair<Properties, TrpServerConn> p = initClient(TEST_CREDS_FILE_NAME);
-		Properties creds = p.getLeft();
-		
+		TrpProperties creds = new TrpProperties(TEST_CREDS_FILE_NAME);
 		username = creds.getProperty("username");
 		password = creds.getProperty("password");
-		client = p.getRight();
+		client = new TrpServerConn(TrpServer.Test, username, password);
+		client.enableDebugLogging();
 	}
 	
 	@Test

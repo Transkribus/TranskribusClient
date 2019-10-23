@@ -2,16 +2,15 @@ package eu.transkribus.client.connection.jobs;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Properties;
 
 import javax.security.auth.login.LoginException;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.transkribus.client.ATrpClientTest;
+import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
 import eu.transkribus.client.connection.TrpServerConn;
+import eu.transkribus.core.io.util.TrpProperties;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
 import eu.transkribus.core.model.beans.TrpP2PaLA;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
@@ -23,9 +22,8 @@ public class P2PaLATest {
 	private static final Logger logger = LoggerFactory.getLogger(P2PaLATest.class);
 	
 	public void testInsertP2PaLATrainJob() throws LoginException, IOException {
-		Pair<Properties, TrpServerConn> p = ATrpClientTest.initClient("adminCreds.properties");
-		
-		try (TrpServerConn client = p.getRight()) {
+		TrpProperties creds = new TrpProperties("adminCreds.properties");
+		try (TrpServerConn client = new TrpServerConn(TrpServer.Test, creds.getString("username"), creds.getString("password"))) {
 			final int colId = 2;
 			final int trainDocId = 6593; // stazh_p2pala_validation1
 			final int testDocId = 6591; // stazh_p2pala_testset1
