@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
+import eu.transkribus.client.util.TrpClientErrorException;
+import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.io.LocalDocReader;
 import eu.transkribus.core.io.UnsupportedFormatException;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
@@ -29,7 +31,6 @@ import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpDbTag;
 import eu.transkribus.core.model.beans.TrpDoc;
 import eu.transkribus.core.model.beans.TrpDocMetadata;
-import eu.transkribus.core.model.beans.TrpP2PaLAModel;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
 import eu.transkribus.core.model.beans.auth.TrpUser;
@@ -50,6 +51,56 @@ public class TrpServerConnTest {
 	private static final Logger logger = LoggerFactory.getLogger(TrpServerConnTest.class);
 	
 	static SebisStopWatch sw = new SebisStopWatch();
+	
+	public static void testGetTrpPagesByPagesStr(String user, String pw) throws LoginException {
+		int colId=4;
+		int docId=102;
+//		String pagesStr = "1-5, 8, 7, 19-2000";
+//		String pagesStr = "bullshit";
+		String pagesStr = "1-3, 100000000-345";
+//		EditStatus editStatus = EditStatus.DONE;
+		EditStatus editStatus = EditStatus.DONE;
+		boolean skipPagesWithMissingStatus = false;
+		
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			List<TrpPage> pages = conn.getTrpPagesByPagesStr(colId, docId, pagesStr, editStatus, skipPagesWithMissingStatus);
+			for (TrpPage p : pages) {
+				logger.debug("p = "+p);
+			}
+			
+//			logger.debug("pages = "+pages);
+		}
+	}
+	
+	public static void testGetTranscriptIdsByPagesStr(String user, String pw) throws LoginException {
+		int colId=4;
+		int docId=102;
+//		String pagesStr = "1-5, 8, 7, 19-2000";
+//		String pagesStr = "bullshit";
+		String pagesStr = null;
+//		EditStatus editStatus = EditStatus.DONE;
+		EditStatus editStatus = null;
+		boolean skipPagesWithMissingStatus = false;
+		
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			List<List<Integer>> tsIds = conn.getTranscriptIdsByPagesStr(colId, docId, pagesStr, editStatus, skipPagesWithMissingStatus);
+			logger.debug("tsIds = "+tsIds);
+		}
+		
+	}
+	
+	public static void testGetPageIdsByPagesStr(String user, String pw) throws TrpServerErrorException, TrpClientErrorException, LoginException {
+		int colId=4;
+		int docId=102;
+//		String pagesStr = "1-5, 8, 7, 19-2000";
+//		String pagesStr = "bullshit";
+		String pagesStr = null;
+		
+		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
+			List<Integer> pageIds = conn.getPageIdsByPagesStr(colId, docId, pagesStr);
+			logger.debug("pageIds = "+CoreUtils.join(pageIds));
+		}
+	}
 	
 	public static void testDocMdDescriptionSizeLimit(String user, String pw) throws Exception {
 		final int colId = 2;
@@ -658,14 +709,6 @@ public class TrpServerConnTest {
 		}
 	}
 	
-	public static void testGetP2PaLAModelsOld(String user, String pw) throws Exception {
-		try (TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[1], user, pw)) {
-			List<TrpP2PaLAModel> models = conn.getP2PaLAModelsOld(1);
-			System.out.println("Got models: "+models.size());
-			models.stream().forEach(System.out::println);
-		}
-	}
-	
 	public static void testGetImageNames(String user, String pw) throws Exception {
 		int colId = 2875;
 		int docId = 7645;
@@ -696,9 +739,15 @@ public class TrpServerConnTest {
 			throw new IllegalArgumentException("No credentials");
 		}
 		
+		testGetTrpPagesByPagesStr(args[0], args[1]);
+		
+//		testGetTranscriptIdsByPagesStr(args[0], args[1]);
+		
+//		testGetPageIdsByPagesStr(args[0], args[1]);
+		
 //		testGetImageNames(args[0], args[1]);
 		
-		testMoveImagesByName(args[0], args[1]);
+//		testMoveImagesByName(args[0], args[1]);
 		
 //		testGetP2PaLAModels(args[0], args[1]);
 		

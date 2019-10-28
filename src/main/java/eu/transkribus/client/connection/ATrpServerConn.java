@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.util.ClientRequestAuthFilter2;
+import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.JulFacade;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.client.util.TrpClientErrorException;
@@ -89,6 +90,7 @@ public abstract class ATrpServerConn implements Closeable {
 	protected WebTarget baseTarget;
 	private WebTarget loginTarget;
 	private WebTarget loginOAuthTarget;
+	protected ModelCalls modelCalls;
 	
 	protected final static MediaType DEFAULT_RESP_TYPE = MediaType.APPLICATION_JSON_TYPE;
 	
@@ -138,6 +140,12 @@ public abstract class ATrpServerConn implements Closeable {
 
 //		//register auth filter with the jSessionId and update the WebTarget accordingly
 //		client.register(new ClientRequestAuthFilter(login.getSessionId()));
+		
+		modelCalls = new ModelCalls(this);
+	}
+	
+	public ModelCalls getModelCalls() {
+		return modelCalls;
 	}
 			
 	/**
@@ -278,18 +286,16 @@ public abstract class ATrpServerConn implements Closeable {
 		return login;
 	}
 	
+	public static WebTarget queryParam(WebTarget t, String param, Object value) {
+		return JerseyUtils.queryParam(t, param, value);
+	}
+	
 	public static WebTarget queryParam(WebTarget t, String param, String value) {
-		if (t != null && !StringUtils.isEmpty(param) && !StringUtils.isEmpty((String)value)) {
-			return t.queryParam(param, value);
-		}
-		return t;
+		return JerseyUtils.queryParam(t, param, value);
 	}
 	
 	public static WebTarget queryParam(WebTarget t, String param, Iterable<?> value) {
-		if (t != null && !StringUtils.isEmpty(param) && value!=null) {
-			return t.queryParam(param, value);
-		}
-		return t;
+		return JerseyUtils.queryParam(t, param, value);
 	}
 
 	public void logout() throws TrpServerErrorException, TrpClientErrorException {

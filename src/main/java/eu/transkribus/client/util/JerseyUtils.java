@@ -13,6 +13,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -68,13 +69,30 @@ public class JerseyUtils {
 	}
 	
 	public static WebTarget queryParam(WebTarget t, String param, Object o) {
-		if ( o == null || (o instanceof String && ((String)o).isEmpty()) )
+		if ( o == null || (o instanceof String && ((String)o).isEmpty()) ) {
 			return t;
-		
+		}
+		if (o instanceof Iterable<?>) { // needed?? -> function with Iterable type parameter should be called anyway...
+			return queryParam(t, param, (Iterable<?>) o);
+		}
 		if (o instanceof Collection<?>) { // needed?? -> function with Collection type parameter should be called anyway...
 			return queryParam(t, param, (Collection<?>) o);
-		}		
+		}
 		else return t.queryParam(param, o);
 	}
+	
+	public static WebTarget queryParam(WebTarget t, String param, String value) {
+		if (t != null && !StringUtils.isEmpty(param) && !StringUtils.isEmpty((String)value)) {
+			return t.queryParam(param, value);
+		}
+		return t;
+	}
+	
+	public static WebTarget queryParam(WebTarget t, String param, Iterable<?> value) {
+		if (t != null && !StringUtils.isEmpty(param) && value!=null) {
+			return t.queryParam(param, value);
+		}
+		return t;
+	}	
 
 }

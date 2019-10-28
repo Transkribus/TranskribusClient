@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.Path;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -85,7 +86,6 @@ import eu.transkribus.core.model.beans.TrpGroundTruthPage;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpJobImplRegistry;
 import eu.transkribus.core.model.beans.TrpP2PaLA;
-import eu.transkribus.core.model.beans.TrpP2PaLAModel;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTotalTranscriptStatistics;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
@@ -151,6 +151,7 @@ public class TrpServerConn extends ATrpServerConn {
 //	public static final int DEFAULT_URI_INDEX = 0;
 	
 	public static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
+	public static final GenericType<List<TrpPage>> PAGE_LIST_TYPE = new GenericType<List<TrpPage>>() {};
 	public static final GenericType<List<TrpCollection>> COL_LIST_TYPE = new GenericType<List<TrpCollection>>() {};
 	public static final GenericType<List<TrpDocMetadata>> DOC_MD_LIST_TYPE = new GenericType<List<TrpDocMetadata>>() {};
 	public static final GenericType<List<TrpJobStatus>> JOB_LIST_TYPE = new GenericType<List<TrpJobStatus>>() {};
@@ -1263,7 +1264,7 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGES_PARAM, pageStr);
-		target = target.queryParam(RESTConst.HTR_MODEL_NAME_PARAM, modelName);
+		target = target.queryParam(RESTConst.MODEL_NAME_PARAM, modelName);
 		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
@@ -2455,20 +2456,33 @@ public class TrpServerConn extends ATrpServerConn {
 		return getObject(docTarget, TrpTotalTranscriptStatistics.class);
 	}
 
-	public List<TrpP2PaLAModel> getP2PaLAModelsOld(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.LAYOUT_PATH).path(RESTConst.P2PALA_PATH);
-		target = target.path(""+colId);
-		target = target.path(RESTConst.LIST_PATH);
-		
-		return super.getList(target, new GenericType<List<TrpP2PaLAModel>>(){});
-	}
+//	public List<TrpP2PaLA> getP2PaLAModels(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+//		WebTarget target = baseTarget.path(RESTConst.P2PALA_PATH);
+//		target = target.path(""+colId);
+//		target = target.path(RESTConst.LIST_PATH);
+//		
+//		return super.getList(target, new GenericType<List<TrpP2PaLA>>(){});
+//	}
 	
-	public List<TrpP2PaLA> getP2PaLAModels(int colId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.P2PALA_PATH);
-		target = target.path(""+colId);
-		target = target.path(RESTConst.LIST_PATH);
+//	public List<Integer> getModelCollections(int modelId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+//		WebTarget t = baseTarget.path(RESTConst.MODELS_PATH).path(""+modelId).path(RESTConst.COLLECTION_ID_PARAM).path(RESTConst.LIST_PATH);
+//		String responseStr = super.getObject(t, String.class, MediaType.TEXT_PLAIN_TYPE);
+//		logger.debug("responseStr = "+responseStr);
+//		return GsonUtil.toIntegerList(responseStr);		
+//	}
+	
+	public List<TrpP2PaLA> getP2PaLAModels(boolean onlyActive, boolean allModels, Integer colId, Integer userId, Integer releaseLevel) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+		WebTarget t = baseTarget.path(RESTConst.P2PALA_PATH);
+//		target = target.path(""+colId);
+		t = t.path(RESTConst.LIST_PATH);
 		
-		return super.getList(target, new GenericType<List<TrpP2PaLA>>(){});
+		t = queryParam(t, RESTConst.ONLY_ACTIVE_PARAM, ""+onlyActive);
+		t = queryParam(t, RESTConst.ALL_PARAM, ""+allModels);
+		t = queryParam(t, RESTConst.COLLECTION_ID_PARAM, colId);
+		t = queryParam(t, RESTConst.USER_ID_PARAM, userId);
+		t = queryParam(t, RESTConst.RELEASE_LEVEL_PARAM, releaseLevel);
+		
+		return super.getList(t, new GenericType<List<TrpP2PaLA>>(){});
 	}	
 	
 	public String trainP2PaLAModel(int colId, P2PaLATrainJobPars jobPars)
@@ -2500,6 +2514,44 @@ public class TrpServerConn extends ATrpServerConn {
 		
 		Response resp = target.request().post(Entity.entity(mp, MediaType.MULTIPART_FORM_DATA));
 		checkStatus(resp, target);
+	}
+	
+	public List<Integer> getPageIdsByPagesStr(int colId, int docId, String pagesStr) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.PAGE_IDS_PARAM);
+		target = queryParam(target, RESTConst.PAGES_PARAM, pagesStr);
+		
+		String responseStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
+		logger.debug("responseStr = "+responseStr);
+		
+		return GsonUtil.toIntegerList(responseStr);
+	}
+	
+	/**
+	 * Returns a list of int-lists each containing: docid, pageid, tsid (for the given docId, parameters)
+	 */
+	public List<List<Integer>> getTranscriptIdsByPagesStr(int colId, int docId, String pagesStr, EditStatus editStatus, boolean skipPagesWithMissingStatus) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.TRANSCRIPT_IDS_PARAM);
+		target = queryParam(target, RESTConst.PAGES_PARAM, pagesStr);
+		if (editStatus!=null) {
+			target = target.queryParam(RESTConst.STATUS_PARAM, editStatus.toString());
+		}
+		target = queryParam(target, RESTConst.SKIP_PAGES_WITH_MISSING_STATUS_PARAM, ""+skipPagesWithMissingStatus);
+		
+		String responseStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
+		logger.debug("responseStr = "+responseStr);
+		
+		return GsonUtil.toListOfIntLists(responseStr);
+	}
+	
+	public List<TrpPage> getTrpPagesByPagesStr(int colId, int docId, String pagesStr, EditStatus editStatus, boolean skipPagesWithMissingStatus) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.PAGES_PARAM);
+		target = queryParam(target, RESTConst.PAGES_PARAM, pagesStr);
+		if (editStatus!=null) {
+			target = target.queryParam(RESTConst.STATUS_PARAM, editStatus.toString());
+		}
+		target = queryParam(target, RESTConst.SKIP_PAGES_WITH_MISSING_STATUS_PARAM, ""+skipPagesWithMissingStatus);
+		
+		return getList(target, PAGE_LIST_TYPE);
 	}
 	
 }
