@@ -33,19 +33,19 @@ public class P2PaLATest {
 		try (TrpServerConn c = new TrpServerConn(TrpServer.Test, creds.getString("username"), creds.getString("password"))) {
 			int colId = 2815;
 			
-			List<TrpP2PaLA> models = c.getP2PaLAModels(true, false, colId, null, null);
+			List<TrpP2PaLA> models = c.getModelCalls().getP2PaLAModels(true, false, colId, null, null);
 			logger.debug("got "+models.size()+" models colId = "+colId);
 			
-			models = c.getP2PaLAModels(true, true, colId, null, null);
+			models = c.getModelCalls().getP2PaLAModels(true, true, colId, null, null);
 			logger.debug("got "+models.size()+" models (all models)");
 			
-			models = c.getP2PaLAModels(true, false, colId, -1234, null);
+			models = c.getModelCalls().getP2PaLAModels(true, false, colId, -1234, null);
 			logger.debug("got "+models.size()+" models (invalid userId)");
 			
-			models = c.getP2PaLAModels(true, false, null, 42, null);
+			models = c.getModelCalls().getP2PaLAModels(true, false, null, 42, null);
 			logger.debug("got "+models.size()+" models (userId=42)");
 			
-			models = c.getP2PaLAModels(true, false, null, null, 1);
+			models = c.getModelCalls().getP2PaLAModels(true, false, null, null, 1);
 			logger.debug("got "+models.size()+" models (releaseLevel>=1)");	
 		}
 	}

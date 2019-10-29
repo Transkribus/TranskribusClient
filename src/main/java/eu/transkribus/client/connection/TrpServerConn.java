@@ -1674,24 +1674,27 @@ public class TrpServerConn extends ATrpServerConn {
 	    super.postEntity(target, multiPart, multiPart.getMediaType());
 	}
 	
-	public PcGtsType analyzePageStructure(int colId, int docId, int pageNr, 
-			boolean detectPageNumbers, boolean detectRunningTitles, boolean detectFootnotes) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, JAXBException, ClientErrorException {
-		
-		WebTarget t = baseTarget.path(RESTConst.STRUCTURE_PATH).path(RESTConst.ANALYZE_STRUCTURE_PATH);
-		t = t.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
-		t = t.queryParam(RESTConst.ID_PARAM, docId);
-		t = t.queryParam(RESTConst.PAGE_NR_PARAM, pageNr);
-		t = t.queryParam(RESTConst.PAGES_PARAM, pageNr);
-		
-		t = t.queryParam(RESTConst.DETECT_PAGE_NUMBERS_PARAM, detectPageNumbers);
-		t = t.queryParam(RESTConst.DETECT_RUNNING_TITLES_PARAM, detectRunningTitles);
-		t = t.queryParam(RESTConst.DETECT_FOOTNOTES_PARAM, detectFootnotes);
-		
-		String xmlStr = getObject(t, String.class, MediaType.TEXT_PLAIN_TYPE);
-		logger.debug("returned xmlStr: \n\n"+xmlStr);
-		
-		return PageXmlUtils.unmarshal(xmlStr);
-	}
+//	/**
+//	 * @deprecated
+//	 */
+//	public PcGtsType analyzePageStructure(int colId, int docId, int pageNr, 
+//			boolean detectPageNumbers, boolean detectRunningTitles, boolean detectFootnotes) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, JAXBException, ClientErrorException {
+//		
+//		WebTarget t = baseTarget.path(RESTConst.STRUCTURE_PATH).path(RESTConst.ANALYZE_STRUCTURE_PATH);
+//		t = t.queryParam(RESTConst.COLLECTION_ID_PARAM, colId);
+//		t = t.queryParam(RESTConst.ID_PARAM, docId);
+//		t = t.queryParam(RESTConst.PAGE_NR_PARAM, pageNr);
+//		t = t.queryParam(RESTConst.PAGES_PARAM, pageNr);
+//		
+//		t = t.queryParam(RESTConst.DETECT_PAGE_NUMBERS_PARAM, detectPageNumbers);
+//		t = t.queryParam(RESTConst.DETECT_RUNNING_TITLES_PARAM, detectRunningTitles);
+//		t = t.queryParam(RESTConst.DETECT_FOOTNOTES_PARAM, detectFootnotes);
+//		
+//		String xmlStr = getObject(t, String.class, MediaType.TEXT_PLAIN_TYPE);
+//		logger.debug("returned xmlStr: \n\n"+xmlStr);
+//		
+//		return PageXmlUtils.unmarshal(xmlStr);
+//	}
 
 	//Editorial Declaration stuff ================================
 	
@@ -2261,6 +2264,7 @@ public class TrpServerConn extends ATrpServerConn {
 	public boolean isUserAllowedForJob(String jobImpl) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		try {
 			List<String> acl = getJobAcl();
+			logger.debug("acl = "+acl);
 			if(acl == null) {
 				return false;
 			}
@@ -2471,19 +2475,18 @@ public class TrpServerConn extends ATrpServerConn {
 //		return GsonUtil.toIntegerList(responseStr);		
 //	}
 	
-	public List<TrpP2PaLA> getP2PaLAModels(boolean onlyActive, boolean allModels, Integer colId, Integer userId, Integer releaseLevel) throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		WebTarget t = baseTarget.path(RESTConst.P2PALA_PATH);
-//		target = target.path(""+colId);
-		t = t.path(RESTConst.LIST_PATH);
-		
-		t = queryParam(t, RESTConst.ONLY_ACTIVE_PARAM, ""+onlyActive);
-		t = queryParam(t, RESTConst.ALL_PARAM, ""+allModels);
-		t = queryParam(t, RESTConst.COLLECTION_ID_PARAM, colId);
-		t = queryParam(t, RESTConst.USER_ID_PARAM, userId);
-		t = queryParam(t, RESTConst.RELEASE_LEVEL_PARAM, releaseLevel);
-		
-		return super.getList(t, new GenericType<List<TrpP2PaLA>>(){});
-	}	
+//	public List<TrpP2PaLA> getP2PaLAModels(boolean onlyActive, boolean allModels, Integer colId, Integer userId, Integer releaseLevel) throws SessionExpiredException, ServerErrorException, ClientErrorException {
+//		WebTarget t = baseTarget.path(RESTConst.P2PALA_PATH);
+//		t = t.path(RESTConst.LIST_PATH);
+//		
+//		t = queryParam(t, RESTConst.ONLY_ACTIVE_PARAM, ""+onlyActive);
+//		t = queryParam(t, RESTConst.ALL_PARAM, ""+allModels);
+//		t = queryParam(t, RESTConst.COLLECTION_ID_PARAM, colId);
+//		t = queryParam(t, RESTConst.USER_ID_PARAM, userId);
+//		t = queryParam(t, RESTConst.RELEASE_LEVEL_PARAM, releaseLevel);
+//		
+//		return super.getList(t, new GenericType<List<TrpP2PaLA>>(){});
+//	}	
 	
 	public String trainP2PaLAModel(int colId, P2PaLATrainJobPars jobPars)
 			throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {

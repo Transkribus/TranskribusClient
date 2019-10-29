@@ -12,10 +12,42 @@ import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
 import eu.transkribus.client.util.TrpClientErrorException;
 import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.io.util.TrpProperties;
+import eu.transkribus.core.model.beans.ATrpModel;
 import eu.transkribus.core.model.beans.TrpCollection;
+import eu.transkribus.core.model.beans.TrpP2PaLA;
 
 public class ModelCallsTest {
 	private static final Logger logger = LoggerFactory.getLogger(ModelCallsTest.class);
+	
+	@Test
+	public void testQueryModel() throws LoginException {
+		TrpProperties creds = new TrpProperties("adminCreds.properties");
+		try (TrpServerConn c = new TrpServerConn(TrpServer.Test, creds.getString("username"), creds.getString("password"))) {
+			int modelId = 50161;
+			
+			TrpP2PaLA model = c.getModelCalls().getModel(modelId, TrpP2PaLA.TYPE);
+			logger.info("model =" +model);
+		}
+	}
+	
+	@Test
+	public void testQueryModels() throws LoginException {
+		TrpProperties creds = new TrpProperties("adminCreds.properties");
+		try (TrpServerConn c = new TrpServerConn(TrpServer.Test, creds.getString("username"), creds.getString("password"))) {
+			int modelId = 50161;
+			
+			boolean allModels=true;
+			Integer colId=null;
+			Integer userId=null;
+			Integer releaseLevel=null;
+			
+			List<TrpP2PaLA> models = c.getModelCalls().getModels(true, allModels, colId, userId, releaseLevel, TrpP2PaLA.TYPE);
+			logger.info("n-models =" +models.size());
+			for (TrpP2PaLA m : models) {
+				logger.info("m = "+m);
+			}
+		}
+	}
 	
 	@Test
 	public void testAddOrRemoveModelToCollection() throws TrpServerErrorException, TrpClientErrorException, LoginException {
