@@ -57,7 +57,7 @@ public class ModelCallsTest {
 			int colId = 3;
 			boolean delete=false;
 			
-			c.getModelCalls().addOrRemoveModelFromCollection(modelId, colId, true);
+//			c.getModelCalls().addOrRemoveModelFromCollection(modelId, colId, true);
 			
 			List<Integer> colIds = c.getModelCalls().getModelCollectionIds(modelId);
 			logger.info("colIds1 = "+colIds);
