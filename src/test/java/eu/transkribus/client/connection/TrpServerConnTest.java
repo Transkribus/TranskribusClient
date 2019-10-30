@@ -11,6 +11,7 @@ import java.util.Map;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.client.InvocationCallback;
 import javax.xml.bind.JAXBException;
 
 import org.junit.Assert;
@@ -38,6 +39,7 @@ import eu.transkribus.core.model.beans.enums.EditStatus;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.job.enums.JobImpl;
 import eu.transkribus.core.model.beans.pagecontent.PcGtsType;
+import eu.transkribus.core.model.beans.rest.TrpHtrList;
 import eu.transkribus.core.model.builder.CommonExportPars;
 import eu.transkribus.core.model.builder.alto.AltoExportPars;
 import eu.transkribus.core.model.builder.docx.DocxExportPars;
@@ -193,7 +195,19 @@ public class TrpServerConnTest {
 	public static void testLoadHtrModels(final String user, final String pw) throws Exception {
 		TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw);
 		
-		conn.getHtrModelListText();
+		conn.getHtrs(2, null, new InvocationCallback<TrpHtrList> () {
+
+			@Override
+			public void completed(TrpHtrList response) {
+				logger.info("Loaded HTR list of size {}", response.getList().size());
+			}
+
+			@Override
+			public void failed(Throwable throwable) {
+				logger.error("Loading HTR list failed", throwable);
+			}
+			
+		});
 		
 	}
 	

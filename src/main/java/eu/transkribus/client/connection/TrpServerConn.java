@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import javax.mail.internet.ParseException;
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
-import javax.ws.rs.Path;
 import javax.ws.rs.ServerErrorException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
@@ -66,7 +65,6 @@ import eu.transkribus.core.model.beans.DocumentUploadDescriptor;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.EdOption;
 import eu.transkribus.core.model.beans.ExportParameters;
-import eu.transkribus.core.model.beans.HtrModel;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TestBean;
@@ -85,7 +83,6 @@ import eu.transkribus.core.model.beans.TrpFImagestore;
 import eu.transkribus.core.model.beans.TrpGroundTruthPage;
 import eu.transkribus.core.model.beans.TrpHtr;
 import eu.transkribus.core.model.beans.TrpJobImplRegistry;
-import eu.transkribus.core.model.beans.TrpP2PaLA;
 import eu.transkribus.core.model.beans.TrpPage;
 import eu.transkribus.core.model.beans.TrpTotalTranscriptStatistics;
 import eu.transkribus.core.model.beans.TrpTranscriptMetadata;
@@ -121,7 +118,6 @@ import eu.transkribus.core.rest.JobConst;
 import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.GsonUtil;
 import eu.transkribus.core.util.JaxbUtils;
-import eu.transkribus.core.util.PageXmlUtils;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
 import eu.transkribus.core.util.SebisStopWatch.SSW;
 
@@ -1310,45 +1306,6 @@ public class TrpServerConn extends ATrpServerConn {
 		super.delete(target);
 	}
 	
-	@Deprecated
-	public List<String> getHtrModelListText() 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_MODEL_PATH);
-		final String modelsStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
-		return Arrays.asList(modelsStr.split("\n"));
-	}
-	
-	/**
-	 * LEGACY. Only used for HMM UPVLC HTR
-	 * @return
-	 * @throws SessionExpiredException
-	 * @throws ServerErrorException
-	 * @throws IllegalArgumentException
-	 * @throws ClientErrorException
-	 */
-	@Deprecated
-	public List<HtrModel> getHtrModelList() 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_MODEL_PATH);
-		return super.getList(target, new GenericType<List<HtrModel>>(){});
-	}
-	
-	/**
-	 * @deprecated uses old HTR list endpoint that does not support filtering and paging
-	 * 
-	 * @param colId
-	 * @param provider
-	 * @return
-	 * @throws SessionExpiredException
-	 * @throws ServerErrorException
-	 * @throws ClientErrorException
-	 */
-	public List<TrpHtr> getHtrs(final int colId, final String provider) throws SessionExpiredException, ServerErrorException, ClientErrorException {		
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path(RESTConst.LIST_PATH);
-		target = target.queryParam(RESTConst.PROVIDER_PARAM, provider);
-		return super.getList(target, new GenericType<List<TrpHtr>>(){});
-	}	
-	
 	private WebTarget buildHtrListTarget(final Integer colId, final String provider, int index, int nValues) {		
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.LIST_PATH)
 				.queryParam(RESTConst.COLLECTION_ID_PARAM, colId)
@@ -1365,6 +1322,16 @@ public class TrpServerConn extends ATrpServerConn {
 	public Future<TrpHtrList> getHtrs(final Integer colId, final String provider, int index, int nValues, InvocationCallback<TrpHtrList> callback) {		
 		WebTarget target = buildHtrListTarget(colId, provider, index, nValues);
 		return target.request(MediaType.APPLICATION_XML_TYPE).async().get(callback);
+	}
+	
+	public TrpHtr updateHtrMetadata(final Integer colId, TrpHtr htr) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		final WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htr.getHtrId());
+		return super.postEntityReturnObject(target, htr, MediaType.APPLICATION_JSON_TYPE, TrpHtr.class, MediaType.APPLICATION_JSON_TYPE);
+	}
+	
+	public void deleteHtr(final Integer colId, final int htrId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		final WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htrId);
+		super.delete(target);
 	}
 	
 	public void addOrModifyUserInCollection(int colId, int userId, TrpRole role) throws SessionExpiredException, ServerErrorException, ClientErrorException  {
@@ -1964,14 +1931,6 @@ public class TrpServerConn extends ATrpServerConn {
 		}
 		return postEntityReturnObject(target, descriptor, MediaType.APPLICATION_JSON_TYPE, 
 				String.class, MediaType.TEXT_PLAIN_TYPE);
-	}
-	
-	@Deprecated
-	public List<String> getHtrRnnListText() 
-			throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_LIST_NETS_PATH);
-		final String modelsStr = super.getObject(target, String.class, MediaType.TEXT_PLAIN_TYPE);
-		return Arrays.asList(modelsStr.split("\n"));
 	}
 	
 	@Deprecated
