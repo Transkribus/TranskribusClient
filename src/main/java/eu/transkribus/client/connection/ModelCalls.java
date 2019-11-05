@@ -33,6 +33,15 @@ public class ModelCalls {
 		return conn.baseTarget.path(RESTConst.MODELS_PATH);
 	}
 	
+	public void updateModel(ATrpModel model, String type) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget t = getBaseModelTarget();
+		t = t.queryParam(RESTConst.TYPE_PARAM, type);
+		
+		conn.postEntity(t, model, MediaType.APPLICATION_JSON_TYPE);
+		
+//		return (T) conn.getObject(t, ModelUtil.getModelClass(type));
+	}
+	
 	public <T extends ATrpModel> T getModel(int modelId, String type) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
 		WebTarget t = getBaseModelTarget().path(""+modelId);
 		t = t.queryParam(RESTConst.TYPE_PARAM, type);

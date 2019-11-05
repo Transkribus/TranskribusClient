@@ -12,12 +12,26 @@ import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
 import eu.transkribus.client.util.TrpClientErrorException;
 import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.io.util.TrpProperties;
-import eu.transkribus.core.model.beans.ATrpModel;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpP2PaLA;
 
 public class ModelCallsTest {
 	private static final Logger logger = LoggerFactory.getLogger(ModelCallsTest.class);
+	
+	@Test
+	public void testUpdateModel() throws LoginException {
+		TrpProperties creds = new TrpProperties("adminCreds.properties");
+		try (TrpServerConn c = new TrpServerConn(TrpServer.Test, creds.getString("username"), creds.getString("password"))) {
+			logger.info("Testing updating a model...");
+			
+			int modelId = 50161;
+			TrpP2PaLA model = c.getModelCalls().getModel(modelId, TrpP2PaLA.TYPE);
+			model.setName("NAME CHANGED!!");
+			c.getModelCalls().updateModel(model, TrpP2PaLA.TYPE);
+			
+			logger.info("model =" +model);
+		}
+	}
 	
 	@Test
 	public void testQueryModel() throws LoginException {
