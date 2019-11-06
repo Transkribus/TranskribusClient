@@ -6,6 +6,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,10 @@ public class ModelCalls {
 	
 	public List<TrpP2PaLA> getP2PaLAModels(boolean onlyActive, boolean allModels, Integer colId, Integer userId, Integer releaseLevel) throws SessionExpiredException {
 		return getModels(onlyActive, allModels, colId, userId, releaseLevel, TrpP2PaLA.TYPE);
+	}
+	
+	public <T extends ATrpModel> List<T> getModels(boolean onlyActive, boolean allModels, Integer colId, Integer userId, Integer releaseLevel, Class<T> clazz) throws SessionExpiredException {
+		return (List<T>) getModels(onlyActive, allModels, colId, userId, releaseLevel, ModelUtil.getType(clazz));		
 	}
 	
 	public <T extends ATrpModel> List<T> getModels(boolean onlyActive, boolean allModels, Integer colId, Integer userId, Integer releaseLevel, String type) throws SessionExpiredException {
