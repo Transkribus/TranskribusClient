@@ -3,10 +3,8 @@ package eu.transkribus.client.connection;
 import java.util.List;
 
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,20 +32,27 @@ public class ModelCalls {
 		return conn.baseTarget.path(RESTConst.MODELS_PATH);
 	}
 	
-	public void updateModel(ATrpModel model, String type) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+	public <T extends ATrpModel> T updateModel(T model, Class<T> clazz) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
 		WebTarget t = getBaseModelTarget();
-		t = t.queryParam(RESTConst.TYPE_PARAM, type);
 		
-		conn.postEntity(t, model, MediaType.APPLICATION_JSON_TYPE);
-		
-//		return (T) conn.getObject(t, ModelUtil.getModelClass(type));
+//		conn.postEntity(t, model, MediaType.APPLICATION_JSON_TYPE);
+		return conn.postEntityReturnObject(t, model, MediaType.APPLICATION_JSON_TYPE, clazz, MediaType.APPLICATION_JSON_TYPE);
 	}
 	
-	public <T extends ATrpModel> T getModel(int modelId, String type) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
-		WebTarget t = getBaseModelTarget().path(""+modelId);
-		t = t.queryParam(RESTConst.TYPE_PARAM, type);
+	public TrpP2PaLA getP2PaLAModel(int modelId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		return getModel(modelId, TrpP2PaLA.class);
+	}
+	
+	public <T extends ATrpModel> T getModel(int modelId, Class<T> clazz/*, String type*/) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget t = getBaseModelTarget().path(""+modelId);//.path(type);
 		
-		return (T) conn.getObject(t, ModelUtil.getModelClass(type));
+		return (T) conn.getObject(t, clazz);
+	}
+	
+	public void setModelDeleted(int modelId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget t = getBaseModelTarget().path(""+modelId);
+		
+		conn.delete(t);
 	}
 	
 	public List<TrpP2PaLA> getP2PaLAModels(boolean onlyActive, boolean allModels, Integer colId, Integer userId, Integer releaseLevel) throws SessionExpiredException {
@@ -60,8 +65,8 @@ public class ModelCalls {
 	
 	public <T extends ATrpModel> List<T> getModels(boolean onlyActive, boolean allModels, Integer colId, Integer userId, Integer releaseLevel, String type) throws SessionExpiredException {
 		WebTarget t = getBaseModelTarget().path(RESTConst.LIST_PATH);
-		t = t.queryParam(RESTConst.TYPE_PARAM, type);
 		
+		t = JerseyUtils.queryParam(t, RESTConst.TYPE_PARAM, type);
 		t = JerseyUtils.queryParam(t, RESTConst.ONLY_ACTIVE_PARAM, ""+onlyActive);
 		t = JerseyUtils.queryParam(t, RESTConst.ALL_PARAM, ""+allModels);
 		t = JerseyUtils.queryParam(t, RESTConst.COLLECTION_ID_PARAM, colId);
@@ -72,19 +77,22 @@ public class ModelCalls {
 		return conn.getList(t, ModelUtil.createGenericType(type));
 	}
 	
+	// Model <-> Collections stuff
+	
 	public List<Integer> getModelCollectionIds(int modelId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
-		WebTarget t = conn.baseTarget.path(RESTConst.MODELS_PATH).path(""+modelId).path(RESTConst.COLLECTION_ID_PARAM).path(RESTConst.LIST_PATH);
-		String responseStr = conn.getObject(t, String.class, MediaType.TEXT_PLAIN_TYPE);
+		WebTarget t = conn.baseTarget.path(RESTConst.MODELS_PATH).path(""+modelId).path(RESTConst.COLLECTION_PATH).path(RESTConst.LIST_PATH);
+		t = t.queryParam(RESTConst.TRANSCRIPT_IDS_PARAM, true);
+		String responseStr = conn.getObject(t, String.class, MediaType.APPLICATION_JSON_TYPE);
 		return GsonUtil.toIntegerList(responseStr);		
 	}
 	
 	public List<TrpCollection> getModelCollections(int modelId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
-		WebTarget t = conn.baseTarget.path(RESTConst.MODELS_PATH).path(""+modelId).path(RESTConst.COLLECTION_PARAM).path(RESTConst.LIST_PATH);
+		WebTarget t = conn.baseTarget.path(RESTConst.MODELS_PATH).path(""+modelId).path(RESTConst.COLLECTION_PATH).path(RESTConst.LIST_PATH);
 		return conn.getList(t, TrpServerConn.COL_LIST_TYPE);
 	}
 	
 	public void addOrRemoveModelFromCollection(int modelId, int colId, boolean delete) throws TrpClientErrorException, TrpServerErrorException, SessionExpiredException {
-		WebTarget t = conn.baseTarget.path(RESTConst.MODELS_PATH).path(""+modelId).path(""+colId);
+		WebTarget t = conn.baseTarget.path(RESTConst.MODELS_PATH).path(""+modelId).path(RESTConst.COLLECTION_PATH).path(""+colId);
 		
 		if (!delete) {
 			conn.postNull(t);

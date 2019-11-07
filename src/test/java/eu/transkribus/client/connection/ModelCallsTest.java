@@ -1,9 +1,11 @@
 package eu.transkribus.client.connection;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.security.auth.login.LoginException;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,24 +14,71 @@ import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
 import eu.transkribus.client.util.TrpClientErrorException;
 import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.io.util.TrpProperties;
+import eu.transkribus.core.model.beans.ATrpModel;
 import eu.transkribus.core.model.beans.TrpCollection;
 import eu.transkribus.core.model.beans.TrpP2PaLA;
+import eu.transkribus.core.util.JaxbUtils;
+import eu.transkribus.core.util.ModelUtil;
 
 public class ModelCallsTest {
 	private static final Logger logger = LoggerFactory.getLogger(ModelCallsTest.class);
 	
 	@Test
-	public void testUpdateModel() throws LoginException {
+	public void testQueryModelToJsonAndCheckType() throws Exception {
+		TrpProperties creds = new TrpProperties("adminCreds.properties");
+		try (TrpServerConn c = new TrpServerConn(TrpServer.Test, creds.getString("username"), creds.getString("password"))) {
+			logger.info("Testing converting a model to json...");
+			
+			int modelId = 50161;
+			TrpP2PaLA model = c.getModelCalls().getP2PaLAModel(modelId);
+//			TrpP2PaLA model = new TrpP2PaLA();
+//			model.setType(TrpP2PaLA.TYPE);
+//			model.setType("helllooooo!");
+			logger.info("model type = "+model.getType());
+			String jsonStr = JaxbUtils.marshalToJsonString(model, true);
+			logger.info("jsonStr =" +jsonStr);
+			
+			Map<String, String> map = ModelUtil.parseModelJsonAsMap(jsonStr);
+			String type = map.get(ATrpModel.TYPE_COL);
+			logger.info("type = "+type);
+			
+			Assert.assertEquals("type is invalid", TrpP2PaLA.TYPE, type);
+			
+//			logger.info("gsonStr =" +GsonUtil.toJson(model));
+		}
+	}
+	
+	@Test
+	public void testSetModelDeleted() throws Exception {
+		TrpProperties creds = new TrpProperties("adminCreds.properties");
+		try (TrpServerConn c = new TrpServerConn(TrpServer.Test, creds.getString("username"), creds.getString("password"))) {
+			logger.info("Testing deleting a model...");
+			
+			int modelId = 50161;
+//			TrpP2PaLA model = c.getModelCalls().getModel(modelId, TrpP2PaLA.TYPE);
+			
+//			model.setName("Changed name: "+new java.util.Date());
+			c.getModelCalls().setModelDeleted(modelId);
+			TrpP2PaLA model = c.getModelCalls().getP2PaLAModel(modelId);
+			
+			logger.info("model =" +model);
+		}
+	}
+	
+	@Test
+	public void testUpdateModel() throws Exception {
 		TrpProperties creds = new TrpProperties("adminCreds.properties");
 		try (TrpServerConn c = new TrpServerConn(TrpServer.Test, creds.getString("username"), creds.getString("password"))) {
 			logger.info("Testing updating a model...");
 			
 			int modelId = 50161;
-			TrpP2PaLA model = c.getModelCalls().getModel(modelId, TrpP2PaLA.TYPE);
-			model.setName("NAME CHANGED!!");
-			c.getModelCalls().updateModel(model, TrpP2PaLA.TYPE);
+			TrpP2PaLA model = c.getModelCalls().getP2PaLAModel(modelId);
 			
-			logger.info("model =" +model);
+			model.setName("Changed ame: "+new java.util.Date());
+			model.setDescription("Changed desc: "+new java.util.Date());
+			model = c.getModelCalls().updateModel(model, TrpP2PaLA.class);
+			
+			logger.info("returned changed model =" +model);
 		}
 	}
 	
@@ -39,8 +88,8 @@ public class ModelCallsTest {
 		try (TrpServerConn c = new TrpServerConn(TrpServer.Test, creds.getString("username"), creds.getString("password"))) {
 			int modelId = 50161;
 			
-			TrpP2PaLA model = c.getModelCalls().getModel(modelId, TrpP2PaLA.TYPE);
-			logger.info("model =" +model);
+			TrpP2PaLA model = c.getModelCalls().getP2PaLAModel(modelId);
+			logger.info("model = " +model);
 		}
 	}
 	
