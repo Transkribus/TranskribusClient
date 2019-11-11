@@ -91,6 +91,7 @@ public abstract class ATrpServerConn implements Closeable {
 	private WebTarget loginTarget;
 	private WebTarget loginOAuthTarget;
 	protected ModelCalls modelCalls;
+	protected AdminCalls adminCalls;
 	
 	protected final static MediaType DEFAULT_RESP_TYPE = MediaType.APPLICATION_JSON_TYPE;
 	
@@ -142,10 +143,15 @@ public abstract class ATrpServerConn implements Closeable {
 //		client.register(new ClientRequestAuthFilter(login.getSessionId()));
 		
 		modelCalls = new ModelCalls(this);
+		adminCalls = new AdminCalls(this);
 	}
 	
 	public ModelCalls getModelCalls() {
 		return modelCalls;
+	}
+	
+	public AdminCalls getAdminCalls() {
+		return adminCalls;
 	}
 			
 	/**
