@@ -37,6 +37,7 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.dea.fimgstoreclient.FimgStoreGetClient;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -67,6 +68,7 @@ import eu.transkribus.core.model.beans.EdOption;
 import eu.transkribus.core.model.beans.ExportParameters;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
+import eu.transkribus.core.model.beans.PyLaiaHtrTrainConfig;
 import eu.transkribus.core.model.beans.TestBean;
 import eu.transkribus.core.model.beans.TrpAction;
 import eu.transkribus.core.model.beans.TrpCollection;
@@ -1285,6 +1287,19 @@ public class TrpServerConn extends ATrpServerConn {
 				
 		return postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
+	}
+	
+	public String runPyLaiaTraining(PyLaiaHtrTrainConfig config) {
+		if(config == null) {
+			throw new IllegalArgumentException("Config is null!");
+		}
+		
+		throw new NotImplementedException("PyLaia training call not implemented yet!");
+		
+		// TODO!!!
+//		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_CITLAB_TRAIN_PATH);
+//		return postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, 
+//				String.class, MediaType.APPLICATION_XML_TYPE);		
 	}
 
 	public void addHtrToCollection(final int htrId, final int colId, final int toColId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
