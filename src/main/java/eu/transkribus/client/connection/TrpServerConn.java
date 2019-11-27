@@ -1289,17 +1289,13 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public String runPyLaiaTraining(PyLaiaHtrTrainConfig config) {
+	public String runPyLaiaTraining(PyLaiaHtrTrainConfig config) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
 		if(config == null) {
 			throw new IllegalArgumentException("Config is null!");
 		}
 		
-		throw new NotImplementedException("PyLaia training call not implemented yet!");
-		
-		// TODO!!!
-//		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.HTR_CITLAB_TRAIN_PATH);
-//		return postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, 
-//				String.class, MediaType.APPLICATION_XML_TYPE);		
+		WebTarget target = baseTarget.path(RESTConst.PYLAIA_PATH).path("" + config.getColId()).path(RESTConst.TRAIN_PATH);
+		return postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 
 	public void addHtrToCollection(final int htrId, final int colId, final int toColId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
