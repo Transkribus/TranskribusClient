@@ -37,7 +37,6 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 import org.dea.fimgstoreclient.FimgStoreGetClient;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -66,6 +65,7 @@ import eu.transkribus.core.model.beans.DocumentUploadDescriptor;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.EdOption;
 import eu.transkribus.core.model.beans.ExportParameters;
+import eu.transkribus.core.model.beans.GroundTruthSelectionDescriptor;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.PyLaiaHtrTrainConfig;
@@ -1870,6 +1870,17 @@ public class TrpServerConn extends ATrpServerConn {
 //		return duplicateDocument(colId, params);
 //	}
 	
+	public String duplicateGtToDocument(int colId, List<GroundTruthSelectionDescriptor> descList, String title, String description) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
+		JobParameters params = new JobParameters();
+		params.setGtList(descList);
+		params.setJobImpl(JobImpl.CopyJob.toString());
+		params.getParams().addParameter(JobConst.PROP_TITLE, title);
+		params.getParams().addParameter(JobConst.PROP_DOC_DESCS, description);
+		
+		return duplicateDocument(colId, params);
+	}
+	
+	
 	private String duplicateDocument(final int colId, JobParameters duplicateParams) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
@@ -1888,7 +1899,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return postEntityReturnObject(docTarget, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
-
+	
 	@Deprecated
 	public List<KwsDocHit> doKwsSearch(int colId, Integer docId, String term, int confidence) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
