@@ -1870,6 +1870,17 @@ public class TrpServerConn extends ATrpServerConn {
 //		return duplicateDocument(colId, params);
 //	}
 	
+	public String duplicateGtToDocument(int colId, List<GroundTruthSelectionDescriptor> descList, String title, String description) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
+		JobParameters params = new JobParameters();
+		params.setGtList(descList);
+		params.setJobImpl(JobImpl.CopyJob.toString());
+		params.getParams().addParameter(JobConst.PROP_TITLE, title);
+		params.getParams().addParameter(JobConst.PROP_DOC_DESCS, description);
+		
+		return duplicateDocument(colId, params);
+	}
+	
+	
 	private String duplicateDocument(final int colId, JobParameters duplicateParams) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
 				.path(""+colId)
@@ -1888,7 +1899,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return postEntityReturnObject(docTarget, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
-
+	
 	@Deprecated
 	public List<KwsDocHit> doKwsSearch(int colId, Integer docId, String term, int confidence) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
