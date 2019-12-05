@@ -2196,6 +2196,15 @@ public class TrpServerConn extends ATrpServerConn {
 		return gtList;		
 	}
 	
+	public List<TrpCollection> getCollectionsByHtr(int colId, int htrId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		final WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH)
+				.path(""+colId)
+				.path("" + htrId)
+				.path(RESTConst.COLLECTION_PATH)
+				.path(RESTConst.LIST_PATH);
+		return super.getList(target, COL_LIST_TYPE, MediaType.APPLICATION_JSON_TYPE);
+	}
+
 	/**
 	 * @deprecated datasets are no longer duplicated to documents but stored as ground truth
 	 * 
@@ -2578,6 +2587,5 @@ public class TrpServerConn extends ATrpServerConn {
 		target = queryParam(target, RESTConst.SKIP_PAGES_WITH_MISSING_STATUS_PARAM, ""+skipPagesWithMissingStatus);
 		
 		return getList(target, PAGE_LIST_TYPE);
-	}
-	
+	}	
 }
