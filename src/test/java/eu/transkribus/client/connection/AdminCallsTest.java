@@ -1,10 +1,14 @@
 package eu.transkribus.client.connection;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.security.auth.login.LoginException;
 
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +21,18 @@ import eu.transkribus.core.model.beans.job.enums.JobImpl;
 
 public class AdminCallsTest {
 	private static final Logger logger = LoggerFactory.getLogger(AdminCallsTest.class);
-	
+
+	@BeforeClass
+	public static void initClient() throws IOException, LoginException {
+		String ADMIN_CREDS_FILE_NAME = "adminCreds.properties";
+		try (InputStream is = TrpServerConn.class.getClassLoader().getResourceAsStream(ADMIN_CREDS_FILE_NAME)) {
+			if(is == null) {
+				logger.warn("Could not find credentials file for test user: {}", ADMIN_CREDS_FILE_NAME);
+			}
+			//skip if no adminCreds file exists
+			Assume.assumeNotNull("Skipping client test due to missing credentials file.", is);
+		}
+	}
 	
 	@Test
 	public void testGetUserNamesForJobImpl() throws LoginException {
