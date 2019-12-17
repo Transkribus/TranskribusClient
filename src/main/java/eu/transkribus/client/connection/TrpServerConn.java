@@ -1853,6 +1853,17 @@ public class TrpServerConn extends ATrpServerConn {
 		return duplicateDocument(colId, params);
 	}
 	
+	public String createSamplePagesJob(int colId, List<DocumentSelectionDescriptor> descList, int nrOfPages, String sampleName, String sampleDescription) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
+		JobParameters params = new JobParameters();
+		params.setDocs(descList);
+		params.setJobImpl(JobImpl.CreateSampleDocJob.toString());
+		params.getParams().addParameter(JobConst.PROP_TITLE, sampleName);
+		params.getParams().addParameter(JobConst.PROP_DOC_DESCS, sampleDescription);
+		params.getParams().addParameter(JobConst.PROP_NUM_PAGESAMPLES, nrOfPages);
+		
+		return duplicateDocument(colId, params);
+	}
+	
 	public TrpJobStatus computeSampleJob(int docId, ParameterMap params) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {	
 		params.addParameter(JobConst.PROP_DOC_ID, docId);
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.COMPUTE_SAMPLE);
