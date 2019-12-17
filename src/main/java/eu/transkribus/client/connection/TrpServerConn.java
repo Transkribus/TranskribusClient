@@ -1853,13 +1853,14 @@ public class TrpServerConn extends ATrpServerConn {
 		return duplicateDocument(colId, params);
 	}
 	
-	public String createSamplePagesJob(int colId, List<DocumentSelectionDescriptor> descList, int nrOfPages, String sampleName, String sampleDescription) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
+	public String createSamplePagesJob(int colId, List<DocumentSelectionDescriptor> descList, int nrOfPages, String sampleName, String sampleDescription, String option) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
 		JobParameters params = new JobParameters();
 		params.setDocs(descList);
 		params.setJobImpl(JobImpl.CreateSampleDocJob.toString());
 		params.getParams().addParameter(JobConst.PROP_TITLE, sampleName);
 		params.getParams().addParameter(JobConst.PROP_DOC_DESCS, sampleDescription);
 		params.getParams().addParameter(JobConst.PROP_NUM_PAGESAMPLES, nrOfPages);
+		params.getParams().addParameter(JobConst.PROP_OPTION_PAGESAMPLES, option);
 		
 		return duplicateDocument(colId, params);
 	}
