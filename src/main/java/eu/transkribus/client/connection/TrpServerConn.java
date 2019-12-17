@@ -1968,7 +1968,8 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public String runPyLaiaHtrDecode(int colId, int docId, String pages, final int modelId, final String dictName, 
-			boolean doLinePolygonSimplification, boolean keepOriginalLinePolygons, boolean doStoreConfMats, List<String> structures) 
+			boolean doLinePolygonSimplification, boolean clearLines, boolean keepOriginalLinePolygons,
+			int batchSize, List<String> structures) 
 					throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		WebTarget target = baseTarget.path(RESTConst.PYLAIA_PATH)
 				.path(""+colId)
@@ -1979,7 +1980,9 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
 		target = target.queryParam(JobConst.PROP_DO_LINE_POLYGON_SIMPLIFICATION, doLinePolygonSimplification);
 		target = target.queryParam(JobConst.PROP_KEEP_ORIGINAL_LINE_POLYGONS, keepOriginalLinePolygons);
-		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
+//		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
+		target = target.queryParam(JobConst.PROP_CLEAR_LINES, clearLines);
+		target = target.queryParam(JobConst.PROP_BATCH_SIZE, batchSize);
 		if(!CollectionUtils.isEmpty(structures)) {
 			target = target.queryParam(JobConst.PROP_STRUCTURES, new ArrayList<>(structures).toArray());
 		}
@@ -1989,7 +1992,7 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 
 	public String runPyLaiaHtrDecode(int colId, DocumentSelectionDescriptor descriptor, final int modelId, final String dictName,
-			boolean doLinePolygonSimplification, boolean keepOriginalLinePolygons, boolean doStoreConfMats, List<String> structures)
+			boolean doLinePolygonSimplification, boolean clearLines, boolean keepOriginalLinePolygons, int batchSize, List<String> structures)
 					throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(descriptor == null || descriptor.getDocId() < 1) {
 			throw new IllegalArgumentException("No document selected!");
@@ -2001,7 +2004,9 @@ public class TrpServerConn extends ATrpServerConn {
 		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
 		target = target.queryParam(JobConst.PROP_DO_LINE_POLYGON_SIMPLIFICATION, doLinePolygonSimplification);
 		target = target.queryParam(JobConst.PROP_KEEP_ORIGINAL_LINE_POLYGONS, keepOriginalLinePolygons);
-		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
+//		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
+		target = target.queryParam(JobConst.PROP_CLEAR_LINES, clearLines);
+		target = target.queryParam(JobConst.PROP_BATCH_SIZE, batchSize);
 		if(!CollectionUtils.isEmpty(structures)) {
 			target = target.queryParam(JobConst.PROP_STRUCTURES, new ArrayList<>(structures).toArray());
 		}
