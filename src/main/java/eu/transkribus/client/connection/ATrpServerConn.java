@@ -92,6 +92,7 @@ public abstract class ATrpServerConn implements Closeable {
 	private WebTarget loginOAuthTarget;
 	protected ModelCalls modelCalls;
 	protected AdminCalls adminCalls;
+	protected PyLaiaCalls pyLaiaCalls;
 	
 	protected final static MediaType DEFAULT_RESP_TYPE = MediaType.APPLICATION_JSON_TYPE;
 	
@@ -144,6 +145,7 @@ public abstract class ATrpServerConn implements Closeable {
 		
 		modelCalls = new ModelCalls(this);
 		adminCalls = new AdminCalls(this);
+		pyLaiaCalls = new PyLaiaCalls(this);
 	}
 	
 	public ModelCalls getModelCalls() {
@@ -152,6 +154,10 @@ public abstract class ATrpServerConn implements Closeable {
 	
 	public AdminCalls getAdminCalls() {
 		return adminCalls;
+	}
+	
+	public PyLaiaCalls getPyLaiaCalls() {
+		return pyLaiaCalls;
 	}
 			
 	/**

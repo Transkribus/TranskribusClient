@@ -1289,15 +1289,6 @@ public class TrpServerConn extends ATrpServerConn {
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
 	
-	public String runPyLaiaTraining(PyLaiaHtrTrainConfig config) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
-		if(config == null) {
-			throw new IllegalArgumentException("Config is null!");
-		}
-		
-		WebTarget target = baseTarget.path(RESTConst.PYLAIA_PATH).path("" + config.getColId()).path(RESTConst.TRAIN_PATH);
-		return postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, String.class, MediaType.APPLICATION_XML_TYPE);
-	}
-
 	public void addHtrToCollection(final int htrId, final int colId, final int toColId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.RECOGNITION_PATH)
@@ -1965,53 +1956,6 @@ public class TrpServerConn extends ATrpServerConn {
 		return postEntityReturnObject(target, descriptor, MediaType.APPLICATION_JSON_TYPE, 
 				String.class, MediaType.TEXT_PLAIN_TYPE);
 	}
-	
-	public String runPyLaiaHtrDecode(int colId, int docId, String pages, final int modelId, final String dictName, 
-			boolean doLinePolygonSimplification, boolean clearLines, boolean keepOriginalLinePolygons,
-			int batchSize, List<String> structures) 
-					throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
-		WebTarget target = baseTarget.path(RESTConst.PYLAIA_PATH)
-				.path(""+colId)
-				.path(""+modelId)
-				.path(RESTConst.RECOGNITION_PATH);
-		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
-		target = target.queryParam(RESTConst.PAGES_PARAM, pages);
-		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
-		target = target.queryParam(JobConst.PROP_DO_LINE_POLYGON_SIMPLIFICATION, doLinePolygonSimplification);
-		target = target.queryParam(JobConst.PROP_KEEP_ORIGINAL_LINE_POLYGONS, keepOriginalLinePolygons);
-//		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
-		target = target.queryParam(JobConst.PROP_CLEAR_LINES, clearLines);
-		target = target.queryParam(JobConst.PROP_BATCH_SIZE, batchSize);
-		if(!CollectionUtils.isEmpty(structures)) {
-			target = target.queryParam(JobConst.PROP_STRUCTURES, new ArrayList<>(structures).toArray());
-		}
-		
-		return postEntityReturnObject(target, null, MediaType.APPLICATION_XML_TYPE, 
-				String.class, MediaType.TEXT_PLAIN_TYPE);
-	}
-
-	public String runPyLaiaHtrDecode(int colId, DocumentSelectionDescriptor descriptor, final int modelId, final String dictName,
-			boolean doLinePolygonSimplification, boolean clearLines, boolean keepOriginalLinePolygons, int batchSize, List<String> structures)
-					throws SessionExpiredException, ServerErrorException, ClientErrorException {
-		if(descriptor == null || descriptor.getDocId() < 1) {
-			throw new IllegalArgumentException("No document selected!");
-		}
-		WebTarget target = baseTarget.path(RESTConst.PYLAIA_PATH)
-				.path(""+colId)
-				.path(""+modelId)
-				.path(RESTConst.RECOGNITION_PATH);
-		target = target.queryParam(RESTConst.HTR_DICT_NAME_PARAM, dictName);
-		target = target.queryParam(JobConst.PROP_DO_LINE_POLYGON_SIMPLIFICATION, doLinePolygonSimplification);
-		target = target.queryParam(JobConst.PROP_KEEP_ORIGINAL_LINE_POLYGONS, keepOriginalLinePolygons);
-//		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
-		target = target.queryParam(JobConst.PROP_CLEAR_LINES, clearLines);
-		target = target.queryParam(JobConst.PROP_BATCH_SIZE, batchSize);
-		if(!CollectionUtils.isEmpty(structures)) {
-			target = target.queryParam(JobConst.PROP_STRUCTURES, new ArrayList<>(structures).toArray());
-		}
-		return postEntityReturnObject(target, descriptor, MediaType.APPLICATION_JSON_TYPE, 
-				String.class, MediaType.TEXT_PLAIN_TYPE);
-	}	
 	
 	@Deprecated
 	public List<String> getHtrDictListText() 
