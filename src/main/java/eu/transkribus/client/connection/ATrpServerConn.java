@@ -61,13 +61,15 @@ public abstract class ATrpServerConn implements Closeable {
 	
 	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
 	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";
+	public static final String LOCAL_TEST_SERVER_URI = "http://localhost:8080/TrpServerTesting";
 	public static final String OLD_TEST_SERVER_URI = "https://dbis-faxe.uibk.ac.at/TrpServerTesting";
 		
 	public static final String[] SERVER_URIS = new String[] {
-		PROD_SERVER_URI, 
-		TEST_SERVER_URI,
-		OLD_TEST_SERVER_URI
-	};	
+			PROD_SERVER_URI,
+			TEST_SERVER_URI,
+			LOCAL_TEST_SERVER_URI,
+			OLD_TEST_SERVER_URI
+	};
 	
 	public enum TrpServer {
 		Prod(PROD_SERVER_URI),
@@ -92,6 +94,7 @@ public abstract class ATrpServerConn implements Closeable {
 	private WebTarget loginOAuthTarget;
 	protected ModelCalls modelCalls;
 	protected AdminCalls adminCalls;
+	protected PyLaiaCalls pyLaiaCalls;
 	
 	protected final static MediaType DEFAULT_RESP_TYPE = MediaType.APPLICATION_JSON_TYPE;
 	
@@ -144,14 +147,19 @@ public abstract class ATrpServerConn implements Closeable {
 		
 		modelCalls = new ModelCalls(this);
 		adminCalls = new AdminCalls(this);
+		pyLaiaCalls = new PyLaiaCalls(this);
 	}
-	
+
 	public ModelCalls getModelCalls() {
 		return modelCalls;
 	}
 	
 	public AdminCalls getAdminCalls() {
 		return adminCalls;
+	}
+	
+	public PyLaiaCalls getPyLaiaCalls() {
+		return pyLaiaCalls;
 	}
 			
 	/**

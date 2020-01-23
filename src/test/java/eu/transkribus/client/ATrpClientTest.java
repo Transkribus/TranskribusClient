@@ -1,14 +1,17 @@
 package eu.transkribus.client;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.security.auth.login.LoginException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.ServerErrorException;
 
 import org.junit.AfterClass;
+import org.junit.Assume;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -17,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
 import eu.transkribus.client.connection.TrpServerConn;
 import eu.transkribus.client.util.SessionExpiredException;
-import eu.transkribus.core.io.util.TrpProperties;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor.PageDescriptor;
 import eu.transkribus.core.model.beans.TrpDoc;
@@ -42,7 +44,14 @@ public class ATrpClientTest {
 	
 	@BeforeClass
 	public static void initClient() throws IOException, LoginException {
-		TrpProperties creds = new TrpProperties(TEST_CREDS_FILE_NAME);
+		Properties creds = new Properties();
+		try (InputStream is = ATrpClientTest.class.getClassLoader().getResourceAsStream(TEST_CREDS_FILE_NAME)) {
+			if(is == null) {
+				logger.warn("Could not find credentials file for test user: {}", TEST_CREDS_FILE_NAME);
+			}
+			Assume.assumeNotNull("Skipping client test due to missing credentials file.", is);
+			creds.load(is);
+		}
 		username = creds.getProperty("username");
 		password = creds.getProperty("password");
 		client = new TrpServerConn(TrpServer.Test, username, password);

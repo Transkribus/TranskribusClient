@@ -65,8 +65,10 @@ import eu.transkribus.core.model.beans.DocumentUploadDescriptor;
 import eu.transkribus.core.model.beans.EdFeature;
 import eu.transkribus.core.model.beans.EdOption;
 import eu.transkribus.core.model.beans.ExportParameters;
+import eu.transkribus.core.model.beans.GroundTruthSelectionDescriptor;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
+import eu.transkribus.core.model.beans.PyLaiaHtrTrainConfig;
 import eu.transkribus.core.model.beans.TestBean;
 import eu.transkribus.core.model.beans.TrpAction;
 import eu.transkribus.core.model.beans.TrpCollection;
@@ -1286,7 +1288,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
-
+	
 	public void addHtrToCollection(final int htrId, final int colId, final int toColId) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget target = baseTarget
 				.path(RESTConst.RECOGNITION_PATH)
@@ -1842,6 +1844,18 @@ public class TrpServerConn extends ATrpServerConn {
 		return duplicateDocument(colId, params);
 	}
 	
+	public String createSamplePagesJob(int colId, List<DocumentSelectionDescriptor> descList, int nrOfPages, String sampleName, String sampleDescription, String option) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
+		JobParameters params = new JobParameters();
+		params.setDocs(descList);
+		params.setJobImpl(JobImpl.CreateSampleDocJob.toString());
+		params.getParams().addParameter(JobConst.PROP_TITLE, sampleName);
+		params.getParams().addParameter(JobConst.PROP_DOC_DESCS, sampleDescription);
+		params.getParams().addParameter(JobConst.PROP_NUM_PAGESAMPLES, nrOfPages);
+		params.getParams().addParameter(JobConst.PROP_OPTION_PAGESAMPLES, option);
+		
+		return duplicateDocument(colId, params);
+	}
+	
 	public TrpJobStatus computeSampleJob(int docId, ParameterMap params) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {	
 		params.addParameter(JobConst.PROP_DOC_ID, docId);
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.COMPUTE_SAMPLE);
@@ -1858,6 +1872,17 @@ public class TrpServerConn extends ATrpServerConn {
 //		//TODO set targetdocName etc in parameters
 //		return duplicateDocument(colId, params);
 //	}
+	
+	public String duplicateGtToDocument(int colId, List<GroundTruthSelectionDescriptor> descList, String title, String description) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
+		JobParameters params = new JobParameters();
+		params.setGtList(descList);
+		params.setJobImpl(JobImpl.CopyJob.toString());
+		params.getParams().addParameter(JobConst.PROP_TITLE, title);
+		params.getParams().addParameter(JobConst.PROP_DOC_DESCS, description);
+		
+		return duplicateDocument(colId, params);
+	}
+	
 	
 	private String duplicateDocument(final int colId, JobParameters duplicateParams) throws SessionExpiredException, ServerErrorException, IllegalArgumentException, ClientErrorException{
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
@@ -1877,7 +1902,7 @@ public class TrpServerConn extends ATrpServerConn {
 		return postEntityReturnObject(docTarget, null, MediaType.APPLICATION_XML_TYPE, 
 				String.class, MediaType.APPLICATION_XML_TYPE);
 	}
-
+	
 	@Deprecated
 	public List<KwsDocHit> doKwsSearch(int colId, Integer docId, String term, int confidence) throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
@@ -2132,6 +2157,15 @@ public class TrpServerConn extends ATrpServerConn {
 		return gtList;		
 	}
 	
+	public List<TrpCollection> getCollectionsByHtr(int colId, int htrId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		final WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH)
+				.path(""+colId)
+				.path("" + htrId)
+				.path(RESTConst.COLLECTION_PATH)
+				.path(RESTConst.LIST_PATH);
+		return super.getList(target, COL_LIST_TYPE, MediaType.APPLICATION_JSON_TYPE);
+	}
+
 	/**
 	 * @deprecated datasets are no longer duplicated to documents but stored as ground truth
 	 * 
@@ -2514,6 +2548,5 @@ public class TrpServerConn extends ATrpServerConn {
 		target = queryParam(target, RESTConst.SKIP_PAGES_WITH_MISSING_STATUS_PARAM, ""+skipPagesWithMissingStatus);
 		
 		return getList(target, PAGE_LIST_TYPE);
-	}
-	
+	}	
 }

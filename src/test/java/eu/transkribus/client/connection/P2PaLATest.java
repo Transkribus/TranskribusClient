@@ -1,22 +1,20 @@
 package eu.transkribus.client.connection;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import javax.security.auth.login.LoginException;
 
+import org.junit.Assume;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
-import eu.transkribus.client.connection.TrpServerConn;
-import eu.transkribus.client.util.SessionExpiredException;
-import eu.transkribus.client.util.TrpClientErrorException;
-import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.io.util.TrpProperties;
 import eu.transkribus.core.model.beans.DocSelection;
-import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
 import eu.transkribus.core.model.beans.TrpP2PaLA;
 import eu.transkribus.core.model.beans.job.TrpJobStatus;
 import eu.transkribus.core.model.beans.rest.P2PaLATrainJobPars;
@@ -26,6 +24,18 @@ import eu.transkribus.core.util.DocSelectionUtil;
 
 public class P2PaLATest {
 	private static final Logger logger = LoggerFactory.getLogger(P2PaLATest.class);
+	
+	@BeforeClass
+	public static void initClient() throws IOException, LoginException {
+		String ADMIN_CREDS_FILE_NAME = "adminCreds.properties";
+		try (InputStream is = TrpServerConn.class.getClassLoader().getResourceAsStream(ADMIN_CREDS_FILE_NAME)) {
+			if(is == null) {
+				logger.warn("Could not find credentials file for test user: {}", ADMIN_CREDS_FILE_NAME);
+			}
+			//skip if no adminCreds file exists
+			Assume.assumeNotNull("Skipping client test due to missing credentials file.", is);
+		}
+	}
 	
 	@Test
 	public void testQueryP2PaLAModels() throws LoginException {
