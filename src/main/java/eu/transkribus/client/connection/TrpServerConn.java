@@ -2539,6 +2539,9 @@ public class TrpServerConn extends ATrpServerConn {
 		return GsonUtil.toListOfIntLists(responseStr);
 	}
 	
+	/**
+	 * @deprecated fails on server for large number of pages 
+	 */
 	public List<TrpPage> getTrpPagesByPagesStr(int colId, int docId, String pagesStr, EditStatus editStatus, boolean skipPagesWithMissingStatus) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
 		WebTarget target = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path(""+docId).path(RESTConst.PAGES_PARAM);
 		target = queryParam(target, RESTConst.PAGES_PARAM, pagesStr);
