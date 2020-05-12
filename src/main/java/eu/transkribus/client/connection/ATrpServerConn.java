@@ -478,7 +478,7 @@ public abstract class ATrpServerConn implements Closeable {
 		return ent;
 	}
 	
-	private <T> T extractObject(Response resp, Class<T> returnType) {
+	private static <T> T extractObject(Response resp, Class<T> returnType) {
 		T object = null;
 		try{
 			object = resp.readEntity(returnType);
