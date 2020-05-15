@@ -32,7 +32,7 @@ public class HtrModelTest extends ATrpClientTest {
 			final int colId = col.getColId();
 			logger.info("Trying to retrieve models in collection {}", colId);
 			
-			Future<TrpHtrList> htrListFut = client.getHtrs(colId, HtrCITlabUtils.PROVIDER_CITLAB_PLUS, 0, -1, new InvocationCallback<TrpHtrList>() {
+			Future<TrpHtrList> htrListFut = client.getHtrs(colId, HtrCITlabUtils.PROVIDER_CITLAB_PLUS, 0, -1, null, null, new InvocationCallback<TrpHtrList>() {
 				@Override
 				public void completed(TrpHtrList response) {
 					logger.info("Success retrieving modelList!");

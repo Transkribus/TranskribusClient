@@ -16,6 +16,7 @@ import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -170,6 +171,16 @@ public class TrpServerConn extends ATrpServerConn {
 	 */
 	private List<String> jobAcl = null;
 	private TrpFImagestore fimagestoreConfig = null;
+	
+	class InvocationCallbackAdapter<T> implements InvocationCallback<T> {
+		@Override
+		public void completed(T response) {
+		}
+
+		@Override
+		public void failed(Throwable throwable) {
+		}
+	};
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
@@ -1308,23 +1319,30 @@ public class TrpServerConn extends ATrpServerConn {
 		super.delete(target);
 	}
 	
-	private WebTarget buildHtrListTarget(final Integer colId, final String provider, int index, int nValues) {		
+	private WebTarget buildHtrListTarget(final Integer colId, final String provider, int index, int nValues, String sortColumn, String sortDirection) {		
 		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.LIST_PATH)
 				.queryParam(RESTConst.COLLECTION_ID_PARAM, colId)
 				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
 				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
 				.queryParam(RESTConst.PROVIDER_PARAM, provider);
+		target = JerseyUtils.queryParam(target, RESTConst.SORT_COLUMN_PARAM, sortColumn);
+		target = JerseyUtils.queryParam(target, RESTConst.SORT_DIRECTION_PARAM, sortDirection);
 		return target;
 	}
 	
 	public Future<TrpHtrList> getHtrs(final Integer colId, final String provider, InvocationCallback<TrpHtrList> callback) {
-		return getHtrs(colId, provider, 0, -1, callback);
+		return getHtrs(colId, provider, 0, -1, null, null, callback);
 	}
 	
-	public Future<TrpHtrList> getHtrs(final Integer colId, final String provider, int index, int nValues, InvocationCallback<TrpHtrList> callback) {		
-		WebTarget target = buildHtrListTarget(colId, provider, index, nValues);
+	public Future<TrpHtrList> getHtrs(final Integer colId, final String provider, int index, int nValues, String sortColumn, String sortDirection, InvocationCallback<TrpHtrList> callback) {		
+		WebTarget target = buildHtrListTarget(colId, provider, index, nValues, sortColumn, sortDirection);
 		return target.request(MediaType.APPLICATION_XML_TYPE).async().get(callback);
 	}
+	
+	public TrpHtrList getHtrsSync(final Integer colId, final String provider, int index, int nValues, String sortColumn, String sortDirection) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget target = buildHtrListTarget(colId, provider, index, nValues, sortColumn, sortDirection);
+		return getObject(target, TrpHtrList.class, MediaType.APPLICATION_XML_TYPE);
+	}	
 	
 	public TrpHtr updateHtrMetadata(final Integer colId, TrpHtr htr) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
 		final WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(""+colId).path("" + htr.getHtrId());

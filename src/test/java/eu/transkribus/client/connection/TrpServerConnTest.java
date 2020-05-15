@@ -195,19 +195,27 @@ public class TrpServerConnTest {
 	public static void testLoadHtrModels(final String user, final String pw) throws Exception {
 		TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw);
 		
-		conn.getHtrs(2, null, new InvocationCallback<TrpHtrList> () {
-
-			@Override
-			public void completed(TrpHtrList response) {
-				logger.info("Loaded HTR list of size {}", response.getList().size());
-			}
-
-			@Override
-			public void failed(Throwable throwable) {
-				logger.error("Loading HTR list failed", throwable);
-			}
-			
-		});
+		TrpHtrList l = conn.getHtrsSync(2, null, 0, -1, null, null);
+		logger.info("got TrpHtrList: "+l);
+		logger.info("n-list: "+l.getList().size());
+		if (l.getList().size()>0) {
+			logger.info("first: "+l.getList().get(0));	
+		}
+		
+//		logger.info("now getting TrpHtrList async...");
+//		conn.getHtrs(2, null, new InvocationCallback<TrpHtrList> () {
+//
+//			@Override
+//			public void completed(TrpHtrList response) {
+//				logger.info("Loaded HTR list of size {}", response.getList().size());
+//			}
+//
+//			@Override
+//			public void failed(Throwable throwable) {
+//				logger.error("Loading HTR list failed", throwable);
+//			}
+//			
+//		});
 		
 	}
 	
@@ -753,7 +761,7 @@ public class TrpServerConnTest {
 			throw new IllegalArgumentException("No credentials");
 		}
 		
-		testGetTrpPagesByPagesStr(args[0], args[1]);
+//		testGetTrpPagesByPagesStr(args[0], args[1]);
 		
 //		testGetTranscriptIdsByPagesStr(args[0], args[1]);
 		
@@ -799,7 +807,7 @@ public class TrpServerConnTest {
 		
 //		testSetTranscriptStatus(args[0], args[1]);
 		
-//		testLoadHtrModels(args[0], args[1]);
+		testLoadHtrModels(args[0], args[1]);
 		
 //		testFindDocs(args[0], args[1]);
 		
