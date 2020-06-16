@@ -16,7 +16,6 @@ import java.util.Map.Entry;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -30,6 +29,7 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.InvocationCallback;
 import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -58,6 +58,8 @@ import eu.transkribus.client.util.JerseyUtils;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.client.util.TrpClientErrorException;
 import eu.transkribus.client.util.TrpServerErrorException;
+import eu.transkribus.core.exceptions.ClientVersionNotSupportedException;
+import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
 import eu.transkribus.core.io.FimgStoreReadConnection;
 import eu.transkribus.core.model.beans.CitLabHtrTrainConfig;
 import eu.transkribus.core.model.beans.CitLabSemiSupervisedHtrTrainConfig;
@@ -69,7 +71,6 @@ import eu.transkribus.core.model.beans.ExportParameters;
 import eu.transkribus.core.model.beans.GroundTruthSelectionDescriptor;
 import eu.transkribus.core.model.beans.KwsDocHit;
 import eu.transkribus.core.model.beans.PageLock;
-import eu.transkribus.core.model.beans.PyLaiaHtrTrainConfig;
 import eu.transkribus.core.model.beans.TestBean;
 import eu.transkribus.core.model.beans.TrpAction;
 import eu.transkribus.core.model.beans.TrpCollection;
@@ -95,7 +96,9 @@ import eu.transkribus.core.model.beans.TrpWordgraph;
 import eu.transkribus.core.model.beans.auth.TrpRole;
 import eu.transkribus.core.model.beans.auth.TrpUser;
 import eu.transkribus.core.model.beans.auth.TrpUserInfo;
+import eu.transkribus.core.model.beans.auth.TrpUserLogin;
 import eu.transkribus.core.model.beans.enums.EditStatus;
+import eu.transkribus.core.model.beans.enums.OAuthProvider;
 import eu.transkribus.core.model.beans.enums.ScriptType;
 import eu.transkribus.core.model.beans.enums.SearchType;
 import eu.transkribus.core.model.beans.job.KwsParameters;
@@ -131,23 +134,6 @@ import eu.transkribus.core.util.SebisStopWatch.SSW;
  */
 public class TrpServerConn extends ATrpServerConn {
 	private static final Logger logger = LoggerFactory.getLogger(TrpServerConn.class);
-		
-	// Debugging URL. Access allowed from UIBK network only
-	// final static String DEFAULT_URI = "http://dbis-faxe.uibk.ac.at:8080/TrpServer";
-	
-	// HTTPS URL. If using self-signed certificates, add it to the java keystore using $JAVA_HOME/bin/keytool.
-//	public static final String DEFAULT_URI = "https://dbis-faxe.uibk.ac.at/TrpServer";
-	
-//	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
-//	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";
-//	public static final String OLD_TEST_SERVER_URI = "https://dbis-faxe.uibk.ac.at/TrpServerTesting";
-//		
-//	public static final String[] SERVER_URIS = new String[] {
-//		PROD_SERVER_URI, 
-//		TEST_SERVER_URI,
-//		OLD_TEST_SERVER_URI
-//	};	
-//	public static final int DEFAULT_URI_INDEX = 0;
 	
 	public static final GenericType<List<TrpTranscriptMetadata>> TRANS_MD_LIST_TYPE = new GenericType<List<TrpTranscriptMetadata>>() {};
 	public static final GenericType<List<TrpPage>> PAGE_LIST_TYPE = new GenericType<List<TrpPage>>() {};
@@ -165,22 +151,18 @@ public class TrpServerConn extends ATrpServerConn {
 	public static final GenericType<List<TrpJobImplRegistry>> JOB_IMPL_REG_LIST_TYPE = new GenericType<List<TrpJobImplRegistry>>() {};
 	public static final GenericType<List<TrpGroundTruthPage>> GROUND_TRUTH_PAGE_LIST_TYPE = new GenericType<List<TrpGroundTruthPage>>() {};
 	
+	private WebTarget loginTarget;
+	private WebTarget loginOAuthTarget;
+	
 	/**
 	 * a list of JobImpls identified by Strings where the server side execution is restricted and the logged in user is allowed to execute them.<br>
 	 * The list is accessed with {@link #isUserAllowedForJob(String)}. If it is not yet initialized, this will be done with a call of {@link #getJobAcl()}
 	 */
 	private List<String> jobAcl = null;
 	private TrpFImagestore fimagestoreConfig = null;
-	
-	class InvocationCallbackAdapter<T> implements InvocationCallback<T> {
-		@Override
-		public void completed(T response) {
-		}
-
-		@Override
-		public void failed(Throwable throwable) {
-		}
-	};
+	protected ModelCalls modelCalls;
+	protected AdminCalls adminCalls;
+	protected PyLaiaCalls pyLaiaCalls;
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
@@ -191,6 +173,10 @@ public class TrpServerConn extends ATrpServerConn {
 			fimagestoreConfigName = "trpProd";	
 		}
 		FimgStoreReadConnection.loadConfig(fimagestoreConfigName);
+		
+		modelCalls = new ModelCalls(this);
+		adminCalls = new AdminCalls(this);
+		pyLaiaCalls = new PyLaiaCalls(this);
 	}
 	
 	public TrpServerConn(String uriStr, final String username, final String password) throws LoginException {
@@ -207,11 +193,11 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 	
 	public static TrpServerConn connectToProdServer(String username, String password) throws LoginException {
-		return new TrpServerConn(ATrpServerConn.PROD_SERVER_URI, username, password);
+		return new TrpServerConn(PROD_SERVER_URI, username, password);
 	}
 	
 	public static TrpServerConn connectToTestServer(String username, String password) throws LoginException {
-		return new TrpServerConn(ATrpServerConn.TEST_SERVER_URI, username, password);
+		return new TrpServerConn(TEST_SERVER_URI, username, password);
 	}
 	
 	@Override
@@ -221,60 +207,136 @@ public class TrpServerConn extends ATrpServerConn {
 		fimagestoreConfig = null;
 	}
 	
-//	private TrpServerConn(String uriStr, final String user, final String pw) throws LoginException {
-//		super(uriStr, user, pw);
-//	}
+	public ModelCalls getModelCalls() {
+		return modelCalls;
+	}
 	
-//	public static TrpServerConn getInstance(final String uriStr) throws LoginException {
-//		if (conn == null) {
-//			logger.debug("Instantiating new TRP Server Connection...");
-//			conn = new TrpServerConn(uriStr);
-//		} else if (!conn.isSameServer(uriStr)) {
-//			logger.debug("different server: "+uriStr+", current: "+conn.getServerUri()+" -> creating new connection instance!");
-//			conn.logout();
-//			conn = new TrpServerConn(uriStr);
-//		}
-//		return conn;
-//	}
-//	
-//	public static TrpServerConn getInstance(final String uriStr, final String username, final String password) throws LoginException {
-//		getInstance(uriStr);
-//		conn.login(username, password);
-//		
-//		return conn;
-//	}
+	public AdminCalls getAdminCalls() {
+		return adminCalls;
+	}
 	
-//	/**
-//	 * @param uriStr e.g. TrpServerConn.DEFAULT_URI
-//	 * @param user
-//	 * @param pw
-//	 * @throws LoginException
-//	 */
-//	public static TrpServerConn getInstance(final String uriStr, final String user, final String pw)
-//			throws LoginException {
-//		if (conn == null) {
-//			logger.debug("Instantiating new TRP Server Connection...");
-//			conn = new TrpServerConn(uriStr, user, pw);
-//		}
-//		return conn;
-//	}
+	public PyLaiaCalls getPyLaiaCalls() {
+		return pyLaiaCalls;
+	}
 	
-//	public static TrpServerConn getInstance() throws LoginException {
-//		if (conn == null) {
-//			throw new LoginException("No connection found!");
-//		}
-//		return conn;
-//	}
+	public TrpUserLogin login(final String user, final String pw) throws ClientVersionNotSupportedException, LoginException {
+		if (login != null) {
+			logout();
+		}
+
+		//post creds to /rest/auth/login
+		Form form = new Form();
+		form = form.param(RESTConst.USER_PARAM, user);
+		form = form.param(RESTConst.PW_PARAM, pw);
+		
+		login = null;
+		try {
+			login = postEntityReturnObject(
+					loginTarget, 
+					form, MediaType.APPLICATION_FORM_URLENCODED_TYPE, 
+					TrpUserLogin.class, MediaType.APPLICATION_JSON_TYPE
+					);
+			
+			initTargets();
+		} catch (TrpClientErrorException e) {
+//			throw e;
+
+//			String entity = readStringEntity(e.getResponse());
+			
+			login = null;
+			if(e.getResponse().getStatus() == ClientVersionNotSupportedException.STATUS_CODE) {
+				logger.debug("ClientVersionNotSupportedException on login!");
+				throw new ClientVersionNotSupportedException(e.getMessage());
+			} else {
+				throw new LoginException(e.getMessage());
+			}
+		} catch (IllegalStateException e) {
+			login = null;
+			logger.error("Login request failed!", e);
+			if("Already connected".equals(e.getMessage()) && e.getCause() != null) {
+				/*
+				 * Jersey throws an IllegalStateException "Already connected" for a variety of issues where actually no connection can be established.
+				 * see https://github.com/jersey/jersey/issues/3000
+				 */
+				Throwable cause = e.getCause();
+				logger.error("'Already connected' caused by: " + cause.getMessage(), cause);
+				//override misleading "Already connected" message
+				throw new LoginException(cause.getMessage());
+			} else {
+				throw new LoginException(e.getMessage());
+			}
+		} catch(Exception e) {
+			login = null;
+			logger.error("Login request failed!", e);
+			throw new LoginException(e.getMessage());
+		}
+		logger.debug("Logged in as: " + login.toString());
+		
+		return login;
+	}
 	
-//	public void login(final String user, final String pw) {
-//		conn.login(user, pw);
-//	}
+	public TrpUserLogin loginOAuth(final String code, final String state, final String grantType, final String redirectUri, final OAuthProvider prov) throws LoginException, OAuthTokenRevokedException {
+		if (login != null) {
+			logout();
+		}
+
+		//post creds to /rest/auth/login
+		Form form = new Form();
+		form = form.param(RESTConst.CODE_PARAM, code);
+		form = form.param(RESTConst.STATE_PARAM, state);
+		form = form.param(RESTConst.TYPE_PARAM, grantType);
+		form = form.param(RESTConst.PROVIDER_PARAM, prov.toString());
+		form = form.param(RESTConst.REDIRECT_URI_PARAM, redirectUri);
+		
+		login = null;
+		try {
+			login = postEntityReturnObject(
+					loginOAuthTarget, 
+					form, MediaType.APPLICATION_FORM_URLENCODED_TYPE, 
+					TrpUserLogin.class, MediaType.APPLICATION_JSON_TYPE
+					);
+			
+			initTargets();
+		} catch(TrpClientErrorException cee){
+			if(cee.getResponse().getStatus() == 403) {
+				login = null;
+				throw new OAuthTokenRevokedException();				
+			} else {
+				login = null;
+				logger.error("Login request failed!", cee);
+				throw new LoginException(cee.getMessage());
+			}
+		} catch(Exception e) {
+			login = null;
+			logger.error("Login request failed!", e);
+			throw new LoginException(e.getMessage());
+		}
+		logger.debug("Logged in as: " + login.toString());
+		
+		return login;
+	}
 	
-//	public void logout() throws ServerErrorException, IllegalArgumentException {
-//		// on logout set singleton instance to null
-////		conn = null;
-//		super.logout();
-//	}
+	@Override
+	public void logout() throws TrpServerErrorException, TrpClientErrorException {
+		try {
+			final WebTarget target = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.LOGOUT_PATH);
+			//just post a null entity. SessionId is added in RequestAuthFilter
+			Response resp = target.request().post(null);
+			checkStatus(resp, target);
+		} catch(SessionExpiredException see) {
+			logger.info("Logout failed as session has expired or sessionId is invalid.");
+		} finally {
+			login = null;
+//			client.close();
+		}
+	}
+	
+	@Override
+	protected void initTargets() {
+		super.initTargets();
+		loginTarget = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.LOGIN_PATH);
+		loginOAuthTarget = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.LOGIN_OAUTH_PATH);
+	}
 	
 	public void invalidate() throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.INVALIDATE_PATH);
@@ -324,7 +386,9 @@ public class TrpServerConn extends ATrpServerConn {
 	public TrpDoc getTrpDoc(final int colId, final int docId, int nrOfTranscriptsPerPage) throws SessionExpiredException, IllegalArgumentException, ClientErrorException {
 		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId).path("" + docId)
 				.path(RESTConst.FULLDOC_PATH)
-				.queryParam(RESTConst.NR_OF_TRANSCRIPTS_PARAM, ""+nrOfTranscriptsPerPage);
+				.queryParam(RESTConst.NR_OF_TRANSCRIPTS_PARAM, ""+nrOfTranscriptsPerPage)
+				//do not include doc stats. Load with getDocStats(colId, docId) if required
+				.queryParam(RESTConst.STATS_PATH, false);
 		return getObject(docTarget, TrpDoc.class);
 	}
 	
@@ -2466,7 +2530,16 @@ public class TrpServerConn extends ATrpServerConn {
 	}
 
 	public TrpTotalTranscriptStatistics getCollectionStats(int colId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
-		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH).path(""+colId)
+		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId)
+				.path(RESTConst.STATS_PATH);
+		return getObject(docTarget, TrpTotalTranscriptStatistics.class);
+	}
+	
+	public TrpTotalTranscriptStatistics getDocStats(int colId, int docId) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		final WebTarget docTarget = baseTarget.path(RESTConst.COLLECTION_PATH)
+				.path(""+colId)
+				.path("" + docId)
 				.path(RESTConst.STATS_PATH);
 		return getObject(docTarget, TrpTotalTranscriptStatistics.class);
 	}

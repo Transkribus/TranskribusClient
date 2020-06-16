@@ -12,7 +12,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
 import eu.transkribus.core.io.util.TrpProperties;
 import eu.transkribus.core.model.beans.DocSelection;
 import eu.transkribus.core.model.beans.TrpP2PaLA;

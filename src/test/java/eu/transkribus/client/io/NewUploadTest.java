@@ -6,7 +6,7 @@ import java.util.Observer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
+import eu.transkribus.client.connection.TrpServer;
 import eu.transkribus.client.connection.TrpServerConn;
 import eu.transkribus.core.io.LocalDocReader;
 import eu.transkribus.core.model.beans.TrpDoc;

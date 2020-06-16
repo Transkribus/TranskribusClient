@@ -16,7 +16,6 @@ import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -38,11 +37,8 @@ import eu.transkribus.client.util.JulFacade;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.client.util.TrpClientErrorException;
 import eu.transkribus.client.util.TrpServerErrorException;
-import eu.transkribus.core.exceptions.ClientVersionNotSupportedException;
-import eu.transkribus.core.exceptions.OAuthTokenRevokedException;
 import eu.transkribus.core.model.beans.adapters.MetsMessageBodyWriter;
 import eu.transkribus.core.model.beans.auth.TrpUserLogin;
-import eu.transkribus.core.model.beans.enums.OAuthProvider;
 import eu.transkribus.core.rest.RESTConst;
 
 /**
@@ -54,52 +50,31 @@ import eu.transkribus.core.rest.RESTConst;
 public abstract class ATrpServerConn implements Closeable {
 	private final static Logger logger = LoggerFactory.getLogger(ATrpServerConn.class);
 	
+	public static final String PROD_SERVER_URI = TrpServer.Prod.getUriStr();
+	public static final String TEST_SERVER_URI = TrpServer.Test.getUriStr();
+	public static final String LOCAL_TEST_SERVER_URI = TrpServer.Local.getUriStr();
+	
+	public static final String[] SERVER_URIS = new String[] {
+			PROD_SERVER_URI,
+			TEST_SERVER_URI,
+			LOCAL_TEST_SERVER_URI
+	};
+	public static final int DEFAULT_URI_INDEX = 0;
+	
 	/**
 	 * Set DEBUG=true if you want this Connection to log all requests/responses in detail
 	 */
 	public final static boolean DEBUG = false;
 	
-	public static final String PROD_SERVER_URI = "https://transkribus.eu/TrpServer";
-	public static final String TEST_SERVER_URI = "https://transkribus.eu/TrpServerTesting";
-	public static final String LOCAL_TEST_SERVER_URI = "http://localhost:8080/TrpServerTesting";
-	public static final String OLD_TEST_SERVER_URI = "https://dbis-faxe.uibk.ac.at/TrpServerTesting";
-		
-	public static final String[] SERVER_URIS = new String[] {
-			PROD_SERVER_URI,
-			TEST_SERVER_URI,
-			LOCAL_TEST_SERVER_URI,
-			OLD_TEST_SERVER_URI
-	};
-	
-	public enum TrpServer {
-		Prod(PROD_SERVER_URI),
-		Test(TEST_SERVER_URI),
-		OldTest(OLD_TEST_SERVER_URI);
-		private final String uri;
-		private TrpServer(String uri) {
-			this.uri = uri;
-		}
-		public String getUriStr() {
-			return uri;
-		}
-	}
-	
-	public static final int DEFAULT_URI_INDEX = 0;
-	
-	private Client client;
-	private TrpUserLogin login;
-	private URI serverUri;
-	protected WebTarget baseTarget;
-	private WebTarget loginTarget;
-	private WebTarget loginOAuthTarget;
-	protected ModelCalls modelCalls;
-	protected AdminCalls adminCalls;
-	protected PyLaiaCalls pyLaiaCalls;
-	
-	protected final static MediaType DEFAULT_RESP_TYPE = MediaType.APPLICATION_JSON_TYPE;
-	
 	public static String guiVersion="NA";
 	public static final int clientId = 1;
+	
+	private Client client;
+	protected TrpUserLogin login;
+	private URI serverUri;
+	protected WebTarget baseTarget;
+	
+	protected final static MediaType DEFAULT_RESP_TYPE = MediaType.APPLICATION_JSON_TYPE;
 	
 	public final static String DEFAULT_URI_ENCODING = "UTF-8";
 	
@@ -145,23 +120,8 @@ public abstract class ATrpServerConn implements Closeable {
 //		//register auth filter with the jSessionId and update the WebTarget accordingly
 //		client.register(new ClientRequestAuthFilter(login.getSessionId()));
 		
-		modelCalls = new ModelCalls(this);
-		adminCalls = new AdminCalls(this);
-		pyLaiaCalls = new PyLaiaCalls(this);
-	}
-
-	public ModelCalls getModelCalls() {
-		return modelCalls;
 	}
 	
-	public AdminCalls getAdminCalls() {
-		return adminCalls;
-	}
-	
-	public PyLaiaCalls getPyLaiaCalls() {
-		return pyLaiaCalls;
-	}
-			
 	/**
 	 * When parameter is true, a LoggingFilter will be registered with the client.<br/>
 	 * Each request and response will then be logged in detail.<br/>
@@ -186,9 +146,7 @@ public abstract class ATrpServerConn implements Closeable {
 		return serverUriStr.equals(serverUri);		
 	}
 
-	private void initTargets() {
-		loginTarget = client.target(serverUri).path(RESTConst.BASE_PATH).path(RESTConst.AUTH_PATH).path(RESTConst.LOGIN_PATH);
-		loginOAuthTarget = client.target(serverUri).path(RESTConst.BASE_PATH).path(RESTConst.AUTH_PATH).path(RESTConst.LOGIN_OAUTH_PATH);
+	protected void initTargets() {
 		baseTarget = client.target(serverUri).path(RESTConst.BASE_PATH);
 	}
 			
@@ -197,108 +155,13 @@ public abstract class ATrpServerConn implements Closeable {
 		logout();
 		client.close();
 	}
+	
+	protected void logout() {}
 
 	// called upon garbage collection:
 	@Override protected void finalize() throws Throwable {
 		close();
 	};
-
-	public TrpUserLogin login(final String user, final String pw) throws ClientVersionNotSupportedException, LoginException {
-		if (login != null) {
-			logout();
-		}
-
-		//post creds to /rest/auth/login
-		Form form = new Form();
-		form = form.param(RESTConst.USER_PARAM, user);
-		form = form.param(RESTConst.PW_PARAM, pw);
-		
-		login = null;
-		try {
-			login = postEntityReturnObject(
-					loginTarget, 
-					form, MediaType.APPLICATION_FORM_URLENCODED_TYPE, 
-					TrpUserLogin.class, MediaType.APPLICATION_JSON_TYPE
-					);
-			
-			initTargets();
-		} catch (TrpClientErrorException e) {
-//			throw e;
-
-//			String entity = readStringEntity(e.getResponse());
-			
-			login = null;
-			if(e.getResponse().getStatus() == ClientVersionNotSupportedException.STATUS_CODE) {
-				logger.debug("ClientVersionNotSupportedException on login!");
-				throw new ClientVersionNotSupportedException(e.getMessage());
-			} else {
-				throw new LoginException(e.getMessage());
-			}
-		} catch (IllegalStateException e) {
-			login = null;
-			logger.error("Login request failed!", e);
-			if("Already connected".equals(e.getMessage()) && e.getCause() != null) {
-				/*
-				 * Jersey throws an IllegalStateException "Already connected" for a variety of issues where actually no connection can be established.
-				 * see https://github.com/jersey/jersey/issues/3000
-				 */
-				Throwable cause = e.getCause();
-				logger.error("'Already connected' caused by: " + cause.getMessage(), cause);
-				//override misleading "Already connected" message
-				throw new LoginException(cause.getMessage());
-			} else {
-				throw new LoginException(e.getMessage());
-			}
-		} catch(Exception e) {
-			login = null;
-			logger.error("Login request failed!", e);
-			throw new LoginException(e.getMessage());
-		}
-		logger.debug("Logged in as: " + login.toString());
-		
-		return login;
-	}
-	
-	public TrpUserLogin loginOAuth(final String code, final String state, final String grantType, final String redirectUri, final OAuthProvider prov) throws LoginException, OAuthTokenRevokedException {
-		if (login != null) {
-			logout();
-		}
-
-		//post creds to /rest/auth/login
-		Form form = new Form();
-		form = form.param(RESTConst.CODE_PARAM, code);
-		form = form.param(RESTConst.STATE_PARAM, state);
-		form = form.param(RESTConst.TYPE_PARAM, grantType);
-		form = form.param(RESTConst.PROVIDER_PARAM, prov.toString());
-		form = form.param(RESTConst.REDIRECT_URI_PARAM, redirectUri);
-		
-		login = null;
-		try {
-			login = postEntityReturnObject(
-					loginOAuthTarget, 
-					form, MediaType.APPLICATION_FORM_URLENCODED_TYPE, 
-					TrpUserLogin.class, MediaType.APPLICATION_JSON_TYPE
-					);
-			
-			initTargets();
-		} catch(TrpClientErrorException cee){
-			if(cee.getResponse().getStatus() == 403) {
-				login = null;
-				throw new OAuthTokenRevokedException();				
-			} else {
-				login = null;
-				logger.error("Login request failed!", cee);
-				throw new LoginException(cee.getMessage());
-			}
-		} catch(Exception e) {
-			login = null;
-			logger.error("Login request failed!", e);
-			throw new LoginException(e.getMessage());
-		}
-		logger.debug("Logged in as: " + login.toString());
-		
-		return login;
-	}
 	
 	public static WebTarget queryParam(WebTarget t, String param, Object value) {
 		return JerseyUtils.queryParam(t, param, value);
@@ -310,20 +173,6 @@ public abstract class ATrpServerConn implements Closeable {
 	
 	public static WebTarget queryParam(WebTarget t, String param, Iterable<?> value) {
 		return JerseyUtils.queryParam(t, param, value);
-	}
-
-	public void logout() throws TrpServerErrorException, TrpClientErrorException {
-		try {
-			final WebTarget target = baseTarget.path(RESTConst.AUTH_PATH).path(RESTConst.LOGOUT_PATH);
-			//just post a null entity. SessionId is added in RequestAuthFilter
-			Response resp = target.request().post(null);
-			checkStatus(resp, target);
-		} catch(SessionExpiredException see) {
-			logger.info("Logout failed as session has expired or sessionId is invalid.");
-		} finally {
-			login = null;
-//			client.close();
-		}
 	}
 	
 	public TrpUserLogin getUserLogin() {
@@ -384,6 +233,12 @@ public abstract class ATrpServerConn implements Closeable {
 		checkStatus(resp, target);
 	}
 	
+	protected <R> R delete(WebTarget target, Class<R> returnType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+		Response resp = target.request().delete();
+		checkStatus(resp, target);
+		return extractObject(resp, returnType);
+	}
+	
 	protected <T> void postEntity(WebTarget target, T entity, MediaType postMediaType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		Response resp = target.request().post(Entity.entity(entity, postMediaType));
 		checkStatus(resp, target);
@@ -416,6 +271,10 @@ public abstract class ATrpServerConn implements Closeable {
 		checkStatus(resp, target);
 		R object = extractObject(resp, returnType);
 		return object;
+	}
+	
+	protected <T, R> R postEntityReturnObject(WebTarget target, T entity, Class<R> returnType) throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
+		return postEntityReturnObject(target, entity, DEFAULT_RESP_TYPE, returnType, DEFAULT_RESP_TYPE);
 	}
 	
 	public <T, R> R putEntityReturnObject(WebTarget target, T entity, MediaType postMediaType, Class<R> returnType, MediaType returnMediaType) throws SessionExpiredException, TrpClientErrorException, TrpServerErrorException {

@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import eu.transkribus.client.connection.ATrpServerConn.TrpServer;
+import eu.transkribus.client.connection.TrpServer;
 import eu.transkribus.client.connection.TrpServerConn;
 import eu.transkribus.client.util.SessionExpiredException;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
