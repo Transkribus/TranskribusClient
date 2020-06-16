@@ -1330,6 +1330,19 @@ public class TrpServerConn extends ATrpServerConn {
 		return target;
 	}
 	
+	private WebTarget buildHtrListFilterTarget(final Integer colId, final String provider, final String filter, final Integer releaseLevel, int index, int nValues, String sortColumn, String sortDirection) {		
+		WebTarget target = baseTarget.path(RESTConst.RECOGNITION_PATH).path(RESTConst.LIST_PATH)
+				.queryParam(RESTConst.COLLECTION_ID_PARAM, colId)
+				.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
+				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
+				.queryParam(RESTConst.PROVIDER_PARAM, provider)
+				.queryParam(RESTConst.FILTER_PARAM, filter)
+				.queryParam(RESTConst.RELEASE_LEVEL_PARAM, releaseLevel);
+		target = JerseyUtils.queryParam(target, RESTConst.SORT_COLUMN_PARAM, sortColumn);
+		target = JerseyUtils.queryParam(target, RESTConst.SORT_DIRECTION_PARAM, sortDirection);
+		return target;
+	}
+	
 	public Future<TrpHtrList> getHtrs(final Integer colId, final String provider, InvocationCallback<TrpHtrList> callback) {
 		return getHtrs(colId, provider, 0, -1, null, null, callback);
 	}
@@ -1339,8 +1352,8 @@ public class TrpServerConn extends ATrpServerConn {
 		return target.request(MediaType.APPLICATION_XML_TYPE).async().get(callback);
 	}
 	
-	public TrpHtrList getHtrsSync(final Integer colId, final String provider, int index, int nValues, String sortColumn, String sortDirection) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
-		WebTarget target = buildHtrListTarget(colId, provider, index, nValues, sortColumn, sortDirection);
+	public TrpHtrList getHtrsSync(final Integer colId, final String provider, final String searchTerm, Integer releaseLevel, int index, int nValues, String sortColumn, String sortDirection) throws TrpServerErrorException, TrpClientErrorException, SessionExpiredException {
+		WebTarget target = buildHtrListFilterTarget(colId, provider, searchTerm, releaseLevel, index, nValues, sortColumn, sortDirection);
 		return getObject(target, TrpHtrList.class, MediaType.APPLICATION_XML_TYPE);
 	}	
 	
