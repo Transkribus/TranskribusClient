@@ -194,7 +194,7 @@ public class TrpServerConnTest {
 	public static void testLoadHtrModels(final String user, final String pw) throws Exception {
 		TrpServerConn conn = new TrpServerConn(TrpServerConn.SERVER_URIS[0], user, pw);
 		
-		TrpHtrList l = conn.getHtrsSync(2, null, 0, -1, null, null);
+		TrpHtrList l = conn.getHtrsSync(2, null, null, null, 0, -1, null, null);
 		logger.info("got TrpHtrList: "+l);
 		logger.info("n-list: "+l.getList().size());
 		if (l.getList().size()>0) {
