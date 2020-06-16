@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.Collection;
 
 import javax.mail.internet.ContentDisposition;
@@ -17,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import eu.transkribus.core.rest.RESTConst;
 import eu.transkribus.core.util.ProgressInputStream;
 import eu.transkribus.core.util.ProgressInputStream.ProgressInputStreamListener;
 
@@ -51,11 +53,13 @@ public class JerseyUtils {
 		if (cl == null) {
 			cl = 0L;
 		}
-		ProgressInputStream input = new ProgressInputStream((InputStream) resp.getEntity(), cl);
-		if (l != null)
-			input.addProgressInputStreamListener(l);
-				
-		IOUtils.copy(input, new FileOutputStream(f));
+		try (ProgressInputStream input = new ProgressInputStream((InputStream) resp.getEntity(), cl);
+				OutputStream output = new FileOutputStream(f);) {
+			if (l != null) {
+				input.addProgressInputStreamListener(l);
+			}
+			IOUtils.copy(input, output);
+		}
 	}
 	
 	public static WebTarget queryParam(WebTarget t, String param, Collection<?> c) {
@@ -93,6 +97,16 @@ public class JerseyUtils {
 			return t.queryParam(param, value);
 		}
 		return t;
+	}
+
+	public static WebTarget setPagingParams(WebTarget t, int index, int nValues, String sortField, String sortDirection) {
+		if(t == null) {
+			return t;
+		}
+		return t.queryParam(RESTConst.PAGING_INDEX_PARAM, index)
+				.queryParam(RESTConst.PAGING_NVALUES_PARAM, nValues)
+				.queryParam(RESTConst.SORT_COLUMN_PARAM, sortField)
+				.queryParam(RESTConst.SORT_DIRECTION_PARAM, sortDirection);
 	}	
 
 }
