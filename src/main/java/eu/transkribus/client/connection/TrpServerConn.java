@@ -74,6 +74,7 @@ import eu.transkribus.core.model.beans.PageLock;
 import eu.transkribus.core.model.beans.TestBean;
 import eu.transkribus.core.model.beans.TrpAction;
 import eu.transkribus.core.model.beans.TrpCollection;
+import eu.transkribus.core.model.beans.TrpCreditCosts;
 import eu.transkribus.core.model.beans.TrpCrowdProject;
 import eu.transkribus.core.model.beans.TrpCrowdProjectMessage;
 import eu.transkribus.core.model.beans.TrpCrowdProjectMilestone;
@@ -150,6 +151,7 @@ public class TrpServerConn extends ATrpServerConn {
 	public static final GenericType<List<String>> STRING_LIST_TYPE = new GenericType<List<String>>() {};
 	public static final GenericType<List<TrpJobImplRegistry>> JOB_IMPL_REG_LIST_TYPE = new GenericType<List<TrpJobImplRegistry>>() {};
 	public static final GenericType<List<TrpGroundTruthPage>> GROUND_TRUTH_PAGE_LIST_TYPE = new GenericType<List<TrpGroundTruthPage>>() {};
+	public static final GenericType<List<TrpCreditCosts>> CREDIT_COSTS_LIST_TYPE = new GenericType<List<TrpCreditCosts>>() {};
 	
 	private WebTarget loginTarget;
 	private WebTarget loginOAuthTarget;
