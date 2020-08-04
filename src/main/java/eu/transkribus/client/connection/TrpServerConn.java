@@ -166,6 +166,7 @@ public class TrpServerConn extends ATrpServerConn {
 	protected AdminCalls adminCalls;
 	protected PyLaiaCalls pyLaiaCalls;
 	protected CreditCalls creditCalls;
+	protected DocUnderstandingCalls duCalls;
 	
 	public TrpServerConn(String uriStr) throws LoginException {
 		super(uriStr);
@@ -181,6 +182,7 @@ public class TrpServerConn extends ATrpServerConn {
 		adminCalls = new AdminCalls(this);
 		pyLaiaCalls = new PyLaiaCalls(this);
 		creditCalls = new CreditCalls(this);
+		duCalls		= new DocUnderstandingCalls(this);
 	}
 	
 	public TrpServerConn(String uriStr, final String username, final String password) throws LoginException {
@@ -225,6 +227,10 @@ public class TrpServerConn extends ATrpServerConn {
 	
 	public CreditCalls getCreditCalls() {
 		return creditCalls;
+	}
+
+	public DocUnderstandingCalls getDuCalls(){
+		return duCalls;
 	}
 	
 	public TrpUserLogin login(final String user, final String pw) throws ClientVersionNotSupportedException, LoginException {
