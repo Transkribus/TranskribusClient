@@ -1982,13 +1982,13 @@ public class TrpServerConn extends ATrpServerConn {
 //		return duplicateDocument(colId, params);
 //	}
 	
-	public String duplicateGtToDocument(int colId, List<GroundTruthSelectionDescriptor> descList, String title, String description) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
+	public String duplicateGtToDocument(int colId, Integer targetColId, List<GroundTruthSelectionDescriptor> descList, String title, String description) throws SessionExpiredException, ServerErrorException, ClientErrorException, IllegalArgumentException {
 		JobParameters params = new JobParameters();
 		params.setGtList(descList);
 		params.setJobImpl(JobImpl.CopyJob.toString());
 		params.getParams().addParameter(JobConst.PROP_TITLE, title);
 		params.getParams().addParameter(JobConst.PROP_DOC_DESCS, description);
-		
+		params.getParams().addIntParam(JobConst.PROP_COLLECTION_ID, targetColId);
 		return duplicateDocument(colId, params);
 	}
 	
