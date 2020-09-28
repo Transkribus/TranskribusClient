@@ -39,7 +39,7 @@ public class PyLaiaCalls {
 		return conn.postEntityReturnObject(target, config, MediaType.APPLICATION_XML_TYPE, String.class, MediaType.APPLICATION_XML_TYPE);
 	}	
 	
-	public String runPyLaiaHtrDecode(int colId, int docId, String pages, final int modelId, final String languageModel, 
+	public String runPyLaiaHtrDecode(int colId, int docId, String pages, final int modelId, final String languageModel, boolean useExistingLinePolygons, 
 			boolean doLinePolygonSimplification, boolean clearLines, boolean keepOriginalLinePolygons, boolean doWordSeg,
 			int batchSize, List<String> structures) 
 					throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
@@ -50,6 +50,7 @@ public class PyLaiaCalls {
 		target = target.queryParam(RESTConst.DOC_ID_PARAM, docId);
 		target = target.queryParam(RESTConst.PAGES_PARAM, pages);
 		target = target.queryParam(RESTConst.LANG_MOD_PARAM, languageModel);
+		target = target.queryParam(JobConst.PROP_USE_EXISTING_LINE_POLYGONS, useExistingLinePolygons);
 		target = target.queryParam(JobConst.PROP_DO_LINE_POLYGON_SIMPLIFICATION, doLinePolygonSimplification);
 		target = target.queryParam(JobConst.PROP_KEEP_ORIGINAL_LINE_POLYGONS, keepOriginalLinePolygons);
 //		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
@@ -64,7 +65,7 @@ public class PyLaiaCalls {
 				String.class, MediaType.TEXT_PLAIN_TYPE);
 	}
 
-	public String runPyLaiaHtrDecode(int colId, DocumentSelectionDescriptor descriptor, final int modelId, final String languageModel,
+	public String runPyLaiaHtrDecode(int colId, DocumentSelectionDescriptor descriptor, final int modelId, final String languageModel, boolean useExistingLinePolygons,
 			boolean doLinePolygonSimplification, boolean clearLines, boolean keepOriginalLinePolygons, boolean doWordSeg, int batchSize, List<String> structures)
 					throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(descriptor == null || descriptor.getDocId() < 1) {
@@ -75,6 +76,7 @@ public class PyLaiaCalls {
 				.path(""+modelId)
 				.path(RESTConst.RECOGNITION_PATH);
 		target = target.queryParam(RESTConst.LANG_MOD_PARAM, languageModel);
+		target = target.queryParam(JobConst.PROP_USE_EXISTING_LINE_POLYGONS, useExistingLinePolygons);
 		target = target.queryParam(JobConst.PROP_DO_LINE_POLYGON_SIMPLIFICATION, doLinePolygonSimplification);
 		target = target.queryParam(JobConst.PROP_KEEP_ORIGINAL_LINE_POLYGONS, keepOriginalLinePolygons);
 //		target = target.queryParam(JobConst.PROP_DO_STORE_CONFMATS, doStoreConfMats);
