@@ -19,6 +19,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 
 import org.apache.commons.lang3.StringUtils;
@@ -419,16 +420,11 @@ public abstract class ATrpServerConn implements Closeable {
 			type = ErrorType.Client;
 			internalMsg = loc + " - Method not allowed! (405) " + ent;
 			userMsg = generateUserMessage("Something went wrong. Please update TranskribusX and report a bug if the issue persists.", ent);
-		} 
-//		else if(status == ClientVersionNotSupportedException.STATUS_CODE) {
-//			throw new RuntimeException(loc + " - Method not allowed! (405) "+readStringEntity(resp)/*, resp*/);
-//		}
-		else if (status >= 400 && status < 500) {
+		} else if (status >= 400 && status < 500) {
 			type = ErrorType.Client;
-			internalMsg = "Client error: " + ent;
-			userMsg = generateUserMessage("Something went wrong. Please update TranskribusX and report a bug if the issue persists.", ent);
-		}
-		else if (status >= 500) { // 500 etc.
+			internalMsg = loc + " - " + Status.fromStatusCode(status).getReasonPhrase() + " - " + ent;
+			userMsg = generateUserMessage("The action could not be processed on the server.", ent);
+		} else if (status >= 500) { // 500 etc.
 			type = ErrorType.Server;
 			internalMsg = loc + " - Some server error occured! " + status + " - " 
 					+ resp.getStatusInfo() 

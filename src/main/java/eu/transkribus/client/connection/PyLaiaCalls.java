@@ -15,6 +15,7 @@ import eu.transkribus.client.util.TrpClientErrorException;
 import eu.transkribus.client.util.TrpServerErrorException;
 import eu.transkribus.core.model.beans.DocumentSelectionDescriptor;
 import eu.transkribus.core.model.beans.PyLaiaHtrTrainConfig;
+import eu.transkribus.core.model.beans.enums.CreditSelectionStrategy;
 import eu.transkribus.core.rest.JobConst;
 import eu.transkribus.core.rest.RESTConst;
 
@@ -41,7 +42,7 @@ public class PyLaiaCalls {
 	
 	public String runPyLaiaHtrDecode(int colId, int docId, String pages, final int modelId, final String languageModel, boolean useExistingLinePolygons, 
 			boolean doLinePolygonSimplification, boolean clearLines, boolean keepOriginalLinePolygons, boolean doWordSeg,
-			int batchSize, List<String> structures) 
+			int batchSize, List<String> structures, CreditSelectionStrategy creditSelectionStrategy) 
 					throws SessionExpiredException, TrpServerErrorException, TrpClientErrorException {
 		WebTarget target = getBaseTarget()
 				.path(""+colId)
@@ -57,6 +58,7 @@ public class PyLaiaCalls {
 		target = target.queryParam(JobConst.PROP_CLEAR_LINES, clearLines);
 		target = target.queryParam(JobConst.PROP_DO_WORD_SEG, doWordSeg);
 		target = target.queryParam(JobConst.PROP_BATCH_SIZE, batchSize);
+		target = target.queryParam(RESTConst.CREDITS_PATH, creditSelectionStrategy);
 		if(!CollectionUtils.isEmpty(structures)) {
 			target = target.queryParam(JobConst.PROP_STRUCTURES, new ArrayList<>(structures).toArray());
 		}
@@ -66,7 +68,8 @@ public class PyLaiaCalls {
 	}
 
 	public String runPyLaiaHtrDecode(int colId, DocumentSelectionDescriptor descriptor, final int modelId, final String languageModel, boolean useExistingLinePolygons,
-			boolean doLinePolygonSimplification, boolean clearLines, boolean keepOriginalLinePolygons, boolean doWordSeg, int batchSize, List<String> structures)
+			boolean doLinePolygonSimplification, boolean clearLines, boolean keepOriginalLinePolygons, boolean doWordSeg, int batchSize, List<String> structures,
+			CreditSelectionStrategy creditSelectionStrategy)
 					throws SessionExpiredException, ServerErrorException, ClientErrorException {
 		if(descriptor == null || descriptor.getDocId() < 1) {
 			throw new IllegalArgumentException("No document selected!");
@@ -83,6 +86,7 @@ public class PyLaiaCalls {
 		target = target.queryParam(JobConst.PROP_CLEAR_LINES, clearLines);
 		target = target.queryParam(JobConst.PROP_DO_WORD_SEG, doWordSeg);
 		target = target.queryParam(JobConst.PROP_BATCH_SIZE, batchSize);
+		target = target.queryParam(RESTConst.CREDITS_PATH, creditSelectionStrategy);
 		if(!CollectionUtils.isEmpty(structures)) {
 			target = target.queryParam(JobConst.PROP_STRUCTURES, new ArrayList<>(structures).toArray());
 		}
