@@ -28,7 +28,7 @@ public class HtrTest extends ATrpClientTest {
 		pd.getRegionIds().add(regionId2);
 		descriptor.addPage(pd);
 		
-		String jobId = client.runCitLabHtr(colId, descriptor, modelId, null, true, false, true, null);
+		String jobId = client.runCitLabHtr(colId, descriptor, modelId, null, true, false, true, null, null);
 		TrpJobStatus job = waitForJobToEnd(client.getJob(jobId));
 		
 	}
@@ -47,7 +47,7 @@ public class HtrTest extends ATrpClientTest {
 		PageDescriptor pd = new PageDescriptor(pageId, tsId);
 		descriptor.addPage(pd);
 		
-		String jobId = client.runCitLabHtr(colId, descriptor, modelId, null, true, false, true, null);
+		String jobId = client.runCitLabHtr(colId, descriptor, modelId, null, true, false, true, null, null);
 		TrpJobStatus job = waitForJobToEnd(client.getJob(jobId));
 		//this job fails with a job error in CITlabModule <= 2.3.0 due to the very short baseline.
 	}
