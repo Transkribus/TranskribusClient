@@ -18,7 +18,7 @@
 		<repository>
 			<id>dea-artifactory</id>
 			<name>dea-artifactory-releases</name>
-			<url>http://dbis-halvar.uibk.ac.at/artifactory/libs-release/</url>
+			<url>https://dbis-halvar.uibk.ac.at/artifactory/libs-release/</url>
 		</repository>
 		<repository>
 			<id>swt-repo</id>
@@ -29,7 +29,7 @@
 	    <repository>
 	        <id>dbis-halvar-artifactory</id>
 	        <name>dbis-halvar-releases</name>
-	        <url>http://dbis-halvar.uibk.ac.at/artifactory/libs-release-local</url>
+	        <url>https://dbis-halvar.uibk.ac.at/artifactory/libs-release-local</url>
 	    </repository>
 	    <site>
 			<id>website</id>
